@@ -1,0 +1,33 @@
+{
+    "arduino.enableUSBDetection": true,
+    "arduino.disableIntelliSenseAutoGen": true,
+    "intelliSenseGen": "global",
+    "files.associations": {
+        "random": "cpp",
+        "*.tcc": "cpp",
+        "optional": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "regex": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "variant": "cpp",
+        "chrono": "cpp",
+        "limits": "cpp",
+        "semaphore": "cpp",
+        "resets.h": "c",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "*.impl": "cpp",
+        "compare": "cpp",
+        "mutex": "cpp"
+    }
+}
