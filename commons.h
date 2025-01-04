@@ -37,12 +37,12 @@
 #define SATS_RINGETER_MAX 15
 
 // Akkumulátor
-#define BATT_BARMETER_MIN 3 // 10
-#define BATT_BARMETER_MAX 6 // 16
+#define BATT_BARMETER_MIN 3
+#define BATT_BARMETER_MAX 16
 
 // Hőmérséklet
-#define TEMP_BARMETER_MIN -5
-#define TEMP_BARMETER_MAX +50
+#define TEMP_BARMETER_MIN -20
+#define TEMP_BARMETER_MAX +70
 
 // Speed RingMeter max érték
 #define SPEED_RINGMETER_MAX_VALUE 240
