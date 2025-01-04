@@ -28,6 +28,10 @@
         "initializer_list": "cpp",
         "*.impl": "cpp",
         "compare": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "unordered_set": "cpp",
+        "format": "cpp",
+        "span": "cpp",
+        "text_encoding": "cpp"
     }
 }

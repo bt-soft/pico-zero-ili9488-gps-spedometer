@@ -34,18 +34,20 @@ auto_init_mutex(_gpsMutex);
 
 // Belső LED;  PICO: LED_BUILTIN (sima LED), Zero: GP16 (WS2812 RGB LED)
 #define LED_PIN 16
-
+// PICO ZERO WS2812 RGB LED driver
 #include <FastLED.h>
 #define FASTLED_FORCE_SOFTWARE_SPI
 #define FASTLED_FORCE_SOFTWARE_PINS
 #define NUM_LEDS 1
 CRGB leds[NUM_LEDS];
+#define INTERNAL_LED_COLOR CRGB::Green; // Zölden villogjon, ha GPS adat érkezik
 
-// Serial1 piout átdefiniálása
+// Serial1 piout átdefiniálása a PICO ZERO-hoz
+// Meg kell hívni a Serial1.setRX(PIN_SERIAL1_RX) és a Serial1.setTX(PIN_SERIAL1_TX)-et a Serial1.begin(9600) előtt
 #define PIN_SERIAL1_TX (12u)
 #define PIN_SERIAL1_RX (13u)
 
-#define __DEBUG_ON_SERIAL__
+// #define __DEBUG_ON_SERIAL__
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 /**
@@ -331,7 +333,7 @@ void readGPS() {
 
         // LED villogtatása, ha van érvéynes bejövő GPS mondat
         if (gps.encode(c)) {
-            leds[0] = CRGB::Red;
+            leds[0] = INTERNAL_LED_COLOR;
             FastLED.show();
 
             leds[0] = CRGB::Black;
@@ -371,6 +373,8 @@ float readtemperature() {
  */
 void setup1(void) {
     // GPS Serial
+    Serial1.setRX(PIN_SERIAL1_RX);
+    Serial1.setTX(PIN_SERIAL1_TX);
     Serial1.begin(9600);
 
     // initialize digital pin LED_BUILTIN as an output.
@@ -395,8 +399,4 @@ void loop1(void) {
     if (Serial1.available()) {
         readSensorValues();
     }
-
-#ifdef __DEBUG_ON_SERIAL__
-    Serial << "loop1" << endl;
-#endif
 }
