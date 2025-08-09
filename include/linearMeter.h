@@ -149,20 +149,15 @@ uint16_t rainbowColor(uint8_t spectrum) {
 
 #include "commons.h"
 
-/******************************************************    // 1. Cím kiírása a mérő tetejére - pozíció javítva hogy ne lógjon ki
-    tft->setTextSize(1);
-    tft->setTextColor(TFT_YELLOW, TFT_BLACK);
-    int titleY = y - (n * (h + g)) - 20;
-    int titleX = mirrored ? x - w : x;  // mirrored esetén csak a sáv szélességével balra
-    if (titleX < 0) titleX = 0;  // ne menjen negatívba
-    tft->drawString(category, titleX, titleY, 2);***************************
-** Function name:           rainbowColor
-** Description:             Return a 16 bit rainbow colour
-***************************************************************************************/
-// If 'spectrum' is in the range 0-159 it is converted to a spectrum colour
-// from 0 = red through to 127 = blue to 159 = violet
-// Extending the range to 0-191 adds a further violet to red band
-
+/**
+ * Szivárvány szín visszaadása 16 bites RGB565 formátumban.
+ *
+ * Ha a 'spectrum' 0-159 közötti, akkor a szín a pirosból indul, kéken át ibolyáig tart.
+ * 0 = piros, 127 = kék, 159 = ibolya, 191-ig tovább megy vissza pirosba.
+ *
+ * @param spectrum Szín spektrum index (0-191)
+ * @return 16 bites RGB565 színkód
+ */
 uint16_t rainbowColor(uint8_t spectrum) {
     spectrum = spectrum % 192;
 
@@ -208,58 +203,49 @@ uint16_t rainbowColor(uint8_t spectrum) {
 
     return red << 11 | green << 6 | blue;
 }
-// #########################################################################
-//  Draw the linear meter
-// #########################################################################
-// val =  reading to show (range is 0 to n)
-// x, y = position of top left corner
-// w, h = width and height of a single bar
-// g    = pixel gap to next bar (can be 0)
-// n    = number of segments
-// s    = colour scheme
+/**
+ * Vízszintes sávos mérő kirajzolása a kijelzőre.
+ * @param tft TFT_eSPI kijelző objektum
+ * @param val Megjelenítendő érték (0-tól n-ig)
+ * @param x Bal felső sarok X koordináta
+ * @param y Bal felső sarok Y koordináta
+ * @param w Egy sáv szélessége
+ * @param h Egy sáv magassága
+ * @param g Sávok közötti távolság
+ * @param n Sávok száma
+ * @param s Színséma
+ */
 void linearBar(TFT_eSPI *tft, int val, int x, int y, int w, int h, int g, int n, byte s) {
-
-    // Variable to save "value" text colour from scheme and set default
+    // Változó a sáv színének tárolására, alapértelmezett: kék
     int colour = TFT_BLUE;
-
-    // Draw n colour blocks
+    // n darab színes blokk kirajzolása
     for (int b = 1; b <= n; b++) {
-        if (val > 0 && b <= val) { // Fill in coloured blocks
+        if (val > 0 && b <= val) { // Kitöltött színes blokkok
             switch (s) {
-
                 case RED2RED:
                     colour = TFT_RED;
-                    break; // Fixed colour
-
+                    break; // Fix szín
                 case GREEN2GREEN:
                     colour = TFT_GREEN;
-                    break; // Fixed colour
-
+                    break; // Fix szín
                 case BLUE2BLUE:
                     colour = TFT_BLUE;
-                    break; // Fixed colour
-
+                    break; // Fix szín
                 case BLUE2RED:
                     colour = rainbowColor(map(b, 0, n, 127, 0));
-                    break; // Blue to red
-
+                    break; // Kékből pirosba
                 case GREEN2RED:
                     colour = rainbowColor(map(b, 0, n, 63, 0));
-                    break; // Green to red
-
+                    break; // Zöldből pirosba
                 case RED2GREEN:
                     colour = rainbowColor(map(b, 0, n, 0, 63));
-                    break; // Red to green
-
+                    break; // Pirosból zöldbe
                 case RED2VIOLET:
                     colour = rainbowColor(map(b, 0, n, 0, 159));
-                    break; // Rainbow (red to violet)
+                    break; // Szivárvány (pirosból ibolyába)
             }
-
             tft->fillRect(x + b * (w + g), y, w, h, colour);
-
-        } else { // Fill in blank segments
-
+        } else { // Üres (szürke) blokkok
             tft->fillRect(x + b * (w + g), y, w, h, TFT_DARKGREY);
         }
     }

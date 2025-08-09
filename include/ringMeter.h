@@ -69,33 +69,33 @@ float sineWave(int phase) { return sin(phase * 0.0174532925); }
  * @return A jobb oldali x koordináta
  */
 int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r, int angle, bool coloredValue, const char *units, byte scheme) {
-    // Minimum value of r is about 52 before value text intrudes on ring
-    // drawing the text first is an option
+    // A r minimális értéke kb. 52, különben az érték szöveg belelóg a gyűrűbe
+    // Opcionálisan először a szöveget is lehet rajzolni
 
     x += r;
-    y += r; // Calculate coords of centre of ring
+    y += r; // A gyűrű középpontjának koordinátái
 
-    int w = r / 3;                                         // Width of outer ring is 1/4 of radius
-    int halfAngle = angle / 2;                             // Half the sweep angle of meter (300 degrees)
-    int v = map(value, vmin, vmax, -halfAngle, halfAngle); // Map the value to an angle v
+    int w = r / 3;                                         // A külső gyűrű szélessége a sugár 1/4-e
+    int halfAngle = angle / 2;                             // A mérő fél szöge (pl. 300 foknál 150)
+    int v = map(value, vmin, vmax, -halfAngle, halfAngle); // Az érték leképezése szögre
 
-    byte seg = 3; // Segments are 3 degrees wide = 100 segments for 300 degrees
-    byte inc = 6; // Draw segments every 3 degrees, increase to 6 for segmented ring
+    byte seg = 3; // Egy szegmens 3 fok széles = 100 szegmens 300 foknál
+    byte inc = 6; // 6 fokonként rajzolunk szegmenst, növelve szegmentáltabb lesz
 
-    // Variable to save "value" text colour from scheme and set default
+    // Változó az érték szöveg színének tárolására, alapértelmezett világoskék
     int colour = RINGMETER_LIGHTBLUE;
 
-    // Draw colour blocks every inc degrees
+    // Színes blokkok rajzolása minden inc foknál
     for (int i = -halfAngle + inc / 2; i < halfAngle - inc / 2; i += inc) {
 
-        // Kicsi méret esetén ritkítunk
+        // Kis méret esetén ritkítunk
         if (r < 50) {
             if (i % 4) {
                 continue;
             }
         }
 
-        // Calculate pair of coordinates for segment start
+        // A szegmens kezdőpontjainak koordinátái
         float sx = cos((i - 90) * 0.0174532925);
         float sy = sin((i - 90) * 0.0174532925);
         uint16_t x0 = sx * (r - w) + x;
@@ -103,7 +103,7 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
         uint16_t x1 = sx * r + x;
         uint16_t y1 = sy * r + y;
 
-        // Calculate pair of coordinates for segment end
+        // A szegmens végpontjainak koordinátái
         float sx2 = cos((i + seg - 90) * 0.0174532925);
         float sy2 = sin((i + seg - 90) * 0.0174532925);
         int x2 = sx2 * (r - w) + x;
@@ -111,48 +111,40 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
         int x3 = sx2 * r + x;
         int y3 = sy2 * r + y;
 
-        if (i < v) { // Fill in coloured segments with 2 triangles
+        if (i < v) { // Kitöltött színes szegmensek (2 háromszöggel)
             switch (scheme) {
-
                 case RED2RED:
                     colour = TFT_RED;
-                    break; // Fixed colour
-
+                    break; // Fix szín
                 case GREEN2GREEN:
                     colour = TFT_GREEN;
-                    break; // Fixed colour
-
+                    break; // Fix szín
                 case BLUE2BLUE:
                     colour = TFT_BLUE;
-                    break; // Fixed colour
-
+                    break; // Fix szín
                 case BLUE2RED:
                     colour = rainbow(map(i, -halfAngle, halfAngle, 0, 127));
-                    break; // Full spectrum blue to red
-
+                    break; // Teljes spektrum kékből pirosba
                 case GREEN2RED:
                     colour = rainbow(map(i, -halfAngle, halfAngle, 70, 127));
-                    break; // Green to red (high temperature etc.)
-
+                    break; // Zöldből pirosba (pl. hőmérséklet)
                 case RED2GREEN:
                     colour = rainbow(map(i, -halfAngle, halfAngle, 127, 63));
-                    break; // Red to green (low battery etc.)
-
+                    break; // Pirosból zöldbe (pl. akku)
                 default:
                     colour = RINGMETER_LIGHTBLUE;
-                    break; // Fixed colour
+                    break; // Fix szín
             }
             tft->fillTriangle(x0, y0, x1, y1, x2, y2, colour);
             tft->fillTriangle(x1, y1, x2, y2, x3, y3, colour);
 
-        } else { // Fill in blank segments
-
+        } else { // Üres (szürke) szegmensek
             tft->fillTriangle(x0, y0, x1, y1, x2, y2, TFT_DARKGREY);
             tft->fillTriangle(x1, y1, x2, y2, x3, y3, TFT_DARKGREY);
         }
     }
 
-    // Convert value to a string
+    // Érték karakterlánccá alakítása
     char buf[10];
     byte len = 3;
     if (value > 999) {
@@ -160,34 +152,34 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
     }
     dtostrf(value, len, 0, buf);
     buf[len] = ' ';
-    buf[len + 1] = 0; // Add blanking space and terminator, helps to centre text too!
+    buf[len + 1] = 0; // Üres karakter és lezáró null, segít középre igazítani
 
     // Érték kiírása
     tft->setTextSize(1);
 
-    // Érték text színe
-    tft->setTextColor(coloredValue ? colour : TFT_WHITE, TFT_BLACK); // színesedik a ring-el együtt vagy fehér
-    tft->setTextDatum(MC_DATUM);                                     // középre
+    // Érték szöveg színe
+    tft->setTextColor(coloredValue ? colour : TFT_WHITE, TFT_BLACK); // Színesedik a gyűrűvel vagy fehér
+    tft->setTextDatum(MC_DATUM);                                     // Középre igazítás
 
-    // Print value, if the meter is large then use big font 8, othewise use 4
+    // Nagy gyűrűnél nagy betűtípus, különben kisebb
     if (r > 84) {
-        tft->setTextPadding(3 * 58);   // Allow for 3 digits each 55 pixels wide + 3 pixel az 1-es piszkának törléséhez
-        tft->drawString(buf, x, y, 8); // Value in middle
+        tft->setTextPadding(3 * 58);   // 3 számjegy, egyenként 55 pixel széles + 3 pixel az 1-es törléséhez
+        tft->drawString(buf, x, y, 8); // Érték középen
     } else {
-        tft->setTextPadding(3 * 14);   // Allow for 3 digits each 14 pixels wide
-        tft->drawString(buf, x, y, 4); // Value in middle
+        tft->setTextPadding(3 * 14);   // 3 számjegy, egyenként 14 pixel széles
+        tft->drawString(buf, x, y, 4); // Érték középen
     }
 
-    // Print units, if the meter is large then use big font 4, othewise use 2
+    // Mértékegység kiírása, nagy gyűrűnél nagyobb betűtípus
     tft->setTextPadding(0);
     tft->setTextColor(TFT_WHITE, TFT_BLACK);
     if (r > 84) {
-        tft->drawString(units, x, y + 60, 4); // Units display
+        tft->drawString(units, x, y + 60, 4); // Mértékegység
     } else {
-        tft->drawString(units, x, y + 15, 2); // Units display
+        tft->drawString(units, x, y + 15, 2); // Mértékegység
     }
 
-    // Calculate and return right hand side x coordinate
+    // Visszaadja a jobb oldali x koordinátát
     return x + r;
 }
 
