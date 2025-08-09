@@ -217,7 +217,7 @@ void displayValues() {
     tft.drawString(buf, 400, 120, 4);
 
 #define VERTICAL_BARS_Y 290
-    // Vertical Line bar - Batterry (visszaállítva TFT alapúra)
+    // Vertical Line bar - Batterry
     verticalLinearMeter(&tft,
                         "Batt [V]",        // category
                         ::vBatterry,       // val
@@ -231,7 +231,7 @@ void displayValues() {
                         10,                // n
                         BLUE2RED);         // color
 
-    // Vertical Line bar - temperature (visszaállítva TFT alapúra)
+    // Vertical Line bar - temperature
     verticalLinearMeter(&tft,
                         "Temp [C]",        // category
                         ::temperature,     // val

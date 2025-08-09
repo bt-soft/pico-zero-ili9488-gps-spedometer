@@ -143,7 +143,7 @@ void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float m
     int titleY = y - (n * (h + g)) - 20;
     tft->setTextSize(1);
     tft->setTextColor(TFT_YELLOW, TFT_BLACK);
-    tft->setTextDatum(mirrored ? TR_DATUM : TL_DATUM);
+    tft->setTextDatum(mirrored ? TC_DATUM : TL_DATUM);
     tft->drawString(category, x, titleY, 2);
     tft->setTextDatum(TL_DATUM);
 
