@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Streaming.h>
 
 #include <TinyGPS++.h>
 TinyGPSPlus gps;
@@ -134,9 +133,6 @@ void displayValues() {
 
     // Ha nem sikerül a lock, akkor nem megyünk tovább
     if (!m) {
-#ifdef __DEBUG_ON_SERIAL__
-        Serial << "displayValues: _gpsMutex aktív" << endl;
-#endif
         return;
     }
 
@@ -262,17 +258,12 @@ void displayValues() {
 /**
  * @brief callback function a hőmérséklet változás kezelésére
  * CSAK akkor hívódik meg, ha a hőmérséklet két ÉRVÉNYES szenzorleolvasás között megváltozik.
- * A "valid" paraméter egy jövőbeli verzióban eltávolításra kerül.
+ * @param deviceIndex A szenzor eszköz indexe
+ * @param temperatureRAW A nyers hőmérséklet érték
  */
 void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
-    Serial.print(F("[NonBlockingDallas] handleTemperatureChange ==> deviceIndex="));
-    Serial.print(deviceIndex);
-    Serial.print(F(" | RAW="));
-    Serial.print(temperatureRAW);
-    Serial.print(F(" | "));
+    //
     ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
-    Serial.print(temperature);
-    Serial.println(F("°C | "));
 }
 
 /**
@@ -290,11 +281,9 @@ void setup(void) {
 
     // Non-blocking Dallas temperature sensor
     nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
-
     // Non-blocking Dallas temperature sensor hőmérséklet változás callback
     nonBlockingDallasTemperatureSensor.onTemperatureChange(handleTemperatureChange);
-
-    // Kérjük le a hőmérsékletet
+    // Azonnal le is kérjük a hőmérsékletet
     nonBlockingDallasTemperatureSensor.requestTemperature();
 
     displayHeaderText();
@@ -368,9 +357,6 @@ void readSensorValues() {
 
     // Ha nem sikerül a lock, akkor nem megyünk tovább
     if (!m) {
-#ifdef __DEBUG_ON_SERIAL__
-        Serial << "readGPS: _gpsMutex aktív" << endl;
-#endif
         return;
     }
 
