@@ -1,9 +1,9 @@
+#include "pins.h"
 #include <Arduino.h>
 
 #include <TinyGPS++.h>
 TinyGPSPlus gps;
 
-#define PICO_ZERO
 #include <TFT_eSPI.h>      // Hardware-specific library
 TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and height
 
@@ -13,7 +13,6 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and heigh
 
 // Hőmérés
 #define DEBUG_DS18B20             // DB18B20 debug
-#define PIN_TEMP_SENSOR 7         /* ATmega328P PIN:4, D10 a DS18B20 bemenete */
 #define DS18B20_TEMP_SENSOR_NDX 0 /* Dallas DS18B20 hõmérõ szenzor indexe */
 #include <OneWire.h>
 #define REQUIRESALARMS false /* nem kell a DallasTemperature ALARM supportja */
@@ -25,7 +24,6 @@ DallasTemperature dallasTemp(&oneWire);
 NonBlockingDallas nonBlockingDallasTemperatureSensor(&dallasTemp); // Create a new instance of the NonBlockingDallas class
 // NonBlockingDallas nonBlockingDallasTemperatureSensor(new DallasTemperature(new OneWire(PIN_TEMP_SENSOR)));
 
-#define PIN_BATTERRY_MEASURE A0
 #define AD_RESOLUTION 12
 volatile float vBatterry = 0.0f;
 volatile float temperature = 0.0f;
@@ -47,11 +45,6 @@ auto_init_mutex(_gpsMutex);
 #define NUM_LEDS 1
 CRGB leds[NUM_LEDS];
 #define INTERNAL_LED_COLOR CRGB::Green; // Zölden villogjon, ha GPS adat érkezik
-
-// Serial1 piout átdefiniálása a PICO ZERO-hoz
-// Meg kell hívni a Serial1.setRX(PIN_SERIAL1_RX_NEW) és a Serial1.setTX(PIN_SERIAL1_TX_NEW)-et a Serial1.begin(9600) előtt
-#define PIN_SERIAL1_TX_NEW (12u)
-#define PIN_SERIAL1_RX_NEW (13u)
 
 #define __DEBUG_ON_SERIAL__
 
