@@ -120,6 +120,7 @@ void linearBar(TFT_eSPI *tft, int val, int x, int y, int w, int h, int g, int n,
  */
 void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float minVal, float maxVal, int x, int y, int w, int h, int g, int n, byte s, boolean mirrored = false) {
     char buf[20];
+
     // 1. Cím kiírása a mérő tetejére
     int titleY = y - (n * (h + g)) - 20;
     tft->setTextSize(1);
@@ -127,12 +128,14 @@ void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float m
     tft->setTextDatum(mirrored ? TC_DATUM : TL_DATUM);
     tft->drawString(category, x, titleY, 2);
     tft->setTextDatum(TL_DATUM);
+
     // 2. Aktuális érték sávszámra váltása (1-től n-ig)
     int barVal = map(val, minVal, maxVal, 1, n);
     if (barVal < 1)
         barVal = 1;
     if (barVal > n)
         barVal = n;
+
     // 3. Sávok és feliratok rajzolása
     for (int b = 1; b <= n; b++) {
         // Sáv Y koordinátája
@@ -167,14 +170,18 @@ void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float m
                     break;
             }
         }
+
         // Sáv rajzolása
         tft->fillRect(x, barY, w, h, barColor);
+
         // Szöveg pozíciója
         int textX = mirrored ? x - 45 : x + w + 8;
         int textY = barY + h / 2 - 4;
+
         // Háttér törlése
         int bgX = mirrored ? x - 50 : x + w + 5;
         tft->fillRect(bgX, barY - 2, 45, h + 4, TFT_BLACK);
+
         // Szöveg meghatározása
         buf[0] = '\0';
         if (b == 1) {
@@ -184,13 +191,17 @@ void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float m
         } else if (b == barVal) {
             dtostrf(val, 0, 1, buf);
         }
+
         // Szöveg kiírása
         if (buf[0] != '\0') {
-            tft->setTextColor(TFT_WHITE, TFT_BLACK);
             tft->setTextSize(1);
+            tft->setTextColor(TFT_WHITE, TFT_BLACK);
+            tft->setTextDatum(mirrored ? TR_DATUM : TL_DATUM);
+            textX += mirrored ? 40 : 0;
             tft->drawString(buf, textX, textY, 1);
         }
     }
+
     // 4. Nagy aktuális érték kiírása a mérő aljára
     dtostrf(val, 0, 2, buf);
     tft->setTextSize(2);

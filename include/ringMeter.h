@@ -69,8 +69,8 @@ float sineWave(int phase) { return sin(phase * 0.0174532925); }
  * @return A jobb oldali x koordináta
  */
 int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r, int angle, bool coloredValue, const char *units, byte scheme) {
+
     // A r minimális értéke kb. 52, különben az érték szöveg belelóg a gyűrűbe
-    // Opcionálisan először a szöveget is lehet rajzolni
 
     x += r;
     y += r; // A gyűrű középpontjának koordinátái
@@ -154,27 +154,23 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
     buf[len] = 0; // Lezáró null, nincs felesleges szóköz
 
     // Érték kiírása középre igazítva drawCentreString-gel
+    bool bigRing = r > 84;
+    int valueY = bigRing ? y - 20 : y;
+    int valueFontSize = bigRing ? 8 : 4;
+    int valueTextPadding = bigRing ? 3 * 58 : 3 * 14;
     tft->setTextSize(1);
     tft->setTextColor(coloredValue ? colour : TFT_WHITE, TFT_BLACK); // Színesedik a gyűrűvel vagy fehér
     tft->setTextDatum(MC_DATUM);                                     // Középre igazítás
-
-    // Nagy gyűrűnél nagy betűtípus, különben kisebb
-    if (r > 84) {
-        tft->setTextPadding(3 * 58);         // 3 számjegy, egyenként 55 pixel széles + 3 pixel az 1-es törléséhez
-        tft->drawCentreString(buf, x, y, 8); // Érték pontosan középen
-    } else {
-        tft->setTextPadding(3 * 14);         // 3 számjegy, egyenként 14 pixel széles
-        tft->drawCentreString(buf, x, y, 4); // Érték pontosan középen
-    }
+    tft->setTextPadding(valueTextPadding);                           // 3 számjegy, egyenként 55 pixel széles + 3 pixel az 1-es törléséhez
+    tft->drawCentreString(buf, x, valueY, valueFontSize);            // Érték pontosan középen
 
     // Mértékegység kiírása, nagy gyűrűnél nagyobb betűtípus
-    tft->setTextPadding(0);
+    int unitY = bigRing ? y - 40 : y - 15; // Mértékegység Y koordináta
+    int unitFontSize = bigRing ? 4 : 2;    // Mértékegység betűméret
+    tft->setTextSize(1);
     tft->setTextColor(TFT_WHITE, TFT_BLACK);
-    if (r > 84) {
-        tft->drawString(units, x, y + 60, 4); // Mértékegység
-    } else {
-        tft->drawString(units, x, y + 15, 2); // Mértékegység
-    }
+    tft->setTextPadding(0);
+    tft->drawString(units, x, unitY, unitFontSize); // Mértékegység
 
     // Visszaadja a jobb oldali x koordinátát
     return x + r;

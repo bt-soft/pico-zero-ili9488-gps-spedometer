@@ -205,7 +205,7 @@ void displayValues() {
               100,                                        // y
               SPEED_RINGMETER_RADIUS,                     // radius
               230,                                        // angle
-              false,                                      // coloredValue
+              true,                                       // coloredValue
               "km/h",                                     // felirat
               GREEN2RED);                                 // scheme
 
