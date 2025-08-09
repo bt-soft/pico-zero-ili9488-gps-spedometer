@@ -4,18 +4,20 @@
 #include "commons.h"
 
 /**
- * Return a 16-bit rainbow colour
+ * 16 bites szivárvány szín visszaadása.
+ *
+ * A value értéke 0-127 között várható, 0 = kék, 127 = piros.
+ *
+ * @param value Szín spektrum index (0-127)
+ * @return 16 bites RGB565 színkód
  */
 unsigned int rainbow(byte value) {
-    // Value is expected to be in range 0-127
-    // The value is converted to a spectrum colour from 0 = blue through to 127 = red
-
-    byte red = 0;   // Red is the top 5 bits of a 16-bit colour value
-    byte green = 0; // Green is the middle 6 bits
-    byte blue = 0;  // Blue is the bottom 5 bits
-
+    // Az érték 0-127 között várható
+    // Az érték spektrum színné konvertálódik: 0 = kék, 127 = piros
+    byte red = 0;   // A piros a felső 5 bit
+    byte green = 0; // A zöld a középső 6 bit
+    byte blue = 0;  // A kék az alsó 5 bit
     byte quadrant = value / 32;
-
     if (quadrant == 0) {
         blue = 31;
         green = 2 * (value % 32);
@@ -39,22 +41,32 @@ unsigned int rainbow(byte value) {
     return (red << 11) + (green << 5) + blue;
 }
 
-// #########################################################################
-// Return a value in range -1 to +1 for a given phase angle in degrees
-// #########################################################################
-float sineWave(int phase) {
-    return sin(phase * 0.0174532925);
-}
+/**
+ * Szinusz hullám érték visszaadása -1 és +1 között, adott fázisszögre (fokban).
+ *
+ * @param phase Fázisszög (fok)
+ * @return Számított szinusz érték
+ */
+float sineWave(int phase) { return sin(phase * 0.0174532925); }
 
-//====================================================================================
-// This is the function to draw the icon stored as an array in program memory (FLASH)
-//====================================================================================
-
-// To speed up rendering we use a 64 pixel buffer
+// A kirajzolás gyorsításához 64 pixeles puffer használata
 #define BUFF_SIZE 64
 
 /**
- *  Draw the meter on the screen, returns x coord of righthand side
+ * Körmérő (ring meter) kirajzolása a kijelzőre.
+ *
+ * @param tft TFT_eSPI kijelző objektum
+ * @param value Aktuális érték
+ * @param vmin Minimum érték
+ * @param vmax Maximum érték
+ * @param x Bal felső sarok X koordináta
+ * @param y Bal felső sarok Y koordináta
+ * @param r Gyűrű sugara
+ * @param angle Teljes szög (fokban)
+ * @param coloredValue Érték színezése (true: színes, false: fehér)
+ * @param units Mértékegység szöveg
+ * @param scheme Színséma
+ * @return A jobb oldali x koordináta
  */
 int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r, int angle, bool coloredValue, const char *units, byte scheme) {
     // Minimum value of r is about 52 before value text intrudes on ring
@@ -102,33 +114,33 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
         if (i < v) { // Fill in coloured segments with 2 triangles
             switch (scheme) {
 
-            case RED2RED:
-                colour = TFT_RED;
-                break; // Fixed colour
+                case RED2RED:
+                    colour = TFT_RED;
+                    break; // Fixed colour
 
-            case GREEN2GREEN:
-                colour = TFT_GREEN;
-                break; // Fixed colour
+                case GREEN2GREEN:
+                    colour = TFT_GREEN;
+                    break; // Fixed colour
 
-            case BLUE2BLUE:
-                colour = TFT_BLUE;
-                break; // Fixed colour
+                case BLUE2BLUE:
+                    colour = TFT_BLUE;
+                    break; // Fixed colour
 
-            case BLUE2RED:
-                colour = rainbow(map(i, -halfAngle, halfAngle, 0, 127));
-                break; // Full spectrum blue to red
+                case BLUE2RED:
+                    colour = rainbow(map(i, -halfAngle, halfAngle, 0, 127));
+                    break; // Full spectrum blue to red
 
-            case GREEN2RED:
-                colour = rainbow(map(i, -halfAngle, halfAngle, 70, 127));
-                break; // Green to red (high temperature etc.)
+                case GREEN2RED:
+                    colour = rainbow(map(i, -halfAngle, halfAngle, 70, 127));
+                    break; // Green to red (high temperature etc.)
 
-            case RED2GREEN:
-                colour = rainbow(map(i, -halfAngle, halfAngle, 127, 63));
-                break; // Red to green (low battery etc.)
+                case RED2GREEN:
+                    colour = rainbow(map(i, -halfAngle, halfAngle, 127, 63));
+                    break; // Red to green (low battery etc.)
 
-            default:
-                colour = RINGMETER_LIGHTBLUE;
-                break; // Fixed colour
+                default:
+                    colour = RINGMETER_LIGHTBLUE;
+                    break; // Fixed colour
             }
             tft->fillTriangle(x0, y0, x1, y1, x2, y2, colour);
             tft->fillTriangle(x1, y1, x2, y2, x3, y3, colour);
