@@ -1,14 +1,10 @@
 #include <Arduino.h>
 #include <Streaming.h>
-#include <stdio.h>
 
 #include <TinyGPS++.h>
 TinyGPSPlus gps;
 
-#include "DayLightSaving.h"
-DaylightSaving dls;
-
-#include <SPI.h>
+#define PICO_ZERO
 #include <TFT_eSPI.h>      // Hardware-specific library
 TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and height
 
@@ -17,17 +13,27 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and heigh
 #include "ringMeter.h"
 
 // Hőmérés
+#define DEBUG_DS18B20             // DB18B20 debug
 #define PIN_TEMP_SENSOR 7         /* ATmega328P PIN:4, D10 a DS18B20 bemenete */
 #define DS18B20_TEMP_SENSOR_NDX 0 /* Dallas DS18B20 hõmérõ szenzor indexe */
 #include <OneWire.h>
 #define REQUIRESALARMS false /* nem kell a DallasTemperature ALARM supportja */
 #include <DallasTemperature.h>
-DallasTemperature ds18B20(new OneWire(PIN_TEMP_SENSOR));
+#include <NonBlockingDallas.h>
 
+OneWire oneWire(PIN_TEMP_SENSOR);
+DallasTemperature dallasTemp(&oneWire);
+NonBlockingDallas nonBlockingDallasTemperatureSensor(&dallasTemp); // Create a new instance of the NonBlockingDallas class
+// NonBlockingDallas nonBlockingDallasTemperatureSensor(new DallasTemperature(new OneWire(PIN_TEMP_SENSOR)));
+
+#define PIN_BATTERRY_MEASURE A0
 #define AD_RESOLUTION 12
 volatile float vBatterry = 0.0f;
 volatile float temperature = 0.0f;
 int maxSpeed = 0;
+
+#include "DayLightSaving.h"
+DaylightSaving dls;
 
 // GPS Mutex
 auto_init_mutex(_gpsMutex);
@@ -35,6 +41,7 @@ auto_init_mutex(_gpsMutex);
 // Belső LED;  PICO: LED_BUILTIN (sima LED), Zero: GP16 (WS2812 RGB LED)
 #define LED_PIN 16
 // PICO ZERO WS2812 RGB LED driver
+#define FASTLED_INTERNAL
 #include <FastLED.h>
 #define FASTLED_FORCE_SOFTWARE_SPI
 #define FASTLED_FORCE_SOFTWARE_PINS
@@ -43,19 +50,17 @@ CRGB leds[NUM_LEDS];
 #define INTERNAL_LED_COLOR CRGB::Green; // Zölden villogjon, ha GPS adat érkezik
 
 // Serial1 piout átdefiniálása a PICO ZERO-hoz
-// Meg kell hívni a Serial1.setRX(PIN_SERIAL1_RX) és a Serial1.setTX(PIN_SERIAL1_TX)-et a Serial1.begin(9600) előtt
-#define PIN_SERIAL1_TX (12u)
-#define PIN_SERIAL1_RX (13u)
+// Meg kell hívni a Serial1.setRX(PIN_SERIAL1_RX_NEW) és a Serial1.setTX(PIN_SERIAL1_TX_NEW)-et a Serial1.begin(9600) előtt
+#define PIN_SERIAL1_TX_NEW (12u)
+#define PIN_SERIAL1_RX_NEW (13u)
 
-// #define __DEBUG_ON_SERIAL__
+#define __DEBUG_ON_SERIAL__
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 /**
  * Eltelt már annyi idő?
  */
-bool timeHasPassed(long fromWhen, int howLong) {
-    return millis() - fromWhen >= howLong;
-}
+bool timeHasPassed(long fromWhen, int howLong) { return millis() - fromWhen >= howLong; }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -212,10 +217,10 @@ void displayValues() {
     tft.drawString(buf, 400, 120, 4);
 
 #define VERTICAL_BARS_Y 290
-    // Vertical Line bar - Batterry
+    // Vertical Line bar - Batterry (visszaállítva TFT alapúra)
     verticalLinearMeter(&tft,
                         "Batt [V]",        // category
-                        vBatterry,         // val
+                        ::vBatterry,       // val
                         BATT_BARMETER_MIN, // minVal
                         BATT_BARMETER_MAX, // maxVal
                         0,                 // x
@@ -226,10 +231,10 @@ void displayValues() {
                         10,                // n
                         BLUE2RED);         // color
 
-    // Vertical Line bar - temperature
+    // Vertical Line bar - temperature (visszaállítva TFT alapúra)
     verticalLinearMeter(&tft,
                         "Temp [C]",        // category
-                        temperature,       // val
+                        ::temperature,     // val
                         TEMP_BARMETER_MIN, // minVal
                         TEMP_BARMETER_MAX, // maxVal
                         tft.width() - 30,  // x = maxX - bar-w
@@ -255,6 +260,22 @@ void displayValues() {
 }
 
 /**
+ * @brief callback function a hőmérséklet változás kezelésére
+ * CSAK akkor hívódik meg, ha a hőmérséklet két ÉRVÉNYES szenzorleolvasás között megváltozik.
+ * A "valid" paraméter egy jövőbeli verzióban eltávolításra kerül.
+ */
+void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
+    Serial.print(F("[NonBlockingDallas] handleTemperatureChange ==> deviceIndex="));
+    Serial.print(deviceIndex);
+    Serial.print(F(" | RAW="));
+    Serial.print(temperatureRAW);
+    Serial.print(F(" | "));
+    ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
+    Serial.print(temperature);
+    Serial.println(F("°C | "));
+}
+
+/**
  * Core-0 Setup
  */
 void setup(void) {
@@ -267,6 +288,15 @@ void setup(void) {
     tft.setRotation(1);
     tft.fillScreen(TFT_BLACK);
 
+    // Non-blocking Dallas temperature sensor
+    nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
+
+    // Non-blocking Dallas temperature sensor hőmérséklet változás callback
+    nonBlockingDallasTemperatureSensor.onTemperatureChange(handleTemperatureChange);
+
+    // Kérjük le a hőmérsékletet
+    nonBlockingDallasTemperatureSensor.requestTemperature();
+
     displayHeaderText();
 }
 
@@ -275,16 +305,15 @@ void setup(void) {
  */
 void loop() {
 
+    // Hőmérséklet frissítése
+    nonBlockingDallasTemperatureSensor.update();
+
     // Értékek kiírása
     static long lastDisplay = millis() - 1000;
     if (timeHasPassed(lastDisplay, 1000)) {
         displayValues();
         lastDisplay = millis();
     }
-
-#ifdef __DEBUG_ON_SERIAL__
-    Serial << "loop" << endl;
-#endif
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -294,33 +323,6 @@ void loop() {
 //
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-/**
- *
- */
-void readSensorValues() {
-
-    // Lockolunk egyet
-    CoreMutex m(&_gpsMutex);
-
-    // Ha nem sikerül a lock, akkor nem megyünk tovább
-    if (!m) {
-#ifdef __DEBUG_ON_SERIAL__
-        Serial << "readGPS: _gpsMutex aktív" << endl;
-#endif
-        return;
-    }
-
-    // GPS adatok olvasása
-    readGPS();
-
-    static long lastReadSensors = millis() - 1000;
-    if (timeHasPassed(lastReadSensors, 1000)) {
-        vBatterry = readBatterry();
-        temperature = readtemperature();
-        lastReadSensors = millis();
-    }
-}
 
 /**
  * GPS adatok kiolvasása
@@ -347,25 +349,39 @@ void readGPS() {
  */
 float readBatterry() {
 #define V_REFERENCE 3.3f
-#define R_ATTENNUATOR ((22.0f + 4.69f) / 4.69f) // A feszültségosztó ellenállások értéke
+#define EXTERNAL_VBUSDIVIDER_RATIO ((22.0f + 4.69f) / 4.69f) // A feszültségosztó ellenállások értéke
 #define CONVERSION_FACTOR (1 << AD_RESOLUTION)
-#define VOLTAGE_ATT_CORR -0.02 // A feszültségosztón mért valós feszültség korrigálásához
 
-    // ADC érték átalakítása feszültséggé
-    float voltageOut = (analogRead(A3) * V_REFERENCE) / CONVERSION_FACTOR;
-    voltageOut += VOLTAGE_ATT_CORR; // csalunk egyet, ez a valós feszültség (műszeres méréssel) az osztón
-    // Serial << "Vout: " << voltageOut << endl;
+    float voltageOut = (analogRead(PIN_BATTERRY_MEASURE) * V_REFERENCE) / CONVERSION_FACTOR;
+    float vBusExtVoltage = voltageOut * EXTERNAL_VBUSDIVIDER_RATIO;
+    // Serial << "Vout: " << vBusExtVoltage << endl;
 
-    // Eredeti feszültség számítása a feszültségosztó alapján
-    return voltageOut * R_ATTENNUATOR;
+    return vBusExtVoltage;
 }
-
 /**
- * DS18B20 hőmérő szenzor olvasása
+ *
  */
-float readtemperature() {
-    ds18B20.requestTemperaturesByIndex(DS18B20_TEMP_SENSOR_NDX);
-    return ds18B20.getTempCByIndex(DS18B20_TEMP_SENSOR_NDX);
+void readSensorValues() {
+
+    // Lockolunk egyet
+    CoreMutex m(&_gpsMutex);
+
+    // Ha nem sikerül a lock, akkor nem megyünk tovább
+    if (!m) {
+#ifdef __DEBUG_ON_SERIAL__
+        Serial << "readGPS: _gpsMutex aktív" << endl;
+#endif
+        return;
+    }
+
+    // GPS adatok olvasása
+    readGPS();
+
+    static long lastReadSensors = millis() - 1000;
+    if (timeHasPassed(lastReadSensors, 1000)) {
+        vBatterry = readBatterry();
+        lastReadSensors = millis();
+    }
 }
 
 /**
@@ -373,21 +389,16 @@ float readtemperature() {
  */
 void setup1(void) {
     // GPS Serial
-    Serial1.setRX(PIN_SERIAL1_RX);
-    Serial1.setTX(PIN_SERIAL1_TX);
+    Serial1.setRX(PIN_SERIAL1_RX_NEW);
+    Serial1.setTX(PIN_SERIAL1_TX_NEW);
     Serial1.begin(9600);
 
     // initialize digital pin LED_BUILTIN as an output.
     FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(50);
 
-    // AD felbontás beállítása
+    // AD felbontás beállítása a feszültségméréshez
     analogReadResolution(AD_RESOLUTION);
-
-    // DS18B20 Hőmérsékletmérő szenzor, felbontásban követjük a belső AD-t
-    ds18B20.begin();
-    ds18B20.setResolution(AD_RESOLUTION);
-    ds18B20.setWaitForConversion(false);
 }
 
 /**

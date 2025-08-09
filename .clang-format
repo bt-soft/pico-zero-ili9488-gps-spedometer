@@ -1,0 +1,4 @@
+ColumnLimit: 220
+IndentWidth: 4
+IndentCaseLabels: true
+IndentCaseBlocks: false

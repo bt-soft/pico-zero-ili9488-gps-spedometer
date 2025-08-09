@@ -38,7 +38,7 @@
 
 // Akkumulátor
 #define BATT_BARMETER_MIN 3
-#define BATT_BARMETER_MAX 16
+#define BATT_BARMETER_MAX 6
 
 // Hőmérséklet
 #define TEMP_BARMETER_MIN -20
