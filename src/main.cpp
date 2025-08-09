@@ -198,14 +198,14 @@ void displayValues() {
     // Sebesség
     int speedValue = gps.speed.isValid() && gps.speed.age() < GPS_DATA_MAX_AGE && gps.speed.kmph() >= 4 ? gps.speed.kmph() : 0;
     ringMeter(&tft,
-              288,//speedValue,                                 // current value
+              288,                                        // speedValue,                                 // current value
               0,                                          // minValue
               SPEED_RINGMETER_MAX_VALUE,                  // maxValue
               (tft.width() / 2 - SPEED_RINGMETER_RADIUS), // x
               100,                                        // y
               SPEED_RINGMETER_RADIUS,                     // radius
               230,                                        // angle
-              true,                                       // coloredValue
+              false,                                      // coloredValue
               "km/h",                                     // felirat
               GREEN2RED);                                 // scheme
 

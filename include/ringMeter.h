@@ -151,23 +151,20 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
         len = 5;
     }
     dtostrf(value, len, 0, buf);
-    buf[len] = ' ';
-    buf[len + 1] = 0; // Üres karakter és lezáró null, segít középre igazítani
+    buf[len] = 0; // Lezáró null, nincs felesleges szóköz
 
-    // Érték kiírása
+    // Érték kiírása középre igazítva drawCentreString-gel
     tft->setTextSize(1);
-
-    // Érték szöveg színe
     tft->setTextColor(coloredValue ? colour : TFT_WHITE, TFT_BLACK); // Színesedik a gyűrűvel vagy fehér
     tft->setTextDatum(MC_DATUM);                                     // Középre igazítás
 
     // Nagy gyűrűnél nagy betűtípus, különben kisebb
     if (r > 84) {
-        tft->setTextPadding(3 * 58);   // 3 számjegy, egyenként 55 pixel széles + 3 pixel az 1-es törléséhez
-        tft->drawString(buf, x, y, 8); // Érték középen
+        tft->setTextPadding(3 * 58);         // 3 számjegy, egyenként 55 pixel széles + 3 pixel az 1-es törléséhez
+        tft->drawCentreString(buf, x, y, 8); // Érték pontosan középen
     } else {
-        tft->setTextPadding(3 * 14);   // 3 számjegy, egyenként 14 pixel széles
-        tft->drawString(buf, x, y, 4); // Érték középen
+        tft->setTextPadding(3 * 14);         // 3 számjegy, egyenként 14 pixel széles
+        tft->drawCentreString(buf, x, y, 4); // Érték pontosan középen
     }
 
     // Mértékegység kiírása, nagy gyűrűnél nagyobb betűtípus
