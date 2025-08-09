@@ -144,33 +144,33 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
         }
     }
 
+    // Nagy kör?
+    bool bigRing = r > 84;
+
+    // Mértékegység kiírása, nagy gyűrűnél nagyobb betűtípus
+    int unitY = bigRing ? y - 60 : y - 18; // Mértékegység Y koordináta 
+    int unitFontSize = bigRing ? 4 : 2;    // Mértékegység betűméret
+    tft->setTextSize(1);
+    tft->setTextColor(TFT_WHITE, TFT_BLACK);
+    tft->setTextPadding(0);
+    tft->setTextDatum(MC_DATUM);                          // Középre igazítás
+    tft->drawCentreString(units, x, unitY, unitFontSize); // Mértékegység
+
     // Érték karakterlánccá alakítása
     char buf[10];
     byte len = 3;
     if (value > 999) {
         len = 5;
     }
-    dtostrf(value, len, 0, buf);
-    buf[len] = 0; // Lezáró null, nincs felesleges szóköz
-
-    // Érték kiírása középre igazítva drawCentreString-gel
-    bool bigRing = r > 84;
-    int valueY = bigRing ? y - 20 : y;
+    dtostrf(value, 0, 0, buf); // Nincs padding, csak a szükséges karakterek
+    // Érték kiírása vízszintesen középre igazítva
+    int valueY = bigRing ? y - 20 : y; // Mértékegység Y koordináta 
     int valueFontSize = bigRing ? 8 : 4;
-    int valueTextPadding = bigRing ? 3 * 58 : 3 * 14;
     tft->setTextSize(1);
     tft->setTextColor(coloredValue ? colour : TFT_WHITE, TFT_BLACK); // Színesedik a gyűrűvel vagy fehér
-    tft->setTextDatum(MC_DATUM);                                     // Középre igazítás
-    tft->setTextPadding(valueTextPadding);                           // 3 számjegy, egyenként 55 pixel széles + 3 pixel az 1-es törléséhez
-    tft->drawCentreString(buf, x, valueY, valueFontSize);            // Érték pontosan középen
-
-    // Mértékegység kiírása, nagy gyűrűnél nagyobb betűtípus
-    int unitY = bigRing ? y - 40 : y - 15; // Mértékegység Y koordináta
-    int unitFontSize = bigRing ? 4 : 2;    // Mértékegység betűméret
-    tft->setTextSize(1);
-    tft->setTextColor(TFT_WHITE, TFT_BLACK);
-    tft->setTextPadding(0);
-    tft->drawString(units, x, unitY, unitFontSize); // Mértékegység
+    tft->setTextDatum(MC_DATUM);                                     // Vízszintes és függőleges középre igazítás
+    tft->setTextPadding(0);                                          // Nincs padding, így a szöveg pontosan középre kerül
+    tft->drawCentreString(buf, x, valueY, valueFontSize);                 // Érték pontosan középen a gyűrű közepén
 
     // Visszaadja a jobb oldali x koordinátát
     return x + r;
