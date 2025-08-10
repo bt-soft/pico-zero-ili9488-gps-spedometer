@@ -174,7 +174,7 @@ void displayValues() {
             dls.correctTime(mins, hours, gps.date.day(), gps.date.month(), gps.date.year());
             sprintf(buf, "%02d:%02d", hours, mins);
             tft.setTextSize(1);
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
+            tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
             tft.setTextPadding(tft.textWidth(buf, 6));
             tft.drawString(buf, 250, 45, 6);
         }
@@ -183,7 +183,7 @@ void displayValues() {
         if (gps.date.isValid() && gps.date.age() < GPS_DATA_MAX_AGE) {
             sprintf(buf, "%04d-%02d-%02d", gps.date.year(), gps.date.month(), gps.date.day());
             tft.setTextSize(1);
-            tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
+            tft.setTextColor(TFT_ORANGE, TFT_BLACK);
             tft.setTextPadding(tft.textWidth(buf, 2));
             tft.drawString(buf, 250, 70, 2);
         }
@@ -212,16 +212,12 @@ void displayValues() {
     speedValue = random(0, 288);
     dtostrf(speedValue, 0, 0, buf);
 
-    // Sebesség kiírás törlő téglalap méretei
-    constexpr int SPEED_CLEAR_RECT_W = 330;
-    constexpr int SPEED_CLEAR_RECT_H = 220;
-
-    // A törlő téglalap
-    tft.fillRect(80, 79, SPEED_CLEAR_RECT_W, SPEED_CLEAR_RECT_H, TFT_BLACK);
-
+    // Flicker-free, always centered speed value using setTextPadding + MC_DATUM
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.setTextDatum(MC_DATUM); // vízszintes közép
     tft.loadFont(Arial_Narrow_Bold120);
+    // Padding: max 3 digits ("288") in this font, textWidth must be called after loadFont and only needs the string
+    tft.setTextPadding(tft.textWidth("288"));
     tft.drawString(buf, tft.width() / 2, 190);
     tft.unloadFont();
 
