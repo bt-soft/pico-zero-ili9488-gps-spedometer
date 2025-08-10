@@ -8,6 +8,10 @@
 #define PIN_SERIAL1_TX_NEW (12u)
 #define PIN_SERIAL1_RX_NEW (13u)
 
+// TFT háttérvilágítás
+#define PIN_TFT_BACKGROUND_LED 1
+#define PIN_LIGHT_SENSOR A1
+
 #define PIN_TEMP_SENSOR 8
 #define PIN_BATTERRY_MEASURE A0
 #define PIN_BUZZER 9

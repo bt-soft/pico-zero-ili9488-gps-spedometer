@@ -8,6 +8,7 @@ TinyGPSPlus gps;
 TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and height
 
 #include "Large_Font.h"
+#include "Utils.h"
 #include "commons.h"
 #include "linearMeter.h"
 #include "pins.h"
@@ -33,6 +34,9 @@ int maxSpeed = 0;
 
 #include "DayLightSaving.h"
 DaylightSaving dls;
+
+#include "TftBackLightAdjuster.h"
+TftBackLightAdjuster tftBackLightAdjuster;
 
 // GPS Mutex
 auto_init_mutex(_gpsMutex);
@@ -209,6 +213,7 @@ void displayValues() {
     //           true,                                       // coloredValue
     //           "km/h",                                     // felirat
     //           GREEN2RED);                                 // scheme
+    //
     // speedValue = random(0, 288);
     dtostrf(speedValue, 0, 0, buf);
 
@@ -300,6 +305,9 @@ void setup(void) {
     tft.setRotation(1);
     tft.fillScreen(TFT_BLACK);
 
+    // TFT háttérvilágítás beállítása
+    tftBackLightAdjuster.begin();
+
     // Non-blocking Dallas temperature sensor
     nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
     // Non-blocking Dallas temperature sensor hőmérséklet változás callback
@@ -307,7 +315,11 @@ void setup(void) {
     // Azonnal le is kérjük a hőmérsékletet
     nonBlockingDallasTemperatureSensor.requestTemperature();
 
+    // Kirajzoljuk az állandó feliratokat
     displayHeaderText();
+
+    // Pittyentünk egyet
+    Utils::beepTick();
 }
 
 /**
@@ -389,6 +401,9 @@ void readSensorValues() {
         vBatterry = readBatterry();
         lastReadSensors = millis();
     }
+
+    // Háttérvilágitás bazseválása
+    tftBackLightAdjuster.adjust();
 }
 
 /**

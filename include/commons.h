@@ -1,7 +1,7 @@
 #ifndef __COMMONS_H__
 #define __COMMONS_H__
 
-#define __DEBUG_ON_SERIAL__
+#define __DEBUG
 
 // Színsémák
 #define RED2RED 0
@@ -52,5 +52,12 @@
 
 // Minimum ennyi ideig látszik a traffipax alarm
 #define ALARM_TIME_MS 10000
+
+//--- Debug ---
+#ifdef __DEBUG
+#define DEBUG(fmt, ...) Serial.printf(fmt __VA_OPT__(, ) __VA_ARGS__)
+#else
+#define DEBUG(fmt, ...) // Üres makró, ha __DEBUG nincs definiálva
+#endif
 
 #endif

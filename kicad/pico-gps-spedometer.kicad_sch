@@ -1679,6 +1679,205 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:R_Photo"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R"
+				(at 1.27 1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "R_Photo"
+				(at 1.27 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left top)
+				)
+			)
+			(property "Footprint" ""
+				(at 1.27 -6.35 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Photoresistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "resistor variable light sensitive opto LDR"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "*LDR* R?LDR*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "R_Photo_0_1"
+				(polyline
+					(pts
+						(xy -1.524 -0.762) (xy -4.064 1.778)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.524 -0.762) (xy -2.286 -0.762)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.524 -0.762) (xy -1.524 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.524 -2.286) (xy -4.064 0.254)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.524 -2.286) (xy -2.286 -2.286)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.524 -2.286) (xy -1.524 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.016 2.54)
+					(end 1.016 -2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_Photo_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Diode:1N4001"
 			(pin_numbers
 				(hide yes)
@@ -3806,6 +4005,12 @@
 		(uuid "67f10af5-d3ce-43ee-8aca-bd996ee6fdc9")
 	)
 	(junction
+		(at 167.64 106.68)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "8a223ec3-8be6-4d3e-9711-0e307a2c902e")
+	)
+	(junction
 		(at 186.69 31.75)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3856,11 +4061,7 @@
 		(uuid "a1f82eae-f2e0-4d2d-81cb-571116c2e2f7")
 	)
 	(no_connect
-		(at 132.08 106.68)
-		(uuid "b1e02adb-70f5-4d41-857a-3a902567a7ed")
-	)
-	(no_connect
-		(at 205.74 99.06)
+		(at 208.28 99.06)
 		(uuid "bd17f1af-b72c-4a72-88a1-d391177909c5")
 	)
 	(no_connect
@@ -4044,7 +4245,7 @@
 	)
 	(wire
 		(pts
-			(xy 160.02 80.01) (xy 154.94 80.01)
+			(xy 160.02 74.93) (xy 154.94 74.93)
 		)
 		(stroke
 			(width 0)
@@ -4104,7 +4305,7 @@
 	)
 	(wire
 		(pts
-			(xy 154.94 104.14) (xy 154.94 107.95)
+			(xy 154.94 104.14) (xy 154.94 109.22)
 		)
 		(stroke
 			(width 0)
@@ -4182,16 +4383,6 @@
 		)
 		(uuid "309db4a5-58e1-4ac4-ad70-9469bceeeb9e")
 	)
-	(bus
-		(pts
-			(xy 60.96 81.28) (xy 63.5 81.28)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "329f01c7-3f5b-4378-b913-259f75a348d5")
-	)
 	(wire
 		(pts
 			(xy 138.43 36.83) (xy 143.51 36.83)
@@ -4254,6 +4445,16 @@
 	)
 	(wire
 		(pts
+			(xy 167.64 106.68) (xy 167.64 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4757bd56-43eb-47f4-b183-5f9db4ce4cf2")
+	)
+	(wire
+		(pts
 			(xy 68.58 73.66) (xy 68.58 78.74)
 		)
 		(stroke
@@ -4311,6 +4512,16 @@
 			(type default)
 		)
 		(uuid "5755d604-66e3-4f6d-a65d-5f0e137f86d1")
+	)
+	(bus
+		(pts
+			(xy 87.63 88.9) (xy 87.63 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "59795e76-d467-4a99-907d-c3501a5fc84b")
 	)
 	(bus
 		(pts
@@ -4404,6 +4615,16 @@
 	)
 	(wire
 		(pts
+			(xy 167.64 85.09) (xy 167.64 87.63)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6afb017d-8b5c-4b31-8a1a-f244ce5a216a")
+	)
+	(wire
+		(pts
 			(xy 46.99 99.06) (xy 46.99 101.6)
 		)
 		(stroke
@@ -4484,7 +4705,7 @@
 	)
 	(wire
 		(pts
-			(xy 201.93 90.17) (xy 201.93 91.44)
+			(xy 204.47 90.17) (xy 204.47 91.44)
 		)
 		(stroke
 			(width 0)
@@ -4524,7 +4745,7 @@
 	)
 	(wire
 		(pts
-			(xy 201.93 88.9) (xy 201.93 86.36)
+			(xy 204.47 88.9) (xy 204.47 86.36)
 		)
 		(stroke
 			(width 0)
@@ -4574,7 +4795,7 @@
 	)
 	(wire
 		(pts
-			(xy 198.12 90.17) (xy 201.93 90.17)
+			(xy 200.66 90.17) (xy 204.47 90.17)
 		)
 		(stroke
 			(width 0)
@@ -4591,6 +4812,16 @@
 			(type default)
 		)
 		(uuid "8cf4dd69-9fa9-4977-8908-e1085b22f4df")
+	)
+	(wire
+		(pts
+			(xy 167.64 95.25) (xy 167.64 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8dfd447f-f62b-4f60-83a9-aed13ac3a7b5")
 	)
 	(wire
 		(pts
@@ -4724,7 +4955,7 @@
 	)
 	(bus
 		(pts
-			(xy 87.63 88.9) (xy 87.63 86.36)
+			(xy 87.63 86.36) (xy 87.63 88.9)
 		)
 		(stroke
 			(width 0)
@@ -4734,7 +4965,7 @@
 	)
 	(wire
 		(pts
-			(xy 154.94 80.01) (xy 154.94 87.63)
+			(xy 154.94 74.93) (xy 154.94 87.63)
 		)
 		(stroke
 			(width 0)
@@ -4774,7 +5005,7 @@
 	)
 	(wire
 		(pts
-			(xy 201.93 91.44) (xy 205.74 91.44)
+			(xy 204.47 91.44) (xy 208.28 91.44)
 		)
 		(stroke
 			(width 0)
@@ -4791,6 +5022,16 @@
 			(type default)
 		)
 		(uuid "bacfd80b-b87f-4ff7-b975-13220eb73842")
+	)
+	(wire
+		(pts
+			(xy 132.08 106.68) (xy 167.64 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc0fd729-e837-4f33-ab96-97829c450513")
 	)
 	(wire
 		(pts
@@ -4832,15 +5073,15 @@
 		)
 		(uuid "c56747ba-c937-4bbd-a537-efe83afec815")
 	)
-	(bus
+	(wire
 		(pts
-			(xy 87.63 91.44) (xy 87.63 88.9)
+			(xy 167.64 116.84) (xy 167.64 120.65)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "c87020f2-bb7d-4373-809f-679b938adc8b")
+		(uuid "c8c63b6e-3851-455b-8b32-421330b259f4")
 	)
 	(wire
 		(pts
@@ -4934,7 +5175,7 @@
 	)
 	(wire
 		(pts
-			(xy 205.74 88.9) (xy 201.93 88.9)
+			(xy 208.28 88.9) (xy 204.47 88.9)
 		)
 		(stroke
 			(width 0)
@@ -4954,7 +5195,7 @@
 	)
 	(wire
 		(pts
-			(xy 154.94 115.57) (xy 154.94 120.65)
+			(xy 154.94 116.84) (xy 154.94 120.65)
 		)
 		(stroke
 			(width 0)
@@ -5002,6 +5243,16 @@
 		)
 		(uuid "dd2173e7-f3f9-4e31-a91a-d8133601c004")
 	)
+	(bus
+		(pts
+			(xy 60.96 81.28) (xy 63.5 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dde729fd-e8b8-466f-abdc-148b5004671f")
+	)
 	(wire
 		(pts
 			(xy 53.34 73.66) (xy 53.34 78.74)
@@ -5014,7 +5265,7 @@
 	)
 	(wire
 		(pts
-			(xy 203.2 93.98) (xy 205.74 93.98)
+			(xy 205.74 93.98) (xy 208.28 93.98)
 		)
 		(stroke
 			(width 0)
@@ -5064,7 +5315,7 @@
 	)
 	(wire
 		(pts
-			(xy 203.2 96.52) (xy 205.74 96.52)
+			(xy 205.74 96.52) (xy 208.28 96.52)
 		)
 		(stroke
 			(width 0)
@@ -5368,7 +5619,7 @@
 	)
 	(global_label "V-IN-MEAS"
 		(shape input)
-		(at 160.02 80.01 0)
+		(at 160.02 74.93 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5378,7 +5629,7 @@
 		)
 		(uuid "9d5a2866-ef02-45c3-88dd-2aacf8d07cb5")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 174.0724 80.01 0)
+			(at 174.0724 74.93 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5390,7 +5641,7 @@
 	)
 	(global_label "GPS_RXD"
 		(shape input)
-		(at 203.2 96.52 180)
+		(at 205.74 96.52 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5400,7 +5651,7 @@
 		)
 		(uuid "d2409a0a-fe99-4319-b1e8-c039b6e1163e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 191.7482 96.52 0)
+			(at 194.2882 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5412,7 +5663,7 @@
 	)
 	(global_label "GPS_TXD"
 		(shape output)
-		(at 203.2 93.98 180)
+		(at 205.74 93.98 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5422,7 +5673,7 @@
 		)
 		(uuid "ef0a9fb1-d706-4552-94e7-c1f100d7a12c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 192.0506 93.98 0)
+			(at 194.5906 93.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5581,6 +5832,72 @@
 			(project "pico-gps-spedometer"
 				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
 					(reference "#PWR016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 167.64 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0d0b4527-e92f-41d7-ae99-98b7343e5156")
+		(property "Reference" "#PWR024"
+			(at 167.64 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 167.64 80.01 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 167.64 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 167.64 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 167.64 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4b6f4ea2-61a8-4c11-b7a8-4cccdc8227e1")
+		)
+		(instances
+			(project "pico-gps-spedometer"
+				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
+					(reference "#PWR024")
 					(unit 1)
 				)
 			)
@@ -6070,7 +6387,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 198.12 90.17 270)
+		(at 200.66 90.17 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -6079,7 +6396,7 @@
 		(fields_autoplaced yes)
 		(uuid "55eada97-4e68-4ffd-baf6-1f7c1b03ee95")
 		(property "Reference" "#PWR022"
-			(at 191.77 90.17 0)
+			(at 194.31 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6088,7 +6405,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 194.31 90.1699 90)
+			(at 196.85 90.1699 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6097,7 +6414,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 198.12 90.17 0)
+			(at 200.66 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6106,7 +6423,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 198.12 90.17 0)
+			(at 200.66 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6115,7 +6432,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 198.12 90.17 0)
+			(at 200.66 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6756,7 +7073,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "8702f1ec-2700-4919-8907-48ee4925662b")
 		(property "Reference" "U4"
 			(at 77.47 45.7199 0)
@@ -6768,7 +7084,7 @@
 			)
 		)
 		(property "Value" "TFT_320x240"
-			(at 77.47 48.2599 0)
+			(at 78.232 48.768 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6777,12 +7093,13 @@
 			)
 		)
 		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x14_P2.54mm_Vertical"
-			(at 77.47 50.7999 0)
+			(at 77.978 54.102 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
@@ -7154,6 +7471,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 167.64 120.65 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a040a6cd-6337-41e2-b1d0-d778c3698eca")
+		(property "Reference" "#PWR023"
+			(at 167.64 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 167.64 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 167.64 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 167.64 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 167.64 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d1b5bcee-1819-4897-b3db-f566b13b88e6")
+		)
+		(instances
+			(project "pico-gps-spedometer"
+				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
+					(reference "#PWR023")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:C_Polarized")
 		(at 222.25 40.64 0)
 		(unit 1)
@@ -7290,16 +7673,16 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 154.94 111.76 0)
+		(at 167.64 113.03 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "a5f354b8-389e-49a2-a0d7-3caf18a06211")
-		(property "Reference" "R3"
-			(at 157.48 110.4899 0)
+		(uuid "a475d1f0-9272-467f-a8db-caccafd52edd")
+		(property "Reference" "R6"
+			(at 170.18 111.7599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7307,8 +7690,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4k7"
-			(at 157.48 113.0299 0)
+		(property "Value" "10k"
+			(at 170.18 114.2999 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7317,7 +7700,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal"
-			(at 153.162 111.76 90)
+			(at 165.862 113.03 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7326,7 +7709,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 154.94 111.76 0)
+			(at 167.64 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7335,7 +7718,77 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 154.94 111.76 0)
+			(at 167.64 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "8ad3c864-e36f-418f-9537-3990fec6db79")
+		)
+		(pin "1"
+			(uuid "be282fde-9649-447c-b8f1-24e3996189b6")
+		)
+		(instances
+			(project "pico-gps-spedometer"
+				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
+					(reference "R6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 154.94 113.03 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a5f354b8-389e-49a2-a0d7-3caf18a06211")
+		(property "Reference" "R3"
+			(at 157.48 111.7599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "4k7"
+			(at 157.48 114.2999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal"
+			(at 153.162 113.03 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 154.94 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 154.94 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7427,7 +7880,7 @@
 	)
 	(symbol
 		(lib_id "Connector:Conn_01x05_Socket")
-		(at 210.82 93.98 0)
+		(at 213.36 93.98 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7436,7 +7889,7 @@
 		(fields_autoplaced yes)
 		(uuid "a925400f-4667-4e77-921c-7ea6adc20807")
 		(property "Reference" "J3"
-			(at 212.09 92.7099 0)
+			(at 214.63 92.7099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7445,7 +7898,7 @@
 			)
 		)
 		(property "Value" "uBlox NEO GPS (6M/8M)"
-			(at 212.09 95.2499 0)
+			(at 214.63 95.2499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7454,7 +7907,7 @@
 			)
 		)
 		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x05_P2.54mm_Vertical"
-			(at 210.82 93.98 0)
+			(at 213.36 93.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7463,7 +7916,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 210.82 93.98 0)
+			(at 213.36 93.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7472,7 +7925,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x05, script generated"
-			(at 210.82 93.98 0)
+			(at 213.36 93.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7897,7 +8350,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 201.93 86.36 0)
+		(at 204.47 86.36 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7906,7 +8359,7 @@
 		(fields_autoplaced yes)
 		(uuid "b6fdc026-4061-4b53-95a8-6ea0148d68a8")
 		(property "Reference" "#PWR021"
-			(at 201.93 90.17 0)
+			(at 204.47 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7915,7 +8368,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 201.93 81.28 0)
+			(at 204.47 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7923,7 +8376,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 201.93 86.36 0)
+			(at 204.47 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7932,7 +8385,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 201.93 86.36 0)
+			(at 204.47 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7941,7 +8394,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 201.93 86.36 0)
+			(at 204.47 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8224,6 +8677,77 @@
 			(project ""
 				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
 					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R_Photo")
+		(at 167.64 91.44 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "dfbef702-b99c-4222-ab5f-dae2030501f5")
+		(property "Reference" "R5"
+			(at 170.18 90.1699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GL5516"
+			(at 170.18 92.7099 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "OptoDevice:R_LDR_4.9x4.2mm_P2.54mm_Vertical"
+			(at 168.91 97.79 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 167.64 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Photoresistor"
+			(at 167.64 91.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "6d97eadb-7e88-4f39-8514-91db053a0e66")
+		)
+		(pin "1"
+			(uuid "5feca246-fddb-4a11-9b20-11a6a35bd999")
+		)
+		(instances
+			(project ""
+				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
+					(reference "R5")
 					(unit 1)
 				)
 			)
