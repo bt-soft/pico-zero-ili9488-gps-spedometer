@@ -128,15 +128,17 @@ void verticalLinearMeter(TFT_eSprite *sprite, int meterHeight, int meterWidth, c
     sprite->setTextSize(1);
     sprite->setTextColor(TFT_YELLOW, TFT_BLACK);
     sprite->setTextDatum(mirrored ? TR_DATUM : TL_DATUM);
-    sprite->drawString(category, mirrored ? meterWidth - 10 : 0, titleY, 2);
+    sprite->drawString(category, mirrored ? meterWidth : 0, titleY, 2);
     sprite->setTextDatum(TL_DATUM);
 
     // 2. Aktuális érték sávszámra váltása (1-től n-ig)
     int barVal = map(val, minVal, maxVal, 1, n);
-    if (barVal < 1)
+    if (barVal < 1) {
         barVal = 1;
-    if (barVal > n)
+    }
+    if (barVal > n) {
         barVal = n;
+    }
 
     // 3. Sávok és feliratok rajzolása
     for (int b = 1; b <= n; b++) {
@@ -173,18 +175,14 @@ void verticalLinearMeter(TFT_eSprite *sprite, int meterHeight, int meterWidth, c
             }
         }
 
-        // Sáv rajzolása
-        sprite->fillRect(mirrored ? meterWidth - w - 10 : 0, barY, w, h, barColor);
+        // Bar téglalap rajzolása
+        sprite->fillRect(mirrored ? meterWidth - w : 0, barY, w, h, barColor);
 
-        // Szöveg pozíciója
-        int textX = mirrored ? meterWidth - w - 55 : w + 8;
-        int textY = barY + h / 2 - 4;
-
-        // Háttér törlése
-        int bgX = mirrored ? meterWidth - w - 60 : w + 5;
+        // Korábbi bar szöveg értékek törlése
+        int bgX = mirrored ? meterWidth - w - 50 : w + 5;
         sprite->fillRect(bgX, barY - 2, 45, h + 4, TFT_BLACK);
 
-        // Szöveg meghatározása
+        // Bar szöveg meghatározása
         buf[0] = '\0';
         if (b == 1) {
             dtostrf(minVal, 0, 1, buf);
@@ -194,22 +192,25 @@ void verticalLinearMeter(TFT_eSprite *sprite, int meterHeight, int meterWidth, c
             dtostrf(val, 0, 1, buf);
         }
 
-        // Szöveg kiírása
+        // Bar szöveg kiírása
         if (buf[0] != '\0') {
             sprite->setTextSize(1);
             sprite->setTextColor(TFT_WHITE, TFT_BLACK);
             sprite->setTextDatum(mirrored ? TR_DATUM : TL_DATUM);
-            textX += mirrored ? 40 : 0;
+
+            // Bar szöveg pozíciója
+            int textX = mirrored ? meterWidth - w - 8 : w + 8;
+            int textY = barY + h / 2 - 4;
             sprite->drawString(buf, textX, textY, 1);
         }
     }
 
-    // 4. Aktuális érték kiírása a mérő aljára
+    // 4. Aktuális érték kiírása a bar aljára
     dtostrf(val, 0, 2, buf);
     sprite->setTextSize(2);
-    sprite->setTextDatum(TL_DATUM);
+    sprite->setTextDatum(BL_DATUM);
     sprite->setTextColor(TFT_ORANGE, TFT_BLACK);
-    sprite->drawString(buf, mirrored ? 30 : 0, meterHeight - 18, 1);
+    sprite->drawString(buf, mirrored ? 10 : 0, meterHeight, 1);
 
     // Sprite kirajzolása a kijelzőre
     int drawX = x;

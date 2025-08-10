@@ -1,5 +1,5 @@
-#include "pins.h"
 #include <Arduino.h>
+#include <Streaming.h>
 
 #include <TinyGPS++.h>
 TinyGPSPlus gps;
@@ -7,8 +7,10 @@ TinyGPSPlus gps;
 #include <TFT_eSPI.h>      // Hardware-specific library
 TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and height
 
+#include "Large_Font.h"
 #include "commons.h"
 #include "linearMeter.h"
+#include "pins.h"
 #include "ringMeter.h"
 
 // Hőmérés
@@ -50,7 +52,8 @@ CRGB leds[NUM_LEDS];
 
 // Sprite méretek kiszámítása (fix, hogy mindig ugyanakkora legyen, így csak egyszer kell allokálni)
 constexpr int SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
-constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 30 + 60 + 10;        // max w=30, + feliratok, +10 ha mirrored
+constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
+
 // Sprite a vertikális bar-oknak
 TFT_eSprite spriteVerticalLinearMeter(&tft);
 
@@ -115,11 +118,14 @@ void displayHeaderText() {
     tft.setTextDatum(MC_DATUM);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
-#define HEADER_TEXT_Y 6
-    tft.drawString("Time/Date", 250, HEADER_TEXT_Y, 2);
-    tft.drawString("Altitude", 455, HEADER_TEXT_Y, 2);
-    tft.drawString("Hdop", 75, 100, 2);
-    tft.drawString("Max Speed", 400, 100, 2);
+    tft.drawString("Time/Date", 250, 6, 2);
+    tft.drawString("Altitude", 455, 6, 2);
+    tft.drawString("Hdop", 40, 90, 2);
+    tft.drawString("Max Speed", 440, 70, 2);
+
+    tft.setTextSize(2);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("km/h", tft.width() / 2, tft.height() - 10, 2);
 }
 
 /**
@@ -185,31 +191,46 @@ void displayValues() {
 
     // Hdop
     double hdop = gps.satellites.isValid() && gps.hdop.age() < GPS_DATA_MAX_AGE ? gps.hdop.hdop() : 0;
-    sprintf(buf, "%.2f", hdop);
+    dtostrf(hdop, 0, 2, buf);
     tft.setTextPadding(5 * 14);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString(buf, 75, 120, 4);
+    tft.drawString(buf, 40, 110, 4);
 
     // Sebesség
     int speedValue = gps.speed.isValid() && gps.speed.age() < GPS_DATA_MAX_AGE && gps.speed.kmph() >= 4 ? gps.speed.kmph() : 0;
-    ringMeter(&tft,
-              speedValue,                                 // speedValue,                                 // current value
-              0,                                          // minValue
-              SPEED_RINGMETER_MAX_VALUE,                  // maxValue
-              (tft.width() / 2 - SPEED_RINGMETER_RADIUS), // x
-              100,                                        // y
-              SPEED_RINGMETER_RADIUS,                     // radius
-              230,                                        // angle
-              true,                                       // coloredValue
-              "km/h",                                     // felirat
-              GREEN2RED);                                 // scheme
+    // ringMeter(&tft,
+    //           speedValue,                                 // speedValue,                                 // current value
+    //           0,                                          // minValue
+    //           SPEED_RINGMETER_MAX_VALUE,                  // maxValue
+    //           (tft.width() / 2 - SPEED_RINGMETER_RADIUS), // x
+    //           100,                                        // y
+    //           SPEED_RINGMETER_RADIUS,                     // radius
+    //           230,                                        // angle
+    //           true,                                       // coloredValue
+    //           "km/h",                                     // felirat
+    //           GREEN2RED);                                 // scheme
+    speedValue = random(0, 288);
+    dtostrf(speedValue, 0, 0, buf);
+
+    // Sebesség kiírás törlő téglalap méretei
+    constexpr int SPEED_CLEAR_RECT_W = 330;
+    constexpr int SPEED_CLEAR_RECT_H = 220;
+
+    // A törlő téglalap
+    tft.fillRect(80, 79, SPEED_CLEAR_RECT_W, SPEED_CLEAR_RECT_H, TFT_BLACK);
+
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.setTextDatum(MC_DATUM); // vízszintes közép
+    tft.loadFont(Arial_Narrow_Bold120);
+    tft.drawString(buf, tft.width() / 2, 190);
+    tft.unloadFont();
 
     // Max Speed
     maxSpeed = MAX(maxSpeed, speedValue);
     sprintf(buf, "%3d", maxSpeed);
     tft.setTextPadding(3 * 14);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString(buf, 400, 120, 4);
+    tft.drawString(buf, 440, 90, 4);
 
     // Sprite legyártása, ha még nem létezik
     if (!spriteVerticalLinearMeter.created()) {
@@ -233,18 +254,18 @@ void displayValues() {
 
     // Vertical Line bar - temperature (sprite-os)
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        "Temp [C]",           // category
-                        ::temperature,        // val
-                        TEMP_BARMETER_MIN,    // minVal
-                        TEMP_BARMETER_MAX,    // maxVal
-                        tft.width() - 90,     // x: sprite szélesség miatt -40
-                        VERTICAL_BARS_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
-                        30,                   // bar-w
-                        10,                   // bar-h
-                        2,                    // gap
-                        10,                   // n
-                        BLUE2RED,             // color
-                        true);                // bal oldalt legyenek az értékek
+                        "Temp [C]",                                       // category
+                        ::temperature,                                    // val
+                        TEMP_BARMETER_MIN,                                // minVal
+                        TEMP_BARMETER_MAX,                                // maxVal
+                        tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH, // x: sprite szélesség beszámítva
+                        VERTICAL_BARS_Y + 10,                             // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                                               // bar-w
+                        10,                                               // bar-h
+                        2,                                                // gap
+                        10,                                               // n
+                        BLUE2RED,                                         // color
+                        true);                                            // bal oldalt legyenek az értékek
 
     // // Traffipax alarm aktív?
     // if (traffiAlarmActive) {
