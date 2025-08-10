@@ -104,6 +104,30 @@ struct TrafipaxAlert {
 
 TrafipaxAlert trafipaxAlert;
 
+// Demo trafipax közeledés/távolodás szimulálása működés közben
+struct TrafipaxDemo {
+    bool isActive = false;
+    unsigned long startTime = 0;
+    unsigned long currentPhase = 0;
+
+    // Demo koordináták
+    double currentLat = 0.0;
+    double currentLon = 0.0;
+    bool hasValidCoords = false;
+
+    // Demo fázisok (másodpercben)
+    static constexpr unsigned long PHASE_WAIT = 10;     // 10mp várakozás
+    static constexpr unsigned long PHASE_APPROACH = 20; // 10mp közeledés (10-20mp)
+    static constexpr unsigned long PHASE_DEPART = 30;   // 10mp távolodás (20-30mp)
+    static constexpr unsigned long PHASE_END = 35;      // 5mp befejezés (30-35mp)
+
+    // Litéri trafipax koordinátái
+    static constexpr double LITERI_LAT = 47.100934;
+    static constexpr double LITERI_LON = 18.011792;
+};
+
+TrafipaxDemo trafipaxDemo;
+
 /**
  * Állandó feliratok kirajzolása feliratok
  */
@@ -132,13 +156,16 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
 
     // Háttérszín meghatározása állapot szerint
     uint16_t backgroundColor;
+    uint16_t textColor;
     switch (trafipaxAlert.currentState) {
         case TrafipaxAlert::APPROACHING:
         case TrafipaxAlert::NEARBY_STOPPED:
             backgroundColor = TFT_RED;
+            textColor = TFT_WHITE;
             break;
         case TrafipaxAlert::DEPARTING:
             backgroundColor = TFT_ORANGE;
+            textColor = TFT_BLACK;
             break;
         default:
             return; // INACTIVE esetén nem rajzolunk semmit
@@ -149,11 +176,15 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
 
     // Szöveg összeállítása
     char alertText[100];
-    snprintf(alertText, sizeof(alertText), "%s, %s - %.0fm", trafipax->city, trafipax->street_or_km, distance);
+    snprintf(alertText, sizeof(alertText), "%s, %s - %dm", trafipax->city, trafipax->street_or_km, (int)distance);
+
+    // Ékezetes karakterek ASCII-ra konvertálása
+    Utils::convertToASCII(alertText);
 
     // Szöveg megjelenítése
     tft.setTextSize(1);
-    tft.setTextColor(TFT_WHITE, backgroundColor);
+    tft.setFreeFont(&FreeSansBold9pt7b);
+    tft.setTextColor(textColor, backgroundColor);
     tft.setTextDatum(MC_DATUM);
 
     // Szöveg középre igazítása
@@ -163,9 +194,119 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
     // Ha túl hosszú a szöveg, rövidítjük
     if (textWidth > tft.width() - 10) {
         snprintf(alertText, sizeof(alertText), "%s - %.0fm", trafipax->city, distance);
+        Utils::convertToASCII(alertText);
     }
 
-    tft.drawString(alertText, textX, 12, 2);
+    tft.drawString(alertText, textX, 12);
+    tft.setFreeFont();
+}
+
+/**
+ * Távolság számítás Haversine formulával (GPS koordináták között)
+ */
+double calculateGPSDistance(double lat1, double lon1, double lat2, double lon2) {
+    const double R = 6371000; // Föld sugara méterben
+    double dLat = (lat2 - lat1) * PI / 180.0;
+    double dLon = (lon2 - lon1) * PI / 180.0;
+    double a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1 * PI / 180.0) * cos(lat2 * PI / 180.0) * sin(dLon / 2) * sin(dLon / 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return R * c;
+}
+
+/**
+ * Demo indítása - 10mp várakozás, majd közeledés/távolodás szimulálása
+ */
+void startTrafipaxDemo() {
+    trafipaxDemo.isActive = true;
+    trafipaxDemo.startTime = millis();
+    trafipaxDemo.currentPhase = 0;
+
+    DEBUG("\n=== TRAFIPAX DEMO INDÍTVA ===\n");
+    DEBUG("Teszt fázisok:\n");
+    DEBUG("0-10mp: Várakozás (nincs riasztás)\n");
+    DEBUG("10-20mp: Közeledés a litéri trafipaxhoz\n");
+    DEBUG("20-30mp: Távolodás a litéri trafipaxtól\n");
+    DEBUG("30-35mp: Demo befejezése\n");
+    DEBUG("------------------------------------------\n\n");
+}
+
+/**
+ * Demo feldolgozása - szimulált GPS koordináták generálása
+ */
+void processTrafipaxDemo() {
+    if (!trafipaxDemo.isActive) {
+        return;
+    }
+
+    unsigned long elapsed = (millis() - trafipaxDemo.startTime) / 1000; // másodpercek
+
+    // Demo befejezése
+    if (elapsed >= TrafipaxDemo::PHASE_END) {
+        trafipaxDemo.isActive = false;
+        trafipaxDemo.hasValidCoords = false;
+        DEBUG("=== DEMO BEFEJEZVE ===\n");
+        return;
+    }
+
+    // Szimulált GPS koordináták generálása a fázis alapján
+    double simLat, simLon;
+
+    if (elapsed < TrafipaxDemo::PHASE_WAIT) {
+        // Várakozási fázis - messze vagyunk (1500m)
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0135; // kb. 1500m délre
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != trafipaxDemo.currentPhase) {
+            trafipaxDemo.currentPhase = elapsed;
+            DEBUG("Demo fázis: Várakozás (%lus/10s)\n", elapsed);
+        }
+
+    } else if (elapsed < TrafipaxDemo::PHASE_APPROACH) {
+        // Közeledési fázis - 1500m-ről 200m-ig
+        float progress = (elapsed - TrafipaxDemo::PHASE_WAIT) / 10.0f; // 0.0 - 1.0
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != trafipaxDemo.currentPhase) {
+            trafipaxDemo.currentPhase = elapsed;
+            double distance = calculateGPSDistance(simLat, simLon, TrafipaxDemo::LITERI_LAT, TrafipaxDemo::LITERI_LON);
+            DEBUG("Demo fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
+        }
+
+    } else if (elapsed < TrafipaxDemo::PHASE_DEPART) {
+        // Távolodási fázis - 200m-ről 1500m-ig
+        float progress = (elapsed - TrafipaxDemo::PHASE_APPROACH) / 10.0f; // 0.0 - 1.0
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != trafipaxDemo.currentPhase) {
+            trafipaxDemo.currentPhase = elapsed;
+            // Távolság számítás a TafipaxList-en keresztül
+            double distance;
+            const TafipaxInternal *closest = tafipax.getClosestTrafipax(simLat, simLon, distance);
+            if (closest) {
+                DEBUG("Demo fázis: Távolodás (%lus/30s) - %dm\n", elapsed, (int)distance);
+            }
+        }
+
+    } else {
+        // Befejező fázis - messze vagyunk
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0135;
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != trafipaxDemo.currentPhase) {
+            trafipaxDemo.currentPhase = elapsed;
+            DEBUG("Demo fázis: Befejezés (%lus/35s)\n", elapsed);
+        }
+    }
+
+    // Demo koordináták tárolása
+    trafipaxDemo.currentLat = simLat;
+    trafipaxDemo.currentLon = simLon;
+    trafipaxDemo.hasValidCoords = true;
+
+    // GPS koordináták beállítása a demo számára (demo override a processIntelligentTrafipaxAlert-ben)
+    // A demo koordinátákat a processTrafipaxDemo-ban tároljuk és a processIntelligentTrafipaxAlert-ben használjuk
 }
 
 /**
@@ -183,20 +324,36 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
  */
 void processIntelligentTrafipaxAlert() {
 
+    double currentLat, currentLon;
+    bool hasValidData = false;
+
+    // Demo mód ellenőrzése
+    if (trafipaxDemo.isActive && trafipaxDemo.hasValidCoords) {
+        // Demo koordináták használata
+        currentLat = trafipaxDemo.currentLat;
+        currentLon = trafipaxDemo.currentLon;
+        hasValidData = true;
+    } else {
+        // Valós GPS adatok használata
+        if (gps.location.isValid() && gps.location.age() < GPS_DATA_MAX_AGE) {
+            currentLat = gps.location.lat();
+            currentLon = gps.location.lng();
+            hasValidData = true;
+        }
+    }
+
     // Nincs érvényes GPS adat
-    if (!gps.location.isValid() || gps.location.age() > GPS_DATA_MAX_AGE) {
+    if (!hasValidData) {
         if (trafipaxAlert.currentState != TrafipaxAlert::INACTIVE) {
             trafipaxAlert.currentState = TrafipaxAlert::INACTIVE;
             trafipaxAlert.activeTrafipax = nullptr;
+            traffiAlarmActive = false; // Riasztás kikapcsolása
             // Töröljük a figyelmeztető sávot
             tft.fillRect(0, 0, tft.width(), 25, TFT_BLACK);
             drawStaticLabels(); // Újrarajzoljuk a feliratokat
         }
         return;
     }
-
-    double currentLat = gps.location.lat();
-    double currentLon = gps.location.lng();
 
     // Legközelebbi trafipax keresése
     double minDistance = 999999.0;
@@ -209,6 +366,7 @@ void processIntelligentTrafipaxAlert() {
         if (trafipaxAlert.currentState != TrafipaxAlert::INACTIVE) {
             trafipaxAlert.currentState = TrafipaxAlert::INACTIVE;
             trafipaxAlert.activeTrafipax = nullptr;
+            traffiAlarmActive = false; // Riasztás kikapcsolása
             // Töröljük a figyelmeztető sávot
             tft.fillRect(0, 0, tft.width(), 25, TFT_BLACK);
             drawStaticLabels(); // Újrarajzoljuk a feliratokat
@@ -238,6 +396,7 @@ void processIntelligentTrafipaxAlert() {
     }
 
     // Figyelmeztető sáv megjelenítése
+    traffiAlarmActive = true;
     displayTrafipaxAlert(closestTrafipax, minDistance);
 
     // Szirénázás csak közeledés esetén, 10mp-enként
@@ -450,6 +609,9 @@ void setup(void) {
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
 
+    // Valós idejű demo indítása (10mp várakozás után közeledés/távolodás)
+    startTrafipaxDemo();
+
     // Közeledés-távolodás teszt - aktív
     // tafipax.testLiteriTrafipaxApproach();
 }
@@ -467,6 +629,11 @@ void loop() {
     if (timeHasPassed(lastDisplay, 1000)) {
         displayValues();
         lastDisplay = millis();
+    }
+
+    // Demo trafipax közeledés/távolodás (ha aktív)
+    if (trafipaxDemo.isActive) {
+        processTrafipaxDemo();
     }
 
     // Intelligens trafipax figyelmeztető rendszer (másodpercenként)
