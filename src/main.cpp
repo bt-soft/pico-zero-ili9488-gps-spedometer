@@ -125,7 +125,7 @@ void displayHeaderText() {
 
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("km/h", tft.width() / 2, tft.height() - 10, 2);
+    tft.drawString("km/h", tft.width() / 2, 110, 2);
 }
 
 /**
@@ -209,7 +209,7 @@ void displayValues() {
     //           true,                                       // coloredValue
     //           "km/h",                                     // felirat
     //           GREEN2RED);                                 // scheme
-    //speedValue = random(0, 288);
+    // speedValue = random(0, 288);
     dtostrf(speedValue, 0, 0, buf);
 
     // Flicker-free, always centered speed value using setTextPadding + MC_DATUM
@@ -218,7 +218,7 @@ void displayValues() {
     tft.loadFont(Arial_Narrow_Bold120);
     // Padding: max 3 digits ("288") in this font, textWidth must be called after loadFont and only needs the string
     tft.setTextPadding(tft.textWidth("288"));
-    tft.drawString(buf, tft.width() / 2, 190);
+    tft.drawString(buf, tft.width() / 2, 240);
     tft.unloadFont();
 
     // Max Speed
