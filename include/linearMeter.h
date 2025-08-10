@@ -121,13 +121,33 @@ void linearBar(TFT_eSPI *tft, int val, int x, int y, int w, int h, int g, int n,
 void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float minVal, float maxVal, int x, int y, int w, int h, int g, int n, byte s, boolean mirrored = false) {
     char buf[20];
 
-    // 1. Cím kiírása a mérő tetejére
-    int titleY = y - (n * (h + g)) - 20;
-    tft->setTextSize(1);
-    tft->setTextColor(TFT_YELLOW, TFT_BLACK);
-    tft->setTextDatum(mirrored ? TC_DATUM : TL_DATUM);
-    tft->drawString(category, x, titleY, 2);
-    tft->setTextDatum(TL_DATUM);
+    // Sprite méretek kiszámítása (fix, hogy mindig ugyanakkora legyen, így csak egyszer kell allokálni)
+    const int meterHeight = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
+    const int meterWidth = 30 + 60 + 10;        // max w=30, + feliratok, +10 ha mirrored
+
+    // Két statikus sprite, bal/jobb oldalra
+    static TFT_eSprite spriteL(tft);
+    static TFT_eSprite spriteR(tft);
+    static bool createdL = false;
+    static bool createdR = false;
+
+    TFT_eSprite *sprite = mirrored ? &spriteR : &spriteL;
+    bool *created = mirrored ? &createdR : &createdL;
+
+    // Sprite létrehozása, ha még nem létezik
+    if (!*created) {
+        sprite->createSprite(meterWidth, meterHeight);
+        *created = true;
+    }
+    sprite->fillSprite(TFT_BLACK);
+
+    // 1. Cím kiírása a sprite tetejére
+    int titleY = 0;
+    sprite->setTextSize(1);
+    sprite->setTextColor(TFT_YELLOW, TFT_BLACK);
+    sprite->setTextDatum(mirrored ? TR_DATUM : TL_DATUM);
+    sprite->drawString(category, mirrored ? meterWidth - 10 : 0, titleY, 2);
+    sprite->setTextDatum(TL_DATUM);
 
     // 2. Aktuális érték sávszámra váltása (1-től n-ig)
     int barVal = map(val, minVal, maxVal, 1, n);
@@ -139,7 +159,7 @@ void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float m
     // 3. Sávok és feliratok rajzolása
     for (int b = 1; b <= n; b++) {
         // Sáv Y koordinátája
-        int barY = y - (b * (h + g));
+        int barY = 20 + (n - b) * (h + g);
         // Sáv színének meghatározása
         uint16_t barColor = TFT_DARKGREY;
         if (b <= barVal) {
@@ -172,15 +192,15 @@ void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float m
         }
 
         // Sáv rajzolása
-        tft->fillRect(x, barY, w, h, barColor);
+        sprite->fillRect(mirrored ? meterWidth - w - 10 : 0, barY, w, h, barColor);
 
         // Szöveg pozíciója
-        int textX = mirrored ? x - 45 : x + w + 8;
+        int textX = mirrored ? meterWidth - w - 55 : w + 8;
         int textY = barY + h / 2 - 4;
 
         // Háttér törlése
-        int bgX = mirrored ? x - 50 : x + w + 5;
-        tft->fillRect(bgX, barY - 2, 45, h + 4, TFT_BLACK);
+        int bgX = mirrored ? meterWidth - w - 60 : w + 5;
+        sprite->fillRect(bgX, barY - 2, 45, h + 4, TFT_BLACK);
 
         // Szöveg meghatározása
         buf[0] = '\0';
@@ -194,20 +214,26 @@ void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float m
 
         // Szöveg kiírása
         if (buf[0] != '\0') {
-            tft->setTextSize(1);
-            tft->setTextColor(TFT_WHITE, TFT_BLACK);
-            tft->setTextDatum(mirrored ? TR_DATUM : TL_DATUM);
+            sprite->setTextSize(1);
+            sprite->setTextColor(TFT_WHITE, TFT_BLACK);
+            sprite->setTextDatum(mirrored ? TR_DATUM : TL_DATUM);
             textX += mirrored ? 40 : 0;
-            tft->drawString(buf, textX, textY, 1);
+            sprite->drawString(buf, textX, textY, 1);
         }
     }
 
-    // 4. Nagy aktuális érték kiírása a mérő aljára
+    // 4. Aktuális érték kiírása a mérő aljára
     dtostrf(val, 0, 2, buf);
-    tft->setTextSize(2);
-    tft->setTextDatum(mirrored ? MC_DATUM : TL_DATUM);
-    tft->setTextColor(TFT_ORANGE, TFT_BLACK);
-    tft->drawString(buf, x, y + 10, 1);
+    sprite->setTextSize(2);
+    sprite->setTextDatum(TL_DATUM);
+    sprite->setTextColor(TFT_ORANGE, TFT_BLACK);
+    sprite->drawString(buf, mirrored ? 30 : 0, meterHeight - 18, 1);
+
+    // Sprite kirajzolása a kijelzőre
+    int drawX = x;
+    int drawY = y - meterHeight;
+
+    sprite->pushSprite(drawX, drawY);
 }
 
 #endif

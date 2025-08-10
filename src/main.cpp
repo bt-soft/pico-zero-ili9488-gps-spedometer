@@ -206,34 +206,34 @@ void displayValues() {
     tft.drawString(buf, 400, 120, 4);
 
 #define VERTICAL_BARS_Y 290
-    // Vertical Line bar - Batterry
+    // Vertical Line bar - Batterry (sprite-os)
     verticalLinearMeter(&tft,
-                        "Batt [V]",        // category
-                        ::vBatterry,       // val
-                        BATT_BARMETER_MIN, // minVal
-                        BATT_BARMETER_MAX, // maxVal
-                        0,                 // x
-                        VERTICAL_BARS_Y,   // bottom-left-y
-                        30,                // bar-w
-                        10,                // bar-h
-                        2,                 // gap
-                        10,                // n
-                        BLUE2RED);         // color
+                        "Batt [V]",           // category
+                        ::vBatterry,          // val
+                        BATT_BARMETER_MIN,    // minVal
+                        BATT_BARMETER_MAX,    // maxVal
+                        0,                    // x
+                        VERTICAL_BARS_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                   // bar-w
+                        10,                   // bar-h
+                        2,                    // gap
+                        10,                   // n
+                        BLUE2RED);            // color
 
-    // Vertical Line bar - temperature
+    // Vertical Line bar - temperature (sprite-os)
     verticalLinearMeter(&tft,
-                        "Temp [C]",        // category
-                        ::temperature,     // val
-                        TEMP_BARMETER_MIN, // minVal
-                        TEMP_BARMETER_MAX, // maxVal
-                        tft.width() - 30,  // x = maxX - bar-w
-                        VERTICAL_BARS_Y,   // bottom-left-y
-                        30,                // bar-w
-                        10,                // bar-h
-                        2,                 // gap
-                        10,                // n
-                        BLUE2RED,          // color
-                        true);             // bal oldalt legyenek az értékek
+                        "Temp [C]",           // category
+                        ::temperature,        // val
+                        TEMP_BARMETER_MIN,    // minVal
+                        TEMP_BARMETER_MAX,    // maxVal
+                        tft.width() - 90,     // x: sprite szélesség miatt -40
+                        VERTICAL_BARS_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                   // bar-w
+                        10,                   // bar-h
+                        2,                    // gap
+                        10,                   // n
+                        BLUE2RED,             // color
+                        true);                // bal oldalt legyenek az értékek
 
     // // Traffipax alarm aktív?
     // if (traffiAlarmActive) {
