@@ -4,6 +4,32 @@
 
 namespace Utils {
 /**
+ * @brief  Formáz egy lebegőpontos számot stringgé, a tizedesjegyek számát paraméterként adva meg.
+ * @param value A lebegőpontos szám értéke
+ * @param decimalPlaces A tizedesjegyek száma (alapértelmezett: 2)
+ */
+String floatToString(float value, int decimalPlaces) {
+    String result = String(value, decimalPlaces);
+    return result;
+}
+
+/**
+ * Várakozás a soros port megnyitására
+ * @param tft a TFT kijelző példánya
+ */
+void debugWaitForSerial(TFT_eSPI &tft) {
+#ifdef __DEBUG
+    beepError();
+    tft.setTextColor(TFT_WHITE);
+    tft.drawString("Nyisd meg a soros portot!", 0, 0);
+    while (!Serial) {
+    }
+    tft.fillScreen(TFT_BLACK);
+    beepTick();
+#endif
+}
+
+/**
  * TFT érintőképernyő kalibráció
  * @param tft TFT kijelző példánya
  * @param calData kalibrációs adatok
@@ -71,6 +97,48 @@ void beepError() {
     tone(PIN_BUZZER, 500);
     delay(100);
     noTone(PIN_BUZZER);
+}
+
+/**
+ * Trafipax riasztó hangjelzés
+ */
+void beepAlert() {
+    // Csak akkor csipogunk, ha a beeper engedélyezve van
+    // if (!config.data.beeperEnabled)
+    //    return;
+    for (int i = 0; i < 3; i++) {
+        tone(PIN_BUZZER, 1200);
+        delay(60);
+        noTone(PIN_BUZZER);
+        delay(40);
+    }
+    delay(100);
+    for (int i = 0; i < 2; i++) {
+        tone(PIN_BUZZER, 1800);
+        delay(80);
+        noTone(PIN_BUZZER);
+        delay(40);
+    }
+}
+
+/**
+ * Sziréna hangjelzés (felfutó-lefutó)
+ */
+void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs) {
+    for (int c = 0; c < cycles; c++) {
+        // Felfutó
+        for (int f = minFreq; f <= maxFreq; f += step) {
+            tone(PIN_BUZZER, f);
+            delay(toneMs);
+        }
+        // Lefutó
+        for (int f = maxFreq; f >= minFreq; f -= step) {
+            tone(PIN_BUZZER, f);
+            delay(toneMs);
+        }
+        noTone(PIN_BUZZER);
+        delay(pauseMs);
+    }
 }
 
 }; // namespace Utils
