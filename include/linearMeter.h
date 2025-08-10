@@ -118,27 +118,9 @@ void linearBar(TFT_eSPI *tft, int val, int x, int y, int w, int h, int g, int n,
  * @param s Színséma
  * @param mirrored Szövegek pozíciója (false=jobbra, true=balra)
  */
-void verticalLinearMeter(TFT_eSPI *tft, const char *category, float val, float minVal, float maxVal, int x, int y, int w, int h, int g, int n, byte s, boolean mirrored = false) {
+void verticalLinearMeter(TFT_eSprite *sprite, int meterHeight, int meterWidth, const char *category, float val, float minVal, float maxVal, int x, int y, int w, int h, int g, int n, byte s, boolean mirrored = false) {
     char buf[20];
 
-    // Sprite méretek kiszámítása (fix, hogy mindig ugyanakkora legyen, így csak egyszer kell allokálni)
-    const int meterHeight = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
-    const int meterWidth = 30 + 60 + 10;        // max w=30, + feliratok, +10 ha mirrored
-
-    // Két statikus sprite, bal/jobb oldalra
-    static TFT_eSprite spriteL(tft);
-    static TFT_eSprite spriteR(tft);
-    static bool createdL = false;
-    static bool createdR = false;
-
-    TFT_eSprite *sprite = mirrored ? &spriteR : &spriteL;
-    bool *created = mirrored ? &createdR : &createdL;
-
-    // Sprite létrehozása, ha még nem létezik
-    if (!*created) {
-        sprite->createSprite(meterWidth, meterHeight);
-        *created = true;
-    }
     sprite->fillSprite(TFT_BLACK);
 
     // 1. Cím kiírása a sprite tetejére

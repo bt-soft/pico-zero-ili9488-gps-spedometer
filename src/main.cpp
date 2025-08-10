@@ -48,6 +48,12 @@ CRGB leds[NUM_LEDS];
 
 #define __DEBUG_ON_SERIAL__
 
+// Sprite méretek kiszámítása (fix, hogy mindig ugyanakkora legyen, így csak egyszer kell allokálni)
+constexpr int SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
+constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 30 + 60 + 10;        // max w=30, + feliratok, +10 ha mirrored
+// Sprite a vertikális bar-oknak
+TFT_eSprite spriteVerticalLinearMeter(&tft);
+
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 /**
  * Eltelt már annyi idő?
@@ -205,9 +211,14 @@ void displayValues() {
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString(buf, 400, 120, 4);
 
+    // Sprite legyártása, ha még nem létezik
+    if (!spriteVerticalLinearMeter.created()) {
+        spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
+    }
+
 #define VERTICAL_BARS_Y 290
     // Vertical Line bar - Batterry (sprite-os)
-    verticalLinearMeter(&tft,
+    verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
                         "Batt [V]",           // category
                         ::vBatterry,          // val
                         BATT_BARMETER_MIN,    // minVal
@@ -221,7 +232,7 @@ void displayValues() {
                         BLUE2RED);            // color
 
     // Vertical Line bar - temperature (sprite-os)
-    verticalLinearMeter(&tft,
+    verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
                         "Temp [C]",           // category
                         ::temperature,        // val
                         TEMP_BARMETER_MIN,    // minVal
