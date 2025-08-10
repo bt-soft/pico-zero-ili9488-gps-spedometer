@@ -171,8 +171,9 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
             return; // INACTIVE esetén nem rajzolunk semmit
     }
 
-    // Figyelmeztető sáv háttere
-    tft.fillRect(0, 0, tft.width(), 25, backgroundColor);
+    // Figyelmeztető sáv háttere (nagyobb sáv)
+    constexpr int ALERT_BAR_HEIGHT = 45;
+    tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, backgroundColor);
 
     // Szöveg összeállítása
     char alertText[100];
@@ -181,15 +182,16 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
     // Ékezetes karakterek ASCII-ra konvertálása
     Utils::convertToASCII(alertText);
 
-    // Szöveg megjelenítése
+    // Szöveg megjelenítése nagyobb fonttal
     tft.setTextSize(1);
-    tft.setFreeFont(&FreeSansBold9pt7b);
+    tft.setFreeFont(&FreeSansBold18pt7b); // nagyobb font
     tft.setTextColor(textColor, backgroundColor);
     tft.setTextDatum(MC_DATUM);
 
     // Szöveg középre igazítása
-    int textWidth = tft.textWidth(alertText, 2);
+    int textWidth = tft.textWidth(alertText);
     int textX = tft.width() / 2;
+    int textY = ALERT_BAR_HEIGHT / 2 + 2; // függőlegesen középre
 
     // Ha túl hosszú a szöveg, rövidítjük
     if (textWidth > tft.width() - 10) {
@@ -197,7 +199,7 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
         Utils::convertToASCII(alertText);
     }
 
-    tft.drawString(alertText, textX, 12);
+    tft.drawString(alertText, textX, textY);
     tft.setFreeFont();
 }
 
@@ -349,7 +351,8 @@ void processIntelligentTrafipaxAlert() {
             trafipaxAlert.activeTrafipax = nullptr;
             traffiAlarmActive = false; // Riasztás kikapcsolása
             // Töröljük a figyelmeztető sávot
-            tft.fillRect(0, 0, tft.width(), 25, TFT_BLACK);
+            constexpr int ALERT_BAR_HEIGHT = 45;
+            tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
             drawStaticLabels(); // Újrarajzoljuk a feliratokat
         }
         return;
@@ -368,7 +371,8 @@ void processIntelligentTrafipaxAlert() {
             trafipaxAlert.activeTrafipax = nullptr;
             traffiAlarmActive = false; // Riasztás kikapcsolása
             // Töröljük a figyelmeztető sávot
-            tft.fillRect(0, 0, tft.width(), 25, TFT_BLACK);
+            constexpr int ALERT_BAR_HEIGHT = 45;
+            tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
             drawStaticLabels(); // Újrarajzoljuk a feliratokat
         }
         return;
