@@ -209,7 +209,7 @@ void displayValues() {
     //           true,                                       // coloredValue
     //           "km/h",                                     // felirat
     //           GREEN2RED);                                 // scheme
-    speedValue = random(0, 288);
+    //speedValue = random(0, 288);
     dtostrf(speedValue, 0, 0, buf);
 
     // Flicker-free, always centered speed value using setTextPadding + MC_DATUM
