@@ -6884,7 +6884,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
+		(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
 			(at 21.59 115.57 0)
 			(effects
 				(font
@@ -8710,7 +8710,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+		(property "Footprint" "OptoDevice:R_LDR_4.9x4.2mm_P2.54mm_Vertical"
 			(at 168.91 97.79 90)
 			(effects
 				(font
