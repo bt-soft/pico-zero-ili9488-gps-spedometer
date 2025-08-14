@@ -176,11 +176,42 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
 
     tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, backgroundColor);
 
-    // Szöveg összeállítása
-    char alertText[100];
-    snprintf(alertText, sizeof(alertText), "%s, %s - %dm", trafipax->city, trafipax->street_or_km, (int)distance);
+    // Distance string
+    char distanceText[16];
+    snprintf(distanceText, sizeof(distanceText), "- %dm", (int)distance);
+    Utils::convertToASCII(distanceText);
+    int distanceWidth = tft.textWidth(distanceText);
 
-    // Ékezetes karakterek ASCII-ra konvertálása
+    // Elérhető hely a város+utca számára
+    int availableWidth = tft.width() - distanceWidth - 20; // 20px padding
+
+    // Összerakjuk a város+utca szöveget
+    char cityStreet[80];
+    snprintf(cityStreet, sizeof(cityStreet), "%s, %s", trafipax->city, trafipax->street_or_km);
+    Utils::convertToASCII(cityStreet);
+
+    // Ha túl hosszú, csonkoljuk úgy, hogy a végére '...' kerüljön
+    int cityStreetWidth = tft.textWidth(cityStreet);
+    if (cityStreetWidth > availableWidth) {
+        int maxLen = strlen(cityStreet);
+        char temp[80];
+        strcpy(temp, cityStreet);
+        bool truncated = false;
+        while ((tft.textWidth(temp) + tft.textWidth("...")) > availableWidth && maxLen > 0) {
+            maxLen--;
+            temp[maxLen] = '\0';
+            truncated = true;
+        }
+        if (truncated && maxLen > 3) {
+            snprintf(cityStreet, sizeof(cityStreet), "%s...", temp);
+        } else {
+            strncpy(cityStreet, temp, sizeof(cityStreet));
+        }
+    }
+
+    // Végső szöveg
+    char alertText[100];
+    snprintf(alertText, sizeof(alertText), "%s %s", cityStreet, distanceText);
     Utils::convertToASCII(alertText);
 
     // Szöveg megjelenítése nagyobb fonttal
@@ -190,16 +221,8 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
     tft.setTextDatum(MC_DATUM);
 
     // Szöveg középre igazítása
-    int textWidth = tft.textWidth(alertText);
     int textX = tft.width() / 2;
-    // Vertikális középre igazítás a sávban (textHeight alapján)
     int textY = (ALERT_BAR_HEIGHT - tft.fontHeight()) / 2 + tft.fontHeight() / 2;
-
-    // Ha túl hosszú a szöveg, rövidítjük
-    if (textWidth > tft.width() - 10) {
-        snprintf(alertText, sizeof(alertText), "%s - %.0fm", trafipax->city, distance);
-        Utils::convertToASCII(alertText);
-    }
 
     tft.drawString(alertText, textX, textY);
     tft.setFreeFont();
@@ -352,7 +375,7 @@ void processIntelligentTrafipaxAlert() {
             trafipaxAlert.currentState = TrafipaxAlert::INACTIVE;
             trafipaxAlert.activeTrafipax = nullptr;
             traffiAlarmActive = false; // Riasztás kikapcsolása
-            // Töröljük a figyelmeztető sávot
+            // Töröljük a figyelmeztető sávot (teljes kijelző szélességben)
             tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
             drawStaticLabels(); // Újrarajzoljuk a feliratokat
         }
@@ -372,7 +395,6 @@ void processIntelligentTrafipaxAlert() {
             trafipaxAlert.activeTrafipax = nullptr;
             traffiAlarmActive = false; // Riasztás kikapcsolása
             // Töröljük a figyelmeztető sávot
-            constexpr int ALERT_BAR_HEIGHT = 60;
             tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
             drawStaticLabels(); // Újrarajzoljuk a feliratokat
         }
