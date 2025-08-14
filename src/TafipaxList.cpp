@@ -102,7 +102,7 @@ void TafipaxList::loadFromCSV(const char *filename) {
             continue;
         }
 
-        TafipaxInternal &t = tafipaxList[tafipaxCount++];
+        TrafipaxInternal &t = tafipaxList[tafipaxCount++];
         strncpy(t.city, city, MAX_CITY_LEN - 1);
         t.city[MAX_CITY_LEN - 1] = 0;
         strncpy(t.street_or_km, street, MAX_STREET_LEN - 1);
@@ -128,7 +128,7 @@ int TafipaxList::count() const { return tafipaxCount; }
  * @param alertDistanceMeters riasztási távolság méterben
  * @return trafipax rekord ha közeledünk és a távolság <= alertDistanceMeters, egyébként nullptr
  */
-const TafipaxInternal *TafipaxList::checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
+const TrafipaxInternal *TafipaxList::checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
 
     // Legközelebbi trafipax keresése
     int closestIdx = -1;
@@ -181,7 +181,7 @@ const TafipaxInternal *TafipaxList::checkTrafipaxApproach(double currentLat, dou
  * @param outDistance kimeneti paraméter a távolsághoz
  * @return legközelebbi trafipax rekord vagy nullptr ha nincs
  */
-const TafipaxInternal *TafipaxList::getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const {
+const TrafipaxInternal *TafipaxList::getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const {
 
     if (tafipaxCount == 0) {
         outDistance = 999999.0;
@@ -236,7 +236,7 @@ void TafipaxList::testLiteriTrafipaxApproach() {
         double distance = TinyGPSPlus::distanceBetween(testLat, testLon, LITERI_LAT, LITERI_LON);
 
         // Trafipax közeledés ellenőrzése
-        const TafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);
+        const TrafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);
 
         Serial.print("Lépés ");
         Serial.print(step);
@@ -270,7 +270,7 @@ void TafipaxList::testLiteriTrafipaxApproach() {
         double distance = TinyGPSPlus::distanceBetween(testLat, testLon, LITERI_LAT, LITERI_LON);
 
         // Trafipax közeledés ellenőrzése
-        const TafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);
+        const TrafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);
 
         Serial.print("Lépés ");
         Serial.print(step);
@@ -291,4 +291,113 @@ void TafipaxList::testLiteriTrafipaxApproach() {
     }
 
     Serial.println("=== TESZT BEFEJEZVE ===\n");
+}
+
+/**
+ * Demo indítása - 5mp várakozás, majd közeledés/távolodás szimulálása
+ */
+void TafipaxList::startDemo() {
+    demo.isActive = true;
+    demo.startTime = millis();
+    demo.currentPhase = 0;
+
+    DEBUG("\n=== TRAFIPAX DEMO INDÍTVA ===\n");
+    DEBUG("Teszt fázisok:\n");
+    DEBUG("0-5mp: Várakozás (nincs riasztás)\n");
+    DEBUG("5-20mp: Közeledés a litéri trafipaxhoz\n");
+    DEBUG("20-30mp: Távolodás a litéri trafipaxtól\n");
+    DEBUG("30-35mp: Demo befejezése\n");
+    DEBUG("------------------------------------------\n\n");
+}
+
+/**
+ * Demo feldolgozása - szimulált GPS koordináták generálása
+ */
+void TafipaxList::processDemo() {
+    if (!demo.isActive) {
+        return;
+    }
+
+    unsigned long elapsed = (millis() - demo.startTime) / 1000; // másodpercek
+
+    // Demo befejezése
+    if (elapsed >= TrafipaxDemo::PHASE_END) {
+        demo.isActive = false;
+        demo.hasValidCoords = false;
+        DEBUG("=== DEMO BEFEJEZVE ===\n");
+        return;
+    }
+
+    // Szimulált GPS koordináták generálása a fázis alapján
+    double simLat, simLon;
+
+    if (elapsed < TrafipaxDemo::PHASE_WAIT) {
+        // Várakozási fázis - messze vagyunk (1500m)
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0135; // kb. 1500m délre
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != demo.currentPhase) {
+            demo.currentPhase = elapsed;
+            DEBUG("Demo fázis: Várakozás (%lus/5s)\n", elapsed);
+        }
+
+    } else if (elapsed < TrafipaxDemo::PHASE_APPROACH) {
+        // Közeledési fázis - 1500m-ről 200m-ig
+        float progress = (elapsed - TrafipaxDemo::PHASE_WAIT) / 15.0f; // 0.0 - 1.0 (15s alatt)
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != demo.currentPhase) {
+            demo.currentPhase = elapsed;
+            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TrafipaxDemo::LITERI_LAT, TrafipaxDemo::LITERI_LON);
+            DEBUG("Demo fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
+        }
+
+    } else if (elapsed < TrafipaxDemo::PHASE_DEPART) {
+        // Távolodási fázis - 200m-ről 1500m-ig
+        float progress = (elapsed - TrafipaxDemo::PHASE_APPROACH) / 10.0f; // 0.0 - 1.0 (10s alatt)
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != demo.currentPhase) {
+            demo.currentPhase = elapsed;
+            double distance;
+            const TrafipaxInternal *closest = getClosestTrafipax(simLat, simLon, distance);
+            if (closest) {
+                DEBUG("Demo fázis: Távolodás (%lus/30s) - %dm\n", elapsed, (int)distance);
+            }
+        }
+
+    } else {
+        // Befejező fázis - messze vagyunk
+        simLat = TrafipaxDemo::LITERI_LAT - 0.0135;
+        simLon = TrafipaxDemo::LITERI_LON;
+
+        if (elapsed != demo.currentPhase) {
+            demo.currentPhase = elapsed;
+            DEBUG("Demo fázis: Befejezés (%lus/35s)\n", elapsed);
+        }
+    }
+
+    // Demo koordináták tárolása
+    demo.currentLat = simLat;
+    demo.currentLon = simLon;
+    demo.hasValidCoords = true;
+}
+
+/**
+ * Visszaadja, hogy aktív-e a demo
+ */
+bool TafipaxList::isDemoActive() const { return demo.isActive; }
+
+/**
+ * Demo koordináták lekérése
+ */
+bool TafipaxList::getDemoCoords(double &lat, double &lon) const {
+    if (demo.isActive && demo.hasValidCoords) {
+        lat = demo.currentLat;
+        lon = demo.currentLon;
+        return true;
+    }
+    return false;
 }

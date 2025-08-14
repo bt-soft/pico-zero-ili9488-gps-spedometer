@@ -1,4 +1,3 @@
-
 #pragma once
 #include <Arduino.h>
 
@@ -6,7 +5,29 @@
 #define MAX_CITY_LEN 32
 #define MAX_STREET_LEN 48
 
-struct TafipaxInternal {
+// Demo trafipax közeledés/távolodás szimulálása működés közben
+struct TrafipaxDemo {
+    bool isActive = false;
+    unsigned long startTime = 0;
+    unsigned long currentPhase = 0;
+
+    // Demo koordináták
+    double currentLat = 0.0;
+    double currentLon = 0.0;
+    bool hasValidCoords = false;
+
+    // Demo fázisok (másodpercben)
+    static constexpr unsigned long PHASE_WAIT = 5;      // 5mp várakozás
+    static constexpr unsigned long PHASE_APPROACH = 20; // 10mp közeledés (10-20mp)
+    static constexpr unsigned long PHASE_DEPART = 30;   // 10mp távolodás (20-30mp)
+    static constexpr unsigned long PHASE_END = 35;      // 5mp befejezés (30-35mp)
+
+    // Litéri trafipax koordinátái
+    static constexpr double LITERI_LAT = 47.100934;
+    static constexpr double LITERI_LON = 18.011792;
+};
+
+struct TrafipaxInternal {
     char city[MAX_CITY_LEN];
     char street_or_km[MAX_STREET_LEN];
     double lat;
@@ -25,16 +46,22 @@ class TafipaxList {
     int count() const;
 
     // Trafipax riasztás - csak közeledés esetén riaszt
-    const TafipaxInternal *checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters);
+    const TrafipaxInternal *checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters);
 
     // Legközelebbi trafipax keresése távolsággal együtt
-    const TafipaxInternal *getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const;
+    const TrafipaxInternal *getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const;
 
     // Teszt metódus - litéri trafipax közeledés/távolodás szimulálása
     void testLiteriTrafipaxApproach();
 
+    // Demo funkciók
+    void startDemo();
+    void processDemo();
+    bool isDemoActive() const;
+    bool getDemoCoords(double &lat, double &lon) const;
+
   private:
-    TafipaxInternal tafipaxList[MAX_TAFIPAX];
+    TrafipaxInternal tafipaxList[MAX_TAFIPAX];
     int tafipaxCount = 0;
 
     // Távolság követés közeledés detektáláshoz
@@ -42,4 +69,7 @@ class TafipaxList {
     double lastLon = 0.0;
     int lastClosestTrafipaxIdx = -1;
     double lastDistance = 999999.0;
+
+    // Demo objektum
+    TrafipaxDemo demo;
 };
