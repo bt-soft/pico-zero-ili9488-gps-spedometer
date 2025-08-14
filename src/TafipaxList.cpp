@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LittleFS.h>
+#include <TinyGPS++.h>
 #include <math.h>
 
 #include "TafipaxList.h"
@@ -121,21 +122,6 @@ void TafipaxList::loadFromCSV(const char *filename) {
 int TafipaxList::count() const { return tafipaxCount; }
 
 /**
- * GPS koordináták közti távolság méterben (Haversine formula)
- */
-double TafipaxList::calculateDistance(double lat1, double lon1, double lat2, double lon2) const {
-    const double R = 6371000.0; // Föld sugara méterben
-
-    double dLat = (lat2 - lat1) * M_PI / 180.0;
-    double dLon = (lon2 - lon1) * M_PI / 180.0;
-
-    double a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1 * M_PI / 180.0) * cos(lat2 * M_PI / 180.0) * sin(dLon / 2) * sin(dLon / 2);
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-    return R * c;
-}
-
-/**
  * Trafipax riasztás - csak közeledés esetén riaszt
  * @param currentLat aktuális GPS szélesség
  * @param currentLon aktuális GPS hosszúság
@@ -149,7 +135,7 @@ const TafipaxInternal *TafipaxList::checkTrafipaxApproach(double currentLat, dou
     double minDistance = 999999.0;
 
     for (int i = 0; i < tafipaxCount; i++) {
-        double distance = calculateDistance(currentLat, currentLon, tafipaxList[i].lat, tafipaxList[i].lon);
+        double distance = TinyGPSPlus::distanceBetween(currentLat, currentLon, tafipaxList[i].lat, tafipaxList[i].lon);
         if (distance < minDistance) {
             minDistance = distance;
             closestIdx = i;
@@ -206,7 +192,7 @@ const TafipaxInternal *TafipaxList::getClosestTrafipax(double currentLat, double
     double minDistance = 999999.0;
 
     for (int i = 0; i < tafipaxCount; i++) {
-        double distance = calculateDistance(currentLat, currentLon, tafipaxList[i].lat, tafipaxList[i].lon);
+        double distance = TinyGPSPlus::distanceBetween(currentLat, currentLon, tafipaxList[i].lat, tafipaxList[i].lon);
         if (distance < minDistance) {
             minDistance = distance;
             closestIdx = i;
@@ -247,7 +233,7 @@ void TafipaxList::testLiteriTrafipaxApproach() {
         double testLon = startLon;
 
         // Távolság kiszámítása ellenőrzéshez
-        double distance = calculateDistance(testLat, testLon, LITERI_LAT, LITERI_LON);
+        double distance = TinyGPSPlus::distanceBetween(testLat, testLon, LITERI_LAT, LITERI_LON);
 
         // Trafipax közeledés ellenőrzése
         const TafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);
@@ -281,7 +267,7 @@ void TafipaxList::testLiteriTrafipaxApproach() {
         double testLon = startLon;
 
         // Távolság kiszámítása ellenőrzéshez
-        double distance = calculateDistance(testLat, testLon, LITERI_LAT, LITERI_LON);
+        double distance = TinyGPSPlus::distanceBetween(testLat, testLon, LITERI_LAT, LITERI_LON);
 
         // Trafipax közeledés ellenőrzése
         const TafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);

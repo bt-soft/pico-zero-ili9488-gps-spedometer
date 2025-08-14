@@ -42,7 +42,4 @@ class TafipaxList {
     double lastLon = 0.0;
     int lastClosestTrafipaxIdx = -1;
     double lastDistance = 999999.0;
-
-    // Távolság számítás Haversine formulával
-    double calculateDistance(double lat1, double lon1, double lat2, double lon2) const;
 };

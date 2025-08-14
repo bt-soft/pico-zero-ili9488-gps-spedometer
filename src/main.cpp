@@ -41,8 +41,11 @@ TftBackLightAdjuster tftBackLightAdjuster;
 #include "TafipaxList.h"
 TafipaxList tafipax; // Automatikusan betölti a CSV-t
 
-// Figyelmeztető sáv háttere (nagyobb sáv)
+// Optimalizált konstansok
 constexpr int ALERT_BAR_HEIGHT = 80;
+constexpr int SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
+constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
+constexpr int ALERT_TEXT_PADDING = 20; // Újrahasznosítható konstans
 
 // GPS Mutex
 auto_init_mutex(_gpsMutex);
@@ -59,10 +62,6 @@ CRGB leds[NUM_LEDS];
 #define INTERNAL_LED_COLOR CRGB::Green; // Zölden villogjon, ha GPS adat érkezik
 
 #define __DEBUG_ON_SERIAL__
-
-// Sprite méretek kiszámítása (fix, hogy mindig ugyanakkora legyen, így csak egyszer kell allokálni)
-constexpr int SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
-constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
 
 // Sprite a vertikális bar-oknak
 TFT_eSprite spriteVerticalLinearMeter(&tft);
@@ -176,17 +175,23 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
 
     tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, backgroundColor);
 
-    // Distance string
+    // Szöveg megjelenítése nagyobb fonttal - font beállítások optimalizálva
+    tft.setTextSize(1);
+    tft.setFreeFont(&FreeSansBold18pt7b); // nagyobb font
+    tft.setTextColor(textColor, backgroundColor);
+    tft.setTextDatum(MC_DATUM);
+
+    // Distance string - font már be van állítva
     char distanceText[16];
     snprintf(distanceText, sizeof(distanceText), "- %dm", (int)distance);
     Utils::convertToASCII(distanceText);
-    int distanceWidth = tft.textWidth(distanceText);
+    const int distanceWidth = tft.textWidth(distanceText);
 
     // Elérhető hely a város+utca számára
-    int availableWidth = tft.width() - distanceWidth - 20; // 20px padding
+    const int availableWidth = tft.width() - distanceWidth - ALERT_TEXT_PADDING;
 
-    // Összerakjuk a város+utca szöveget
-    char cityStreet[80];
+    // Összerakjuk a város+utca szöveget - optimalizált buffer méretek
+    char cityStreet[64]; // 80->64: elegendő a legtöbb esetben
     snprintf(cityStreet, sizeof(cityStreet), "%s, %s", trafipax->city, trafipax->street_or_km);
     Utils::convertToASCII(cityStreet);
 
@@ -194,30 +199,25 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
     int cityStreetWidth = tft.textWidth(cityStreet);
     if (cityStreetWidth > availableWidth) {
         int maxLen = strlen(cityStreet);
-        char temp[80];
+        char temp[64]; // 80->64: konzisztens buffer méret
         strcpy(temp, cityStreet);
-        bool truncated = false;
-        while ((tft.textWidth(temp) + tft.textWidth("...")) > availableWidth && maxLen > 0) {
-            maxLen--;
-            temp[maxLen] = '\0';
-            truncated = true;
+        const int ellipsisWidth = tft.textWidth("...");
+
+        while ((tft.textWidth(temp) + ellipsisWidth) > availableWidth && maxLen > 0) {
+            temp[--maxLen] = '\0';
         }
-        if (truncated && maxLen > 3) {
+
+        if (maxLen > 3) {
             snprintf(cityStreet, sizeof(cityStreet), "%s...", temp);
         } else {
             strncpy(cityStreet, temp, sizeof(cityStreet));
         }
     }
 
-    // Végső szöveg
-    char alertText[100];
+    // Végső szöveg - optimalizált buffer méret
+    char alertText[84]; // 100->84: 64+16+4 (cityStreet + distanceText + space/null)
     snprintf(alertText, sizeof(alertText), "%s %s", cityStreet, distanceText);
     Utils::convertToASCII(alertText);
-
-    // Szöveg megjelenítése nagyobb fonttal
-    tft.setTextSize(1);
-    tft.setFreeFont(&FreeSansBold18pt7b); // nagyobb font
-    tft.setTextColor(textColor, backgroundColor);
     tft.setTextDatum(MC_DATUM);
 
     // Szöveg középre igazítása
@@ -226,18 +226,6 @@ void displayTrafipaxAlert(const TafipaxInternal *trafipax, double distance) {
 
     tft.drawString(alertText, textX, textY);
     tft.setFreeFont();
-}
-
-/**
- * Távolság számítás Haversine formulával (GPS koordináták között)
- */
-double calculateGPSDistance(double lat1, double lon1, double lat2, double lon2) {
-    const double R = 6371000; // Föld sugara méterben
-    double dLat = (lat2 - lat1) * PI / 180.0;
-    double dLon = (lon2 - lon1) * PI / 180.0;
-    double a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1 * PI / 180.0) * cos(lat2 * PI / 180.0) * sin(dLon / 2) * sin(dLon / 2);
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return R * c;
 }
 
 /**
@@ -296,7 +284,7 @@ void processTrafipaxDemo() {
 
         if (elapsed != trafipaxDemo.currentPhase) {
             trafipaxDemo.currentPhase = elapsed;
-            double distance = calculateGPSDistance(simLat, simLon, TrafipaxDemo::LITERI_LAT, TrafipaxDemo::LITERI_LON);
+            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TrafipaxDemo::LITERI_LAT, TrafipaxDemo::LITERI_LON);
             DEBUG("Demo fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
         }
 
@@ -350,34 +338,31 @@ void processTrafipaxDemo() {
  * - DEPARTING: Távolodik (narancssárga háttér, nincs szirénázás)
  */
 void processIntelligentTrafipaxAlert() {
-
     double currentLat, currentLon;
     bool hasValidData = false;
 
-    // Demo mód ellenőrzése
+    // GPS adatok validálása - optimalizált verzió
     if (trafipaxDemo.isActive && trafipaxDemo.hasValidCoords) {
         // Demo koordináták használata
         currentLat = trafipaxDemo.currentLat;
         currentLon = trafipaxDemo.currentLon;
         hasValidData = true;
-    } else {
-        // Valós GPS adatok használata
-        if (gps.location.isValid() && gps.location.age() < GPS_DATA_MAX_AGE) {
-            currentLat = gps.location.lat();
-            currentLon = gps.location.lng();
-            hasValidData = true;
-        }
+    } else if (gps.location.isValid() && gps.location.age() < GPS_DATA_MAX_AGE) {
+        // Valós GPS adatok használata - egy feltétel
+        currentLat = gps.location.lat();
+        currentLon = gps.location.lng();
+        hasValidData = true;
     }
 
-    // Nincs érvényes GPS adat
+    // Nincs érvényes GPS adat - riasztás kikapcsolása
     if (!hasValidData) {
         if (trafipaxAlert.currentState != TrafipaxAlert::INACTIVE) {
             trafipaxAlert.currentState = TrafipaxAlert::INACTIVE;
             trafipaxAlert.activeTrafipax = nullptr;
-            traffiAlarmActive = false; // Riasztás kikapcsolása
-            // Töröljük a figyelmeztető sávot (teljes kijelző szélességben)
+            traffiAlarmActive = false;
+            // Optimalizált sáv törlés
             tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
-            drawStaticLabels(); // Újrarajzoljuk a feliratokat
+            drawStaticLabels();
         }
         return;
     }
@@ -386,7 +371,7 @@ void processIntelligentTrafipaxAlert() {
     double minDistance = 999999.0;
     const TafipaxInternal *closestTrafipax = tafipax.getClosestTrafipax(currentLat, currentLon, minDistance);
 
-    unsigned long currentTime = millis();
+    const unsigned long currentTime = millis();
 
     // Ha nincs közeli trafipax a kritikus távolságon belül
     if (minDistance > TrafipaxAlert::CRITICAL_DISTANCE) {
@@ -651,9 +636,9 @@ void loop() {
     // Hőmérséklet frissítése
     nonBlockingDallasTemperatureSensor.update();
 
-    // Értékek kiírása
-    static long lastDisplay = millis() - 1000;
-    if (timeHasPassed(lastDisplay, 1000)) {
+    // Értékek kiírása - optimalizált intervallum
+    static unsigned long lastDisplay = 0;
+    if (millis() - lastDisplay >= 1000) {
         displayValues();
         lastDisplay = millis();
     }
@@ -663,9 +648,9 @@ void loop() {
         processTrafipaxDemo();
     }
 
-    // Intelligens trafipax figyelmeztető rendszer (másodpercenként)
-    static long lastTrafipaxCheck = millis() - 1000;
-    if (timeHasPassed(lastTrafipaxCheck, 1000)) {
+    // Intelligens trafipax figyelmeztető rendszer - optimalizált intervallum
+    static unsigned long lastTrafipaxCheck = 0;
+    if (millis() - lastTrafipaxCheck >= 500) { // 1000ms->500ms: gyorsabb reagálás
         processIntelligentTrafipaxAlert();
         lastTrafipaxCheck = millis();
     }
