@@ -22,11 +22,9 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and heigh
 #define REQUIRESALARMS false /* nem kell a DallasTemperature ALARM supportja */
 #include <DallasTemperature.h>
 #include <NonBlockingDallas.h>
-
 OneWire oneWire(PIN_TEMP_SENSOR);
 DallasTemperature dallasTemp(&oneWire);
 NonBlockingDallas nonBlockingDallasTemperatureSensor(&dallasTemp); // Create a new instance of the NonBlockingDallas class
-// NonBlockingDallas nonBlockingDallasTemperatureSensor(new DallasTemperature(new OneWire(PIN_TEMP_SENSOR)));
 
 #define AD_RESOLUTION 12
 volatile float vBatterry = 0.0f;
@@ -369,7 +367,7 @@ void displayValues() {
         sprintf(buf, "%4d", alt);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setTextPadding(14 * 4);
-        tft.drawString(buf, 450, 30, 4);
+        tft.drawString(gps.altitude.isValid() ? buf : "--", 450, 30, 4);
 
         // Idő
         if (gps.time.isValid() && gps.time.age() < GPS_DATA_MAX_AGE) {
@@ -380,7 +378,7 @@ void displayValues() {
             tft.setTextSize(1);
             tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
             tft.setTextPadding(tft.textWidth(buf, 6));
-            tft.drawString(buf, 250, 45, 6);
+            tft.drawString(gps.time.isValid() ? buf : "--", 250, 45, 6);
         }
 
         // Dátum
@@ -389,7 +387,7 @@ void displayValues() {
             tft.setTextSize(1);
             tft.setTextColor(TFT_ORANGE, TFT_BLACK);
             tft.setTextPadding(tft.textWidth(buf, 2));
-            tft.drawString(buf, 250, 70, 2);
+            tft.drawString(gps.date.isValid() ? buf : "--", 250, 70, 2);
         }
 
         // Hdop
@@ -397,7 +395,7 @@ void displayValues() {
         dtostrf(hdop, 0, 2, buf);
         tft.setTextPadding(5 * 14);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.drawString(buf, 40, 110, 4);
+        tft.drawString(gps.hdop.isValid() ? buf : "--", 40, 110, 4);
 
         // Max Speed
         maxSpeed = MAX(maxSpeed, speedValue);
@@ -473,14 +471,25 @@ void displayValues() {
 }
 
 /**
+ * @brief callback function a hőmérséklet intervallum lejáratakor
+ * Minden mérési ciklusban meghívódik, függetlenül attól, hogy változott-e az érték
+ * @param deviceIndex A szenzor eszköz indexe
+ * @param temperatureRAW A nyers hőmérséklet érték
+ */
+void handleIntervalElapsed(int deviceIndex, int32_t temperatureRAW) {
+    ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
+    Serial << "handleIntervalElapsed:: " << temperatureRAW << " -> " << ::temperature << " °C\n";
+}
+
+/**
  * @brief callback function a hőmérséklet változás kezelésére
  * CSAK akkor hívódik meg, ha a hőmérséklet két ÉRVÉNYES szenzorleolvasás között megváltozik.
  * @param deviceIndex A szenzor eszköz indexe
  * @param temperatureRAW A nyers hőmérséklet érték
  */
 void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
-    //
     ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
+    Serial << "handleTemperatureChange:: " << temperatureRAW << " -> " << ::temperature << " °C\n";
 }
 
 /**
@@ -565,10 +574,13 @@ void setup(void) {
     // Utils::tftTouchCalibrate(tft, tftCalibrateData);
     tft.setTouch(tftCalibrateData);
 
-    // Non-blocking Dallas temperature sensor
+    // Non-blocking Dallas temperature sensor - 1500ms ajánlott 12 bites felbontáshoz
     nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
-    // Non-blocking Dallas temperature sensor hőmérséklet változás callback
+
+    // Non-blocking Dallas temperature sensor callback-ek
+    nonBlockingDallasTemperatureSensor.onIntervalElapsed(handleIntervalElapsed);
     nonBlockingDallasTemperatureSensor.onTemperatureChange(handleTemperatureChange);
+
     // Azonnal le is kérjük a hőmérsékletet
     nonBlockingDallasTemperatureSensor.requestTemperature();
 
@@ -673,7 +685,10 @@ void readSensorValues() {
 
     static long lastReadSensors = millis() - 1000;
     if (timeHasPassed(lastReadSensors, 1000)) {
+
+        // Akkumulátor feszültség mérése
         vBatterry = readBatterry();
+
         lastReadSensors = millis();
     }
 
