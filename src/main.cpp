@@ -344,12 +344,14 @@ void displayValues() {
 
     // Aktuális sebesség
     int speedValue = gps.speed.isValid() && gps.speed.age() < GPS_DATA_MAX_AGE && gps.speed.kmph() >= 4 ? gps.speed.kmph() : 0;
+    speedValue = random(0, 288); //demo mód
+
 
     // Ha a riasztás nem aktív
     if (!traffiAlarmActive) {
         // Műholdak száma
         short sats = gps.satellites.isValid() && gps.satellites.age() < GPS_DATA_MAX_AGE ? gps.satellites.value() : 0;
-        sats = random(0, 16);
+        sats = random(0, 16); //Demo mód
         ringMeter(&tft, sats,
                   SATS_RINGETER_MIN, // min
                   SATS_RINGETER_MAX, // max
@@ -417,7 +419,6 @@ void displayValues() {
     //           "km/h",                                     // felirat
     //           GREEN2RED);                                 // scheme
     //
-    speedValue = random(0, 288);
 
     // Sebesség - MegaFont méretekkel
     dtostrf(speedValue, 0, 0, buf);
@@ -510,7 +511,7 @@ void setup(void) {
 
     // TFT érintőképernyő kalibrálása
     uint16_t tftCalibrateData[5] = {209, 3692, 254, 3547, 7};
-    Utils::tftTouchCalibrate(tft, tftCalibrateData);
+    //Utils::tftTouchCalibrate(tft, tftCalibrateData);
     tft.setTouch(tftCalibrateData);
 
     // Non-blocking Dallas temperature sensor
