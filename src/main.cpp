@@ -506,6 +506,10 @@ void setup(void) {
     Utils::debugWaitForSerial(tft);
 #endif
 
+    uint16_t tftCalibrateData[5] = {221, 3657, 288, 3524, 7};
+    Utils::tftTouchCalibrate(tft, tftCalibrateData);
+    tft.setTouch(tftCalibrateData);
+
     // Non-blocking Dallas temperature sensor
     nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
     // Non-blocking Dallas temperature sensor hőmérséklet változás callback
@@ -527,9 +531,6 @@ void setup(void) {
 
     // Valós idejű demo indítása (5mp várakozás után közeledés/távolodás)
     tafipax.startDemo();
-
-    // Közeledés-távolodás teszt - aktív
-    // tafipax.testLiteriTrafipaxApproach();
 }
 
 /**
