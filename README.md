@@ -97,17 +97,13 @@ pio run --target uploadfs
 ### Adatbázis Formátum
 A `data/trafipaxes.csv` fájl formátuma:
 ```csv
-lat,lon,type,speed_limit
-47.123456,19.123456,fix,50
-47.234567,19.234567,mobile,90
-47.345678,19.345678,section,130
+Vármegye,Település neve,Útszám,Kilométer-szelvény/utca,GPS koordináta szélesség,GPS koordináta hosszúság
+Pest,Alsónémedi,,Haraszti út 6.,47.315308,19.163705
+Pest,Biatorbágy,,M1 17+000,47.468751,18.864466
+Pest,Budapest,,M0,47.589436,19.142904
+Pest,Budapest,,M0 14+450,47.400208,19.011840
+...
 ```
-
-**Oszlopok jelentése:**
-- `lat` - GPS szélesség (WGS84)
-- `lon` - GPS hosszúság (WGS84)  
-- `type` - Trafipax típusa (fix/mobile/section)
-- `speed_limit` - Sebességkorlát (km/h)
 
 ### Adatbázis Frissítése
 
@@ -130,9 +126,7 @@ extra_scripts = upload_fs.py  # Uncomment this line
 ```
 
 ### Adatforrások
-- **Magyarország:** [Közútkezelő](https://kozut.hu) hivatalos adatai
-- **Európa:** OpenStreetMap alapú adatbázisok
-- **Saját gyűjtés:** GPS koordináták saját megfigyelés alapján
+- **Magyarország:** [AutópályaMatrica.hu](https://www.autopalyamatrica.hu/fix-traffipax-lista-veda-terkep) adatai
 
 **⚠️ Jogi figyelmeztetés:** A trafipax adatok tájékoztató jellegűek. A pontos és aktuális információkért mindig a hivatalos forrásokat használja!
 
@@ -161,33 +155,6 @@ static constexpr double CRITICAL_DISTANCE = 800.0;  // 800m figyelmeztető távo
 static constexpr unsigned long SIREN_INTERVAL = 10000;  // 10 sec szirénázás
 ```
 
-## Hibaelhárítás
-
-### Gyakori Problémák
-
-**GPS nem kapcsolódik:**
-- Ellenőrizze a kábelezést (RX/TX felcserélés)
-- Várjon 1-2 percet a műhold kapcsolódásra
-- Használjon külső antennát fedett helyen
-
-**Kijelző nem működik:**
-- Ellenőrizze az SPI kapcsolatokat
-- Frissítse a TFT_eSPI konfigurációt
-- Ellenőrizze a tápellátást (5V szükséges)
-
-**Trafipax adatok hiányoznak:**
-- Töltse fel újra a fájlrendszert: `pio run --target uploadfs`
-- Ellenőrizze a CSV fájl formátumát
-- Tekintse meg a soros konzol üzeneteit
-
-### Debug Módok
-```cpp
-// Soros konzol debug üzenetek
-#define DEBUG_GPS
-#define DEBUG_TRAFIPAX
-#define DEBUG_DISPLAY
-```
-
 ## Fejlesztői Információk
 
 ### Projekt Struktúra
@@ -210,14 +177,6 @@ static constexpr unsigned long SIREN_INTERVAL = 10000;  // 10 sec szirénázás
 │   └── connections/      # Kábelezési útmutatók
 └── platformio.ini        # PlatformIO konfiguráció
 ```
-
-### Hozzájárulás
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
 ## Licenc
 
 Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részletekért.
