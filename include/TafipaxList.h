@@ -18,9 +18,9 @@ struct TrafipaxDemo {
 
     // Demo fázisok (másodpercben)
     static constexpr unsigned long PHASE_WAIT = 5;      // 5mp várakozás
-    static constexpr unsigned long PHASE_APPROACH = 20; // 10mp közeledés (10-20mp)
-    static constexpr unsigned long PHASE_DEPART = 30;   // 10mp távolodás (20-30mp)
-    static constexpr unsigned long PHASE_END = 35;      // 5mp befejezés (30-35mp)
+    static constexpr unsigned long PHASE_APPROACH = 20; // 15mp közeledés (5-20mp)
+    static constexpr unsigned long PHASE_DEPART = 40;   // 20mp távolodás (20-40mp) - lassítva
+    static constexpr unsigned long PHASE_END = 45;      // 5mp befejezés (40-45mp)
 
     // Litéri trafipax koordinátái
     static constexpr double LITERI_LAT = 47.100934;

@@ -65,6 +65,7 @@ CRGB leds[NUM_LEDS];
 
 // Sprite a vertikális bar-oknak
 TFT_eSprite spriteVerticalLinearMeter(&tft);
+TFT_eSprite spriteAlertBar(&tft);
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 /**
@@ -126,42 +127,56 @@ void drawStaticLabels() {
 }
 
 /**
- * Trafipax figyelmeztető sáv megjelenítése
+ * Alert bar törlése
+ */
+void clearAlertBar() {
+    spriteAlertBar.fillSprite(TFT_BLACK);
+    spriteAlertBar.pushSprite(0, 0);
+}
+
+/**
+ * Trafipax figyelmeztető sáv megjelenítése sprite-tal és villogással
  */
 void displayTrafipaxAlert(const TrafipaxInternal *trafipax, double distance) {
     if (trafipax == nullptr)
         return;
 
-    // Háttérszín meghatározása állapot szerint
+    // Háttérszín meghatározása állapot szerint - egyszerű fix színek
     uint16_t backgroundColor;
     uint16_t textColor;
+
     switch (trafipaxAlert.currentState) {
         case TrafipaxAlert::APPROACHING:
         case TrafipaxAlert::NEARBY_STOPPED:
+            // Közeledéskor fix piros háttér
             backgroundColor = TFT_RED;
             textColor = TFT_WHITE;
             break;
+
         case TrafipaxAlert::DEPARTING:
+            // Távolodáskor fix narancssárga háttér
             backgroundColor = TFT_ORANGE;
             textColor = TFT_BLACK;
             break;
+
         default:
             return; // INACTIVE esetén nem rajzolunk semmit
     }
 
-    tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, backgroundColor);
+    // Sprite törlése és háttér beállítása
+    spriteAlertBar.fillSprite(backgroundColor);
 
     // Szöveg megjelenítése nagyobb fonttal - font beállítások optimalizálva
-    tft.setTextSize(1);
-    tft.setFreeFont(&FreeSansBold18pt7b); // nagyobb font
-    tft.setTextColor(textColor, backgroundColor);
-    tft.setTextDatum(MC_DATUM);
+    spriteAlertBar.setTextSize(1);
+    spriteAlertBar.setFreeFont(&FreeSansBold18pt7b); // nagyobb font
+    spriteAlertBar.setTextColor(textColor, backgroundColor);
+    spriteAlertBar.setTextDatum(MC_DATUM);
 
     // Distance string - font már be van állítva
     char distanceText[16];
     snprintf(distanceText, sizeof(distanceText), "- %dm", (int)distance);
     Utils::convertToASCII(distanceText);
-    const int distanceWidth = tft.textWidth(distanceText);
+    const int distanceWidth = spriteAlertBar.textWidth(distanceText);
 
     // Elérhető hely a város+utca számára
     const int availableWidth = tft.width() - distanceWidth - ALERT_TEXT_PADDING;
@@ -172,14 +187,14 @@ void displayTrafipaxAlert(const TrafipaxInternal *trafipax, double distance) {
     Utils::convertToASCII(cityStreet);
 
     // Ha túl hosszú, csonkoljuk úgy, hogy a végére '...' kerüljön
-    int cityStreetWidth = tft.textWidth(cityStreet);
+    int cityStreetWidth = spriteAlertBar.textWidth(cityStreet);
     if (cityStreetWidth > availableWidth) {
         int maxLen = strlen(cityStreet);
         char temp[64]; // 80->64: konzisztens buffer méret
         strcpy(temp, cityStreet);
-        const int ellipsisWidth = tft.textWidth("...");
+        const int ellipsisWidth = spriteAlertBar.textWidth("...");
 
-        while ((tft.textWidth(temp) + ellipsisWidth) > availableWidth && maxLen > 0) {
+        while ((spriteAlertBar.textWidth(temp) + ellipsisWidth) > availableWidth && maxLen > 0) {
             temp[--maxLen] = '\0';
         }
 
@@ -194,14 +209,17 @@ void displayTrafipaxAlert(const TrafipaxInternal *trafipax, double distance) {
     char alertText[84]; // 100->84: 64+16+4 (cityStreet + distanceText + space/null)
     snprintf(alertText, sizeof(alertText), "%s %s", cityStreet, distanceText);
     Utils::convertToASCII(alertText);
-    tft.setTextDatum(MC_DATUM);
+    spriteAlertBar.setTextDatum(MC_DATUM);
 
     // Szöveg középre igazítása
     int textX = tft.width() / 2;
-    int textY = (ALERT_BAR_HEIGHT - tft.fontHeight()) / 2 + tft.fontHeight() / 2;
+    int textY = (ALERT_BAR_HEIGHT - spriteAlertBar.fontHeight()) / 2 + spriteAlertBar.fontHeight() / 2;
 
-    tft.drawString(alertText, textX, textY);
-    tft.setFreeFont();
+    spriteAlertBar.drawString(alertText, textX, textY);
+    spriteAlertBar.unloadFont();
+
+    // Sprite kirajzolása a képernyőre
+    spriteAlertBar.pushSprite(0, 0);
 }
 
 /**
@@ -238,8 +256,8 @@ void processIntelligentTrafipaxAlert() {
             trafipaxAlert.currentState = TrafipaxAlert::INACTIVE;
             trafipaxAlert.activeTrafipax = nullptr;
             traffiAlarmActive = false;
-            // Optimalizált sáv törlés
-            tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
+            // Optimalizált sáv törlés sprite-tal
+            clearAlertBar();
             drawStaticLabels();
         }
         return;
@@ -257,8 +275,8 @@ void processIntelligentTrafipaxAlert() {
             trafipaxAlert.currentState = TrafipaxAlert::INACTIVE;
             trafipaxAlert.activeTrafipax = nullptr;
             traffiAlarmActive = false; // Riasztás kikapcsolása
-            // Töröljük a figyelmeztető sávot
-            tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
+            // Töröljük a figyelmeztető sávot sprite-tal
+            clearAlertBar();
             drawStaticLabels(); // Újrarajzoljuk a feliratokat
         }
         return;
@@ -297,8 +315,11 @@ void processIntelligentTrafipaxAlert() {
         }
     }
 
-    // Távolság frissítése a következő összehasonlításhoz
-    trafipaxAlert.lastDistance = minDistance;
+    // Távolság frissítése a következő összehasonlításhoz - késleltetett frissítés
+    // Csak akkor frissítjük, ha jelentős változás van (min 3m), hogy elkerüljük a váltakozást
+    if (abs(minDistance - trafipaxAlert.lastDistance) >= 3.0) {
+        trafipaxAlert.lastDistance = minDistance;
+    }
     trafipaxAlert.currentDistance = minDistance;
 }
 
@@ -409,6 +430,11 @@ void displayValues() {
     // Sprite legyártása, ha még nem létezik
     if (!spriteVerticalLinearMeter.created()) {
         spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
+    }
+
+    // Alert bar sprite létrehozása
+    if (!spriteAlertBar.created()) {
+        spriteAlertBar.createSprite(tft.width(), ALERT_BAR_HEIGHT);
     }
 
 #define VERTICAL_BARS_Y 290

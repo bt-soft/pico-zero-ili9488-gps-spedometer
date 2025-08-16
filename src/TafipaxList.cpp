@@ -305,8 +305,8 @@ void TafipaxList::startDemo() {
     DEBUG("Teszt fázisok:\n");
     DEBUG("0-5mp: Várakozás (nincs riasztás)\n");
     DEBUG("5-20mp: Közeledés a litéri trafipaxhoz\n");
-    DEBUG("20-30mp: Távolodás a litéri trafipaxtól\n");
-    DEBUG("30-35mp: Demo befejezése\n");
+    DEBUG("20-40mp: Távolodás a litéri trafipaxtól (lassítva)\n");
+    DEBUG("40-45mp: Demo befejezése\n");
     DEBUG("------------------------------------------\n\n");
 }
 
@@ -354,8 +354,8 @@ void TafipaxList::processDemo() {
         }
 
     } else if (elapsed < TrafipaxDemo::PHASE_DEPART) {
-        // Távolodási fázis - 200m-ről 1500m-ig
-        float progress = (elapsed - TrafipaxDemo::PHASE_APPROACH) / 10.0f; // 0.0 - 1.0 (10s alatt)
+        // Távolodási fázis - 200m-ről 1500m-ig (lassítva 20s alatt)
+        float progress = (elapsed - TrafipaxDemo::PHASE_APPROACH) / 20.0f; // 0.0 - 1.0 (20s alatt)
         simLat = TrafipaxDemo::LITERI_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
         simLon = TrafipaxDemo::LITERI_LON;
 
@@ -364,7 +364,7 @@ void TafipaxList::processDemo() {
             double distance;
             const TrafipaxInternal *closest = getClosestTrafipax(simLat, simLon, distance);
             if (closest) {
-                DEBUG("Demo fázis: Távolodás (%lus/30s) - %dm\n", elapsed, (int)distance);
+                DEBUG("Demo fázis: Távolodás (%lus/40s) - %dm\n", elapsed, (int)distance);
             }
         }
 
@@ -375,7 +375,7 @@ void TafipaxList::processDemo() {
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
-            DEBUG("Demo fázis: Befejezés (%lus/35s)\n", elapsed);
+            DEBUG("Demo fázis: Befejezés (%lus/45s)\n", elapsed);
         }
     }
 

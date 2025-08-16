@@ -4,6 +4,11 @@
 	(generator_version "9.0")
 	(uuid "33c280c0-d5d0-4346-a42c-293ed40465e2")
 	(paper "A4")
+	(title_block
+		(title "Pico GPS Spedometer")
+		(date "2025-08-16")
+		(company "BT-Soft")
+	)
 	(lib_symbols
 		(symbol "Connector:Conn_01x02_Socket"
 			(pin_names
@@ -7833,7 +7838,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_THT:D_DO-15_P15.24mm_Horizontal"
+		(property "Footprint" "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal"
 			(at 237.49 31.75 0)
 			(effects
 				(font
