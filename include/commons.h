@@ -1,6 +1,8 @@
 #ifndef __COMMONS_H__
 #define __COMMONS_H__
 
+#define APP_VERSION "0.0.1"
+
 #define __DEBUG
 // #define DEBUG_WAIT_FOR_SERIAL
 

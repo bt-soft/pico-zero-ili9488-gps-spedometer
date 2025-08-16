@@ -110,6 +110,8 @@ TrafipaxAlert trafipaxAlert;
  */
 void drawStaticLabels() {
 
+    tft.fillScreen(TFT_BLACK);
+
     tft.setTextSize(1);
     tft.setTextDatum(MC_DATUM);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
@@ -344,14 +346,13 @@ void displayValues() {
 
     // Aktuális sebesség
     int speedValue = gps.speed.isValid() && gps.speed.age() < GPS_DATA_MAX_AGE && gps.speed.kmph() >= 4 ? gps.speed.kmph() : 0;
-    speedValue = random(0, 288); //demo mód
-
+    speedValue = random(0, 288); // demo mód
 
     // Ha a riasztás nem aktív
     if (!traffiAlarmActive) {
         // Műholdak száma
         short sats = gps.satellites.isValid() && gps.satellites.age() < GPS_DATA_MAX_AGE ? gps.satellites.value() : 0;
-        sats = random(0, 16); //Demo mód
+        sats = random(0, 16); // Demo mód
         ringMeter(&tft, sats,
                   SATS_RINGETER_MIN, // min
                   SATS_RINGETER_MAX, // max
@@ -483,6 +484,49 @@ void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
 }
 
 /**
+ * @brief Splash screen kirajzolása
+ */
+void drawSplashScreen() {
+    // Modern splash screen ---
+    // Gradient háttér
+    for (int y = 0; y < tft.height(); y++) {
+        uint16_t color = tft.color565(0, 40 + y / 4, 120 + y / 8); // kékes-lila gradient
+        tft.drawFastHLine(0, y, tft.width(), color);
+    }
+
+    // Nagy cím árnyékkal
+    tft.setTextSize(6);
+    tft.setTextDatum(MC_DATUM);
+    tft.setTextColor(TFT_BLACK); // árnyék
+    tft.drawString("Pico GPS", tft.width() / 2 + 4, 60 + 4);
+    tft.setTextColor(TFT_WHITE);
+    tft.drawString("Pico GPS", tft.width() / 2, 60);
+
+    // leírás
+    tft.setTextSize(2);
+    tft.setTextDatum(MC_DATUM);
+    tft.setTextColor(TFT_WHITE);
+    tft.drawString("Motoros GPS sebessegmero", tft.width() / 2, 110, 2);
+
+    // Verzió
+    char buf[64];
+    tft.setTextDatum(MC_DATUM);
+    tft.setTextColor(TFT_WHITE);
+    sprintf(buf, "V%s", APP_VERSION);
+    tft.drawString(buf, tft.width() / 2, 160, 1);
+
+    // Build
+    sprintf(buf, "%s %s", __DATE__, __TIME__);
+    tft.setTextColor(TFT_CYAN);
+    tft.drawString(buf, tft.width() / 2, 180, 1);
+
+    // Trafipaxok száma
+    sprintf(buf, "Traffi cnt: %d", tafipax.count());
+    tft.setTextColor(TFT_YELLOW);
+    tft.drawString(buf, tft.width() / 2, 250, 4);
+}
+
+/**
  * Core-0 Setup
  */
 void setup(void) {
@@ -504,6 +548,13 @@ void setup(void) {
 
     // LittleFS filesystem indítása
     LittleFS.begin();
+    // Trafipax adatok betöltése CSV-ből
+    if (tafipax.checkFile(TafipaxList::CSV_FILE_NAME)) {
+        tafipax.loadFromCSV(TafipaxList::CSV_FILE_NAME);
+    }
+    DEBUG("Tafipaxok száma: %d\n", tafipax.count());
+
+    drawSplashScreen();
 
 #ifdef DEBUG_WAIT_FOR_SERIAL
     Utils::debugWaitForSerial(tft);
@@ -511,7 +562,7 @@ void setup(void) {
 
     // TFT érintőképernyő kalibrálása
     uint16_t tftCalibrateData[5] = {209, 3692, 254, 3547, 7};
-    //Utils::tftTouchCalibrate(tft, tftCalibrateData);
+    // Utils::tftTouchCalibrate(tft, tftCalibrateData);
     tft.setTouch(tftCalibrateData);
 
     // Non-blocking Dallas temperature sensor
@@ -521,14 +572,11 @@ void setup(void) {
     // Azonnal le is kérjük a hőmérsékletet
     nonBlockingDallasTemperatureSensor.requestTemperature();
 
+    // Még egy picit mutatjuk a splash screent
+    delay(3000);
+
     // Kirajzoljuk az állandó feliratokat
     drawStaticLabels();
-
-    // Trafipax adatok betöltése CSV-ből
-    if (tafipax.checkFile(TafipaxList::CSV_FILE_NAME)) {
-        tafipax.loadFromCSV(TafipaxList::CSV_FILE_NAME);
-    }
-    DEBUG("Tafipaxok száma: %d\n", tafipax.count());
 
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
