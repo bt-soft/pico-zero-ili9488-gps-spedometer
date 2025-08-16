@@ -1,59 +1,233 @@
 # Pico GPS Sebességmérő Motorokhoz
 
-Ez a projekt egy Raspberry Pi Pico alapú GPS sebességmérő, amely egy ILI9488 TFT kijelzőt használ a sebesség, idő, magasság és a közeli sebességmérő kamerák (trafipaxok) megjelenítésére.
+Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő és navigációs asszisztens, amely egy ILI9488 TFT kijelzőt használ a sebesség, idő, magasság és a közeli sebességmérő kamerák (trafipaxok) megjelenítésére. A készülék kifejezetten motorkerékpár-vezetők számára lett tervezve, hogy segítse őket a biztonságos és szabályos közlekedésben.
 
 ![3D render a készülékről](Docs/pictures/pico-gps-spedometer-3d.png)
 ![3D render a készülékről 2](Docs/pictures/pico-gps-spedometer-3d-2.png)
 
 ## Főbb Jellemzők
 
-- **Valós idejű sebességmérés** GPS adatok alapján.
-- **Pontos idő** megjelenítése (GPS szinkronizációval).
-- Tengerszint feletti **magasság** kijelzése.
-- **Sebességmérő kamera (trafipax) adatbázis** kezelése és figyelmeztetés a közeli kamerákra.
-- **Lineáris és kör alakú sebességmérő** vizuális megjelenítés.
-- **Automatikusan állítható háttérvilágítás** a környezeti fényviszonyokhoz igazodva (tervezett funkció).
-- A hardver tervei **KiCad** szoftverrel készültek.
+### 🚀 **Sebességmérés és Navigáció**
+- **Valós idejű sebességmérés** GPS adatok alapján nagy pontossággal
+- **Lineáris és kör alakú sebességmérő** vizuális megjelenítés választható kijelzési módokkal
+- **Digitális és analóg sebesség** kijelzés (km/h)
+- **Tengerszint feletti magasság** mérése és megjelenítése
+- **GPS koordináták** valós idejű kijelzése
+- **Műholdak száma** és jelerősség megjelenítése
 
-## Hardver
+### 🕐 **Időkezelés és Pozicionálás**
+- **Pontos idő** megjelenítése GPS szinkronizációval
+- **Automatikus időzóna** beállítás
+- **Téli/nyári időszámítás** támogatása
+- **Koordináták megjelenítése** decimális és DMS (fok/perc/másodperc) formátumban
 
-- **Mikrokontroller:** Raspberry Pi Pico vagy Pico Zero
-- **Kijelző:** ILI9488 3.5" 480x320 SPI TFT kijelző
-- **GPS Modul:** Bármilyen UART-alapú GPS modul (pl. NEO-6M)
-- **Egyéb:** A projekt KiCad tervei a `kicad/` mappában találhatóak.
+### 🚨 **Trafipax Figyelmeztető Rendszer**
+- **Intelligens sebességmérő kamera (trafipax) adatbázis** kezelése
+- **Közeledési figyelmeztetés** 800 méteres távolságon belül
+- **Vizuális riasztás**: piros háttér közeledéskor, narancssárga távolodáskor
+- **Hangos figyelmeztetés** szirénával közeledés esetén
+- **Távolság megjelenítése** a legközelebbi trafipaxig
+- **Stabil állapotváltás** GPS pontatlansággal szembeni védelemmel
 
-## Szoftver
+### 🎨 **Megjelenítés és Felhasználói Felület**
+- **3.5" ILI9488 480x320 színes TFT kijelző**
+- **Anti-flicker sprite alapú** megjelenítés
+- **Nagyméretű, jól olvasható** betűtípusok
+- **Kontraszt optimalizált** színek nappal és éjszaka
+- **Automatikusan állítható háttérvilágítás** (tervezett funkció)
 
-- **Fejlesztői környezet:** [PlatformIO](https://platformio.org/) a [Visual Studio Code](https://code.visualstudio.com/)-ban.
-- **Framework:** Arduino
-- **Főbb könyvtárak:**
-  - `bodmer/TFT_eSPI`
-  - `mikalhart/TinyGPSPlus`
-  - `LittleFS`
+### 💾 **Adatkezelés és Testre Szabás**
+- **LittleFS fájlrendszer** a beépített flash memóriában
+- **CSV formátumú trafipax adatbázis** egyszerű frissítéshez
+- **Konfigurálható figyelmeztetési távolságok**
+- **Személyre szabható megjelenítési beállítások**
 
-## Telepítés
+## Hardver Követelmények
 
-1.  Klónozza a repository-t.
-2.  Nyissa meg a projektet a Visual Studio Code-ban (telepített PlatformIO kiterjesztéssel).
-3.  Fordítsa le és töltse fel a kódot a `PlatformIO: Upload` paranccsal.
+- **Mikrokontroller:** Raspberry Pi Pico vagy Pico Zero (RP2040 alapú)
+- **Kijelző:** ILI9488 3.5" 480x320 SPI TFT kijelző érintőképernyővel
+- **GPS Modul:** Bármilyen UART-alapú GPS modul (pl. NEO-6M, NEO-8M)
+- **Tápellátás:** 5V USB vagy külső tápegység
+- **Ház:** 3D nyomtatható ház tervekkel (STL fájlok)
+- **Kábelezés:** A kapcsolási rajzok a `kicad/` mappában
 
-## Trafipax Adatbázis Frissítése
+## Szoftver Architektúra
 
-A készülék a `data` mappában található `trafipaxes.csv` fájlból olvassa be a sebességmérő kamerák pozícióit. A frissítés menete a következő:
+- **Fejlesztői környezet:** [PlatformIO](https://platformio.org/) a [Visual Studio Code](https://code.visualstudio.com/)-ban
+- **Framework:** Arduino Framework Raspberry Pi Pico támogatással
+- **Többmagos feldolgozás:** Dual-core RP2040 kihasználása
+  - **Core 0:** Fő alkalmazás logika, kijelzőkezelés
+  - **Core 1:** GPS adatfeldolgozás, háttér számítások
 
-1.  **Szerezze be a frissített `trafipaxes.csv` fájlt.**
-    - A fájlnak a következő formátumúnak kell lennie: `szélesség,hosszúság,típus,sebesség` (pl. `47.123456,19.123456,fix,50`).
-2.  **Cserélje le a fájlt.**
-    - Másolja az új `trafipaxes.csv` fájlt a projekt `data/` mappájába, felülírva a régit.
-3.  **Töltse fel a fájlrendszert.**
-    - Nyissa meg a `platformio.ini` fájlt.
-    - Keresse meg az `extra_scripts` sort, és távolítsa el a megjegyzésjelet (`#`) előle, hogy így nézzen ki:
-      ```ini
-      extra_scripts = upload_fs.py
-      ```
-    - Mentse el a `platformio.ini` fájlt.
-    - Futtassa a **`PlatformIO: Upload`** parancsot. A beállításnak köszönhetően a firmware feltöltése *előtt* a PlatformIO automatikusan feltölti a `data` mappa tartalmát (a LittleFS fájlrendszerbe).
-4.  **(Opcionális) Állítsa vissza a konfigurációt.**
-    - A feltöltés után ismét megjegyzésbe teheti az `extra_scripts` sort a `platformio.ini` fájlban, hogy a későbbi firmware feltöltések gyorsabbak legyenek (ne töltse fel minden alkalommal a fájlrendszert).
+### Főbb Könyvtárak
+- `bodmer/TFT_eSPI` - Kijelzőkezelés és sprite renderelés
+- `mikalhart/TinyGPSPlus` - GPS adatfeldolgozás és koordináta számítások  
+- `LittleFS` - Beépített fájlrendszer kezelés
+- `NonBlockingDallas` - Hőmérséklet szenzorok (opcionális)
+- `FastLED` - LED vezérlés (státusz jelzéshez)
 
-Ezzel a módszerrel az adatbázis frissül a készüléken.
+## Telepítés és Üzembe Helyezés
+
+### 1. Fejlesztői Környezet Beállítása
+```bash
+# Git repository klónozása
+git clone https://github.com/bt-soft/pico-zero-ili9488-gps-spedometer.git
+cd pico-zero-ili9488-gps-spedometer
+
+# Visual Studio Code megnyitása
+code .
+```
+
+### 2. Firmware Fordítása és Feltöltése
+1. Nyissa meg a projektet Visual Studio Code-ban
+2. Telepítse a PlatformIO kiterjesztést
+3. Csatlakoztassa a Pico-t USB-n keresztül BOOTSEL módban
+4. Futtassa: `PlatformIO: Upload`
+
+### 3. Trafipax Adatbázis Feltöltése
+A készülék kezdeti használatához fel kell tölteni a trafipax adatbázist:
+
+```bash
+# Adatbázis feltöltése LittleFS-be
+pio run --target uploadfs
+```
+
+## Trafipax Adatbázis Kezelése
+
+### Adatbázis Formátum
+A `data/trafipaxes.csv` fájl formátuma:
+```csv
+lat,lon,type,speed_limit
+47.123456,19.123456,fix,50
+47.234567,19.234567,mobile,90
+47.345678,19.345678,section,130
+```
+
+**Oszlopok jelentése:**
+- `lat` - GPS szélesség (WGS84)
+- `lon` - GPS hosszúság (WGS84)  
+- `type` - Trafipax típusa (fix/mobile/section)
+- `speed_limit` - Sebességkorlát (km/h)
+
+### Adatbázis Frissítése
+
+#### Módszer 1: Teljes Újrafeltöltés (Ajánlott)
+```bash
+# 1. Új trafipaxes.csv elhelyezése a data/ mappában
+# 2. Fájlrendszer feltöltése
+pio run --target uploadfs
+
+# 3. Készülék újraindítása (automatikus)
+```
+
+#### Módszer 2: Fejlesztői Módszer
+```ini
+# platformio.ini fájlban:
+[env:pico]
+extra_scripts = upload_fs.py  # Uncomment this line
+
+# Ezután minden "pio run --target upload" automatikusan feltölti a fájlrendszert is
+```
+
+### Adatforrások
+- **Magyarország:** [Közútkezelő](https://kozut.hu) hivatalos adatai
+- **Európa:** OpenStreetMap alapú adatbázisok
+- **Saját gyűjtés:** GPS koordináták saját megfigyelés alapján
+
+**⚠️ Jogi figyelmeztetés:** A trafipax adatok tájékoztató jellegűek. A pontos és aktuális információkért mindig a hivatalos forrásokat használja!
+
+## Konfiguráció és Testreszabás
+
+### GPS Beállítások
+```cpp
+// include/pins.h fájlban
+#define GPS_RX_PIN 0
+#define GPS_TX_PIN 1
+#define GPS_BAUD_RATE 9600
+```
+
+### Kijelző Beállítások  
+```cpp
+// Docs/TFT_eSPI/User_Setup.h fájlban
+#define ILI9488_DRIVER
+#define TFT_WIDTH  480
+#define TFT_HEIGHT 320
+```
+
+### Trafipax Figyelmeztetési Távolságok
+```cpp
+// src/main.cpp fájlban
+static constexpr double CRITICAL_DISTANCE = 800.0;  // 800m figyelmeztető távolság
+static constexpr unsigned long SIREN_INTERVAL = 10000;  // 10 sec szirénázás
+```
+
+## Hibaelhárítás
+
+### Gyakori Problémák
+
+**GPS nem kapcsolódik:**
+- Ellenőrizze a kábelezést (RX/TX felcserélés)
+- Várjon 1-2 percet a műhold kapcsolódásra
+- Használjon külső antennát fedett helyen
+
+**Kijelző nem működik:**
+- Ellenőrizze az SPI kapcsolatokat
+- Frissítse a TFT_eSPI konfigurációt
+- Ellenőrizze a tápellátást (5V szükséges)
+
+**Trafipax adatok hiányoznak:**
+- Töltse fel újra a fájlrendszert: `pio run --target uploadfs`
+- Ellenőrizze a CSV fájl formátumát
+- Tekintse meg a soros konzol üzeneteit
+
+### Debug Módok
+```cpp
+// Soros konzol debug üzenetek
+#define DEBUG_GPS
+#define DEBUG_TRAFIPAX
+#define DEBUG_DISPLAY
+```
+
+## Fejlesztői Információk
+
+### Projekt Struktúra
+```
+├── src/                    # Fő forráskód
+│   ├── main.cpp           # Főprogram
+│   ├── TafipaxList.cpp    # Trafipax adatbázis kezelő
+│   └── TafipaxList.h
+├── include/               # Header fájlok
+│   ├── pins.h            # Pin definíciók
+│   ├── commons.h         # Közös definíciók
+│   └── *.h
+├── data/                  # LittleFS fájlok
+│   └── trafipaxes.csv    # Trafipax adatbázis
+├── kicad/                 # Hardver tervek
+│   ├── *.kicad_sch       # Kapcsolási rajz
+│   └── *.kicad_pcb       # Nyomtatott áramkör
+├── Docs/                  # Dokumentáció
+│   ├── pictures/         # Képek
+│   └── connections/      # Kábelezési útmutatók
+└── platformio.ini        # PlatformIO konfiguráció
+```
+
+### Hozzájárulás
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## Licenc
+
+Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részletekért.
+
+## Kapcsolat
+
+**Fejlesztő:** BT-Soft  
+**GitHub:** [https://github.com/bt-soft](https://github.com/bt-soft)  
+**Email:** [email cím]
+
+---
+
+**⚠️ Biztonsági figyelmeztetés:** Ez az eszköz csak tájékoztató célokat szolgál. A közlekedési szabályok betartása a vezető felelőssége. A készülék használata nem mentesít a figyelmes és szabályos vezetés kötelezettsége alól.
