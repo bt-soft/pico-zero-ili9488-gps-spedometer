@@ -121,7 +121,7 @@ void drawStaticLabels() {
 
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("km/h", tft.width() / 2, 110, 2);
+    tft.drawString("km/h", tft.width() / 2, 105, 2);
 }
 
 /**
@@ -349,6 +349,7 @@ void displayValues() {
     if (!traffiAlarmActive) {
         // Műholdak száma
         short sats = gps.satellites.isValid() && gps.satellites.age() < GPS_DATA_MAX_AGE ? gps.satellites.value() : 0;
+        sats = random(0, 16);
         ringMeter(&tft, sats,
                   SATS_RINGETER_MIN, // min
                   SATS_RINGETER_MAX, // max
@@ -363,6 +364,7 @@ void displayValues() {
         // Magasság
         int alt = gps.satellites.isValid() && gps.altitude.age() < GPS_DATA_MAX_AGE ? gps.altitude.meters() : 0;
         sprintf(buf, "%4d", alt);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setTextPadding(14 * 4);
         tft.drawString(buf, 450, 30, 4);
 
@@ -415,7 +417,7 @@ void displayValues() {
     //           "km/h",                                     // felirat
     //           GREEN2RED);                                 // scheme
     //
-    // speedValue = random(0, 288);
+    speedValue = random(0, 288);
 
     // Sebesség - MegaFont méretekkel
     dtostrf(speedValue, 0, 0, buf);
@@ -506,7 +508,8 @@ void setup(void) {
     Utils::debugWaitForSerial(tft);
 #endif
 
-    uint16_t tftCalibrateData[5] = {221, 3657, 288, 3524, 7};
+    // TFT érintőképernyő kalibrálása
+    uint16_t tftCalibrateData[5] = {209, 3692, 254, 3547, 7};
     Utils::tftTouchCalibrate(tft, tftCalibrateData);
     tft.setTouch(tftCalibrateData);
 

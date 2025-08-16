@@ -164,19 +164,20 @@ int ringMeter(TFT_eSPI *tft, int value, int vmin, int vmax, int x, int y, int r,
     }
     dtostrf(value, 0, 0, buf); // Nincs padding, csak a szükséges karakterek
 
-    // Először töröljük az érték szövegének helyét egy fekete téglalappal, hogy ne maradjon vizuális szemét
-    int valueY = bigRing ? y - 20 : y;
+    // // Először töröljük az érték szövegének helyét egy fekete téglalappal, hogy ne maradjon vizuális szemét
+    int valueY = bigRing ? y - 20 : y + 10;
     int valueFontSize = bigRing ? 8 : 4;
-    int rectHeight = valueFontSize * 8 - 20; // kb. karakter magasság + ráhagyás
-    int rectWidth = valueFontSize * 24 - 35; // kb. max 5 karakter szélesség + ráhagyás
-    tft->fillRect(x - rectWidth / 2, valueY - rectHeight / 2, rectWidth, rectHeight, TFT_BLACK);
+    // int rectHeight = valueFontSize * 8 - 20; // kb. karakter magasság + ráhagyás
+    // int rectWidth = valueFontSize * 24 - 35; // kb. max 5 karakter szélesség + ráhagyás
+    // tft->fillRect(x - rectWidth / 2, valueY - rectHeight / 2, rectWidth, rectHeight, TFT_BLACK);
 
     // Érték kiírása vízszintesen középre igazítva
     tft->setTextSize(1);
     tft->setTextColor(coloredValue ? colour : TFT_WHITE, TFT_BLACK); // Színesedik a gyűrűvel vagy fehér
     tft->setTextDatum(MC_DATUM);                                     // Vízszintes és függőleges középre igazítás
-    tft->setTextPadding(0);                                          // Nincs padding, így a szöveg pontosan középre kerül
-    tft->drawCentreString(buf, x, valueY, valueFontSize);            // Érték pontosan középen a gyűrű közepén
+    tft->setTextFont(valueFontSize);                                 // a paddinghoz ezt is be kell állítani!
+    tft->setTextPadding(tft->textWidth("88"));
+    tft->drawString(buf, x, valueY);
 
     // Visszaadja a jobb oldali x koordinátát
     return x + r;
