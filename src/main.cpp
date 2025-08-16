@@ -96,13 +96,11 @@ struct TrafipaxAlert {
     const TrafipaxInternal *activeTrafipax = nullptr;
     double currentDistance = 0.0;
     double lastDistance = 999999.0;
-    unsigned long lastStateChange = 0;
     unsigned long lastSirenTime = 0;
-    bool wasApproachingLastCheck = false;
+    unsigned long lastStateChange = 0;
 
     static constexpr double CRITICAL_DISTANCE = 800.0;     // 800m kritikus távolság
     static constexpr unsigned long SIREN_INTERVAL = 10000; // 10 sec szirénázási intervallum
-    static constexpr unsigned long MIN_STATE_TIME = 2000;  // Min 2 sec egy állapotban
 };
 
 TrafipaxAlert trafipaxAlert;
@@ -283,18 +281,19 @@ void processIntelligentTrafipaxAlert() {
     }
 
     // Van közeli trafipax - állapot meghatározása
-    bool isApproaching = minDistance < trafipaxAlert.lastDistance;
-    bool isStopped = abs(minDistance - trafipaxAlert.lastDistance) < 5.0; // 5m tolerancia "megálláshoz"
+    // Stabil állapotváltás - csak 10m+ változásnál váltunk
+    bool isApproaching = minDistance < (trafipaxAlert.lastDistance - 10.0);
+    bool isDeparting = minDistance > (trafipaxAlert.lastDistance + 10.0);
 
-    TrafipaxAlert::State newState = trafipaxAlert.currentState;
-
-    if (isApproaching && !isStopped) {
+    TrafipaxAlert::State newState = trafipaxAlert.currentState; // Ha még nincs beállítva állapot, akkor a távolság alapján indítjuk
+    if (trafipaxAlert.currentState == TrafipaxAlert::INACTIVE) {
+        newState = TrafipaxAlert::APPROACHING; // Kezdetben közeledés
+    } else if (isApproaching) {
         newState = TrafipaxAlert::APPROACHING;
-    } else if (isStopped) {
-        newState = TrafipaxAlert::NEARBY_STOPPED;
-    } else {
+    } else if (isDeparting) {
         newState = TrafipaxAlert::DEPARTING;
     }
+    // Ha nincs jelentős változás, akkor marad a jelenlegi állapot
 
     // Állapotváltás detektálása
     if (newState != trafipaxAlert.currentState) {
@@ -305,6 +304,9 @@ void processIntelligentTrafipaxAlert() {
 
     // Figyelmeztető sáv megjelenítése
     traffiAlarmActive = true;
+    trafipaxAlert.currentDistance = minDistance;
+
+    // Megjelenítés
     displayTrafipaxAlert(closestTrafipax, minDistance);
 
     // Szirénázás csak közeledés esetén, 10mp-enként
@@ -315,12 +317,10 @@ void processIntelligentTrafipaxAlert() {
         }
     }
 
-    // Távolság frissítése a következő összehasonlításhoz - késleltetett frissítés
-    // Csak akkor frissítjük, ha jelentős változás van (min 3m), hogy elkerüljük a váltakozást
-    if (abs(minDistance - trafipaxAlert.lastDistance) >= 3.0) {
+    // Távolság frissítése - csak 5m+ változásnál
+    if (abs(minDistance - trafipaxAlert.lastDistance) >= 5.0) {
         trafipaxAlert.lastDistance = minDistance;
     }
-    trafipaxAlert.currentDistance = minDistance;
 }
 
 /**
