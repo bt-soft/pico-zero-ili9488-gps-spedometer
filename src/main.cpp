@@ -608,7 +608,7 @@ void setup(void) {
     Utils::beepTick();
 
     // Valós idejű demo indítása (5mp várakozás után közeledés/távolodás)
-    // trafiPaxManager.startDemo();
+    trafipaxManager.startDemo();
 
     // --------------------------------------------------------------------------------------------------------
     // Figyelem!!!
