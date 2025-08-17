@@ -32,8 +32,6 @@ volatile float temperature = 0.0f;
 int maxSpeed = 0;
 
 #include "DayLightSaving.h"
-DaylightSaving dls;
-
 #include "TftBackLightAdjuster.h"
 TftBackLightAdjuster tftBackLightAdjuster;
 
@@ -343,7 +341,7 @@ void displayValues() {
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
     // Aktuális sebesség
-    int speedValue = gps.speed.isValid() && gps.speed.age() < GPS_DATA_MAX_AGE && gps.speed.kmph() >= 4 ? gps.speed.kmph() : 0;
+    int16_t speedValue = (int16_t)(gps.speed.isValid() && gps.speed.age() < GPS_DATA_MAX_AGE && gps.speed.kmph() >= 4 ? gps.speed.kmph() : 0);
 #ifdef DEMO_MODE
     speedValue = random(0, 288); // demo mód
 #endif
@@ -367,7 +365,7 @@ void displayValues() {
                   RED2GREEN);
 
         // Magasság
-        int alt = gps.satellites.isValid() && gps.altitude.age() < GPS_DATA_MAX_AGE ? gps.altitude.meters() : 0;
+        int16_t alt = (int16_t)(gps.satellites.isValid() && gps.altitude.age() < GPS_DATA_MAX_AGE ? gps.altitude.meters() : 0);
         sprintf(buf, "%4d", alt);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setTextPadding(14 * 4);
@@ -375,9 +373,9 @@ void displayValues() {
 
         // Idő
         if (gps.time.isValid() && gps.time.age() < GPS_DATA_MAX_AGE) {
-            int hours = gps.time.hour();
-            int mins = gps.time.minute();
-            dls.correctTime(mins, hours, gps.date.day(), gps.date.month(), gps.date.year());
+            uint8_t hours = gps.time.hour();
+            uint8_t mins = gps.time.minute();
+            DaylightSaving::correctTime(mins, hours, gps.date.day(), gps.date.month(), gps.date.year());
             sprintf(buf, "%02d:%02d", hours, mins);
             tft.setTextSize(1);
             tft.setTextColor(TFT_GREENYELLOW, TFT_BLACK);
