@@ -1,7 +1,7 @@
 #ifndef __LINEARMETER_H__
 #define __LINEARMETER_H__
 
-#include "commons.h"
+#include "defines.h"
 
 /**
  * Szivárvány szín visszaadása 16 bites RGB565 formátumban.

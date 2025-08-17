@@ -1,7 +1,7 @@
 #ifndef __RINGMETER_H__
 #define __RINGMETER_H__
 
-#include "commons.h"
+#include "defines.h"
 
 /**
  * 16 bites szivárvány szín visszaadása.

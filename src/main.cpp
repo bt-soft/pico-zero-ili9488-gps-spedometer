@@ -7,10 +7,13 @@ TinyGPSPlus gps;
 #include <TFT_eSPI.h>      // Hardware-specific library
 TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and height
 
+//-------------------- Config
+#include "Config.h"
+
 #include "Large_Font.h"
 #include "TafipaxList.h"
 #include "Utils.h"
-#include "commons.h"
+#include "defines.h"
 #include "linearMeter.h"
 #include "pins.h"
 #include "ringMeter.h"
@@ -426,7 +429,7 @@ void displayValues() {
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.setTextDatum(MC_DATUM); // vízszintes közép
     tft.loadFont(Arial_Narrow_Bold120);
-    tft.setTextPadding(tft.textWidth("288"));
+    tft.setTextPadding(tft.textWidth("888"));
     tft.drawString(buf, tft.width() / 2, 240);
     tft.unloadFont();
 
@@ -480,7 +483,7 @@ void displayValues() {
  */
 void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
     ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
-    DEBUG("handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(::temperature, 1).c_str());
+    DEBUG("handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(::temperature, 2).c_str());
 }
 
 /**
@@ -542,12 +545,37 @@ void setup(void) {
     tft.setRotation(1);
     tft.fillScreen(TFT_BLACK);
 
-    // TFT háttérvilágítás beállítása
-    tftBackLightAdjuster.begin();
-
 #ifdef DEBUG_WAIT_FOR_SERIAL
     Utils::debugWaitForSerial(tft);
 #endif
+
+    // Config
+    StoreEepromBase<Config_t>::init(); // Meghívjuk a statikus init metódust
+    uint16_t x, y;
+    if (tft.getTouch(&x, &y)) {
+        delay(3000); // Ha van touch, akkor várunk egy picit, hogy a TFT stabilizálódjon
+        if (tft.getTouch(&x, &y)) {
+            // Ha még mindig nyomva van..
+            DEBUG("Restoring default settings...\n");
+            Utils::beepTick();
+
+            // akkor betöltjük a default konfigot
+            config.loadDefaults();
+
+            // és el is mentjük
+            DEBUG("Save default settings...\n");
+            config.checkSave();
+
+            Utils::beepTick();
+            DEBUG("Default settings restored!\n");
+        }
+    } else {
+        // Konfig sima betöltése
+        config.load();
+    }
+
+    // TFT háttérvilágítás beállítása
+    tftBackLightAdjuster.begin(config.data.tftAutoBrightnessActive, config.data.tftManualBrightnessValue);
 
     // LittleFS filesystem indítása
     LittleFS.begin();
@@ -560,9 +588,14 @@ void setup(void) {
     drawSplashScreen();
 
     // TFT érintőképernyő kalibrálása
-    uint16_t tftCalibrateData[5] = {209, 3692, 254, 3547, 7};
-    // Utils::tftTouchCalibrate(tft, tftCalibrateData);
-    tft.setTouch(tftCalibrateData);
+    // Kell kalibrálni a TFT Touch-t?
+    if (Utils::isZeroArray(config.data.tftCalibrateData)) {
+        Utils::beepError();
+        Utils::tftTouchCalibrate(tft, config.data.tftCalibrateData);
+        config.checkSave(); // el is mentjük a kalibrációs adatokat
+    }
+    // Beállítjuk a touch scren-t
+    tft.setTouch(config.data.tftCalibrateData);
 
     // Még egy picit mutatjuk a splash screent
     delay(3000);

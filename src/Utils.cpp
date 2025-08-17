@@ -1,5 +1,5 @@
 #include "Utils.h"
-#include "commons.h"
+#include "defines.h"
 #include "pins.h"
 
 namespace Utils {
@@ -217,6 +217,25 @@ void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int p
         noTone(PIN_BUZZER);
         delay(pauseMs);
     }
+}
+
+/**
+ * @brief CRC16 számítás (CCITT algoritmus)
+ * Használhatnánk a CRC könyvtárat is, de itt saját implementációt adunk
+ *
+ * @param data Adat pointer
+ * @param length Adat hossza bájtokban
+ * @return Számított CRC16 érték
+ */
+uint16_t calcCRC16(const uint8_t *data, size_t length) {
+    uint16_t crc = 0xFFFF;
+    for (size_t i = 0; i < length; i++) {
+        crc ^= data[i] << 8;
+        for (uint8_t j = 0; j < 8; j++) {
+            crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) : (crc << 1);
+        }
+    }
+    return crc;
 }
 
 }; // namespace Utils

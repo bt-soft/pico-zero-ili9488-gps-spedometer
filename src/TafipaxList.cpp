@@ -5,7 +5,7 @@
 
 #include "TafipaxList.h"
 #include "Utils.h"
-#include "commons.h"
+#include "defines.h"
 
 // CSV forrás:
 //   https://www.autopalyamatrica.hu/fix-traffipax-lista-veda-terkep

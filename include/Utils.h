@@ -50,6 +50,28 @@ void beepAlert();
  */
 void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs);
 
+/**
+ * @brief CRC16 számítás (CCITT algoritmus)
+ * Használhatnánk a CRC könyvtárat is, de itt saját implementációt adunk
+ *
+ * @param data Adat pointer
+ * @param length Adat hossza bájtokban
+ * @return Számított CRC16 érték
+ */
+uint16_t calcCRC16(const uint8_t *data, size_t length);
+
+/**
+ * Tömb elemei nullák?
+ */
+template <typename T, size_t N> bool isZeroArray(T (&arr)[N]) {
+    for (size_t i = 0; i < N; ++i) {
+        if (arr[i] != 0) {
+            return false; // Ha bármelyik elem nem nulla, akkor false-t adunk vissza
+        }
+    }
+    return true; // Ha minden elem nulla, akkor true-t adunk vissza
+}
+
 }; // namespace Utils
 
 #endif // __UTILS_H__

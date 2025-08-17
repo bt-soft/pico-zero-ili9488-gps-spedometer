@@ -4,8 +4,8 @@
 #define APP_VERSION "0.0.1"
 
 #define __DEBUG
- #define DEBUG_WAIT_FOR_SERIAL
-//#define DEMO_MODE
+#define DEBUG_WAIT_FOR_SERIAL
+// #define DEMO_MODE
 
 // Színsémák
 #define RED2RED 0
@@ -56,6 +56,9 @@
 
 // Minimum ennyi ideig látszik a traffipax alarm
 #define ALARM_TIME_MS 10000
+
+// TFT
+#define TFT_BACKGROUND_LED_MAX_BRIGHTNESS 255
 
 //--- Debug ---
 #ifdef __DEBUG
