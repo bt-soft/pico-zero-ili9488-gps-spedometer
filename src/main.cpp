@@ -42,7 +42,7 @@ TftBackLightAdjuster tftBackLightAdjuster;
 TrafipaxManager trafipaxManager; // Automatikusan betölti a CSV-t
 
 // Settings class instance
-Settings settings(tft, config, tftBackLightAdjuster);
+Settings settings(tft, config, tftBackLightAdjuster, trafipaxManager);
 
 // Optimalizált konstansok
 constexpr int ALERT_BAR_HEIGHT = 80;

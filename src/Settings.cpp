@@ -1,19 +1,21 @@
 #include "Settings.h"
 #include "Config.h"               // Include the full header for implementation
 #include "TftBackLightAdjuster.h" // Include full definition
-#include "Utils.h"                // For beeping and other utilities
+#include "TrafipaxManager.h"
+#include "Utils.h" // For beeping and other utilities
 #include "defines.h"
 
 /**
  *  A beállítások menü inicializálása
  */
-Settings::Settings(TFT_eSPI &tft, Config &config, TftBackLightAdjuster &tftBackLightAdjuster) : _tft(tft), _config(config), _active(false), _currentState(ScreenState::MAIN), _tftBackLightAdjuster(tftBackLightAdjuster) {}
+Settings::Settings(TFT_eSPI &tft, Config &config, TftBackLightAdjuster &tftBackLightAdjuster, TrafipaxManager &trafipaxManager)
+    : _tft(tft), _config(config), _active(false), _currentState(ScreenState::MAIN), _tftBackLightAdjuster(tftBackLightAdjuster), _trafipaxManager(trafipaxManager) {}
 
 /**
  *  A beállítások menü inicializálása
  */
 void Settings::init() {
-    _mainButtons.reserve(4);
+    _mainButtons.reserve(5);
 
     // Screen Button
     _mainButtons.emplace_back(_tft, 50, 80, _tft.width() - 100, 50, "Screen", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
@@ -27,6 +29,14 @@ void Settings::init() {
     _mainButtons.emplace_back(_tft, 50, 150, _tft.width() - 100, 50, "Alarm", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
     _mainButtons.back().setCallback([this]() {
         _currentState = ScreenState::ALARM;
+        draw();
+        Utils::beepTick();
+    });
+
+    // Info Button
+    _mainButtons.emplace_back(_tft, 50, 220, _tft.width() - 100, 50, "Info", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
+    _mainButtons.back().setCallback([this]() {
+        _currentState = ScreenState::INFORMATION;
         draw();
         Utils::beepTick();
     });
@@ -46,6 +56,19 @@ void Settings::init() {
 
     initBrightnessButtons();
     initAlarmButtons();
+    initInformationButtons();
+}
+
+void Settings::initInformationButtons() {
+    _informationButtons.reserve(1);
+
+    // Back Button
+    _informationButtons.emplace_back(_tft, 30, _tft.height() - 70, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
+    _informationButtons.back().setCallback([this]() {
+        _currentState = ScreenState::MAIN;
+        draw();
+        Utils::beepTick();
+    });
 }
 
 void Settings::initBrightnessButtons() {
@@ -172,6 +195,9 @@ void Settings::draw() {
         case ScreenState::ALARM:
             drawAlarmScreen();
             break;
+        case ScreenState::INFORMATION:
+            drawInformationScreen();
+            break;
     }
 }
 
@@ -250,10 +276,40 @@ void Settings::drawAlarmScreen() {
     updateAlarmValueDisplay();
 }
 
+void Settings::drawInformationScreen() {
+    _tft.setTextFont(4);
+    _tft.setTextSize(2);
+    _tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    _tft.setTextDatum(MC_DATUM);
+    _tft.drawString("Information", _tft.width() / 2, 30);
+    _tft.setTextSize(1);
+
+    char buf[64];
+
+    // Program Version
+    _tft.setTextDatum(TL_DATUM);
+    _tft.setTextColor(TFT_CYAN);
+    sprintf(buf, "Version: V%s", APP_VERSION);
+    _tft.drawString(buf, 50, 100);
+
+    // Build Time
+    sprintf(buf, "Build: %s %s", __DATE__, __TIME__);
+    _tft.drawString(buf, 50, 140);
+
+    // Trafipax Count
+    sprintf(buf, "Trafipax Count: %d", _trafipaxManager.count());
+    _tft.drawString(buf, 50, 180);
+
+    // Draw all buttons
+    for (auto &button : _informationButtons) {
+        button.draw();
+    }
+}
+
 void Settings::updateBrightnessValueDisplay() {
     // Clear previous value
-    _tft.setTextFont(4);                    // Set font for calculations and drawing
-    _tft.setTextSize(2);                    // Set text size for better visibility
+    _tft.setTextFont(4);
+    _tft.setTextSize(2);
     int text_width = _tft.textWidth("255"); // Max 3 digits
     int text_height = _tft.fontHeight();
     int x_center = _tft.width() / 2;
@@ -278,8 +334,8 @@ void Settings::updateBrightnessValueDisplay() {
 
 void Settings::updateAlarmValueDisplay() {
     // Clear previous value
-    _tft.setTextFont(4);                     // Set font for calculations and drawing
-    _tft.setTextSize(2);                     // Set text size for better visibility
+    _tft.setTextFont(4);
+    _tft.setTextSize(2);
     int text_width = _tft.textWidth("2000"); // Max 4 digits
     int text_height = _tft.fontHeight();
     int x_center = _tft.width() / 2;
@@ -315,6 +371,9 @@ void Settings::handleTouch() {
             case ScreenState::ALARM:
                 handleAlarmTouch(x, y);
                 break;
+            case ScreenState::INFORMATION:
+                handleInformationTouch(x, y);
+                break;
         }
         delay(200); // Debounce
     }
@@ -340,6 +399,15 @@ void Settings::handleBrightnessTouch(uint16_t x, uint16_t y) {
 
 void Settings::handleAlarmTouch(uint16_t x, uint16_t y) {
     for (auto &button : _alarmButtons) {
+        if (button.contains(x, y)) {
+            button.press();
+            return;
+        }
+    }
+}
+
+void Settings::handleInformationTouch(uint16_t x, uint16_t y) {
+    for (auto &button : _informationButtons) {
         if (button.contains(x, y)) {
             button.press();
             return;
