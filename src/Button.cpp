@@ -55,8 +55,8 @@ void Button::drawPressed() {
     _tft.setTextDatum(MC_DATUM);
 
     // Lenyomott állpotban a gomb felirata
-    _tft.setTextFont(2);
-    _tft.setTextSize(3);
+    _tft.setTextFont(4);
+    _tft.setTextSize(1);
     _tft.drawString(_label, _x + _w / 2, _y + _h / 2);
     _tft.setTextFont(1); // Restore a default font
 }
