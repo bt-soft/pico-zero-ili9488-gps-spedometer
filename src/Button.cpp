@@ -25,6 +25,43 @@ void Button::draw() {
 }
 
 /**
+ *  A gomb kirajzolása a képernyőre szöveggel az alján (grid buttonokhoz)
+ */
+void Button::drawWithTextAtBottom() {
+    // Draw the button with a border using more rounded corners
+    _tft.fillRoundRect(_x, _y, _w, _h, 15, _bgColor);
+    _tft.drawRoundRect(_x, _y, _w, _h, 15, _borderColor);
+
+    // Draw the label at the bottom of the button
+    _tft.setTextColor(_textColor);
+    _tft.setTextDatum(MC_DATUM);
+
+    // Select the font, draw the string at bottom, then restore the original font
+    _tft.setTextFont(_font);
+    _tft.drawString(_label, _x + _w / 2, _y + _h - 15); // 15px from bottom
+    _tft.setTextFont(1);                                // Restore a default font
+}
+
+/**
+ *  A gomb kirajzolása megnyomott állapotban kisebb fonttal
+ */
+void Button::drawPressed() {
+    // Draw the button with a border using more rounded corners
+    _tft.fillRoundRect(_x, _y, _w, _h, 15, _bgColor);
+    _tft.drawRoundRect(_x, _y, _w, _h, 15, _borderColor);
+
+    // Draw the label centered in the button with smaller font for pressed state
+    _tft.setTextColor(_textColor);
+    _tft.setTextDatum(MC_DATUM);
+
+    // Lenyomott állpotban a gomb felirata
+    _tft.setTextFont(2);
+    _tft.setTextSize(3);
+    _tft.drawString(_label, _x + _w / 2, _y + _h / 2);
+    _tft.setTextFont(1); // Restore a default font
+}
+
+/**
  *  Ellenőrzi, hogy a megadott koordináták a gomb területén belül vannak-e
  */
 bool Button::contains(int16_t x, int16_t y) { return (x >= _x && x <= (_x + _w) && y >= _y && y <= (_y + _h)); }
@@ -46,13 +83,25 @@ void Button::press() {
     _bgColor = originalBg >> 1; // Simple way to darken
     _borderColor = 0xFFFF;      // White border for press
 
-    draw();     // Redraw with pressed appearance
+    // Use smaller font for grid buttons (Screen/Alarm/Info) when pressed
+    // Check if this is a grid button by checking the label
+    if (_label == "Screen" || _label == "Alarm" || _label == "Info") {
+        drawPressed(); // Use smaller font for grid buttons
+    } else {
+        draw(); // Use normal font for other buttons
+    }
     delay(100); // Brief delay for visual feedback
 
     // Restore original colors
     _bgColor = originalBg;
     _borderColor = originalBorder;
-    draw(); // Redraw with normal appearance
+
+    // Redraw with normal appearance
+    if (_label == "Screen" || _label == "Alarm" || _label == "Info") {
+        drawWithTextAtBottom(); // Restore grid button appearance
+    } else {
+        draw(); // Restore normal button appearance
+    }
 
     // Execute the callback function if it's set
     if (_callback) {

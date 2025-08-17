@@ -52,6 +52,7 @@ class Settings {
     void createButton(std::vector<Button> &buttonList, int16_t x, int16_t y, int16_t w, int16_t h, const char *label, uint16_t borderColor, std::function<void()> callback);
     void handleTouchForButtonList(std::vector<Button> &buttonList, uint16_t x, uint16_t y);
     void updateValueDisplay(int value, const char *disabledText, bool isEnabled);
+    void drawButtonIcon(int16_t centerX, int16_t centerY, const char *iconType, uint16_t color);
 
     TFT_eSPI &_tft;
     Config &_config;

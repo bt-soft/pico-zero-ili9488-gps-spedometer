@@ -4,6 +4,7 @@
 #include "TrafipaxManager.h"
 #include "Utils.h" // For beeping and other utilities
 #include "defines.h"
+#include <math.h> // For trigonometric functions
 
 // Define title bar height
 const int TITLE_BAR_HEIGHT = 80; // Increased height for better visual
@@ -42,7 +43,7 @@ Settings::Settings(TFT_eSPI &tft, Config &config, TftBackLightAdjuster &tftBackL
  */
 void Settings::init() {
     // Reserve memory to avoid reallocations
-    _mainButtons.reserve(5);
+    _mainButtons.reserve(4); // 3 grid buttons + 1 back button
     _brightnessButtons.reserve(4);
     _alarmButtons.reserve(4);
     _informationButtons.reserve(1);
@@ -55,37 +56,41 @@ void Settings::init() {
 
 void Settings::initMainButtons() {
     int screenWidth = _tft.width();
-    int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
-    int yPos = 100; // Start lower to accommodate taller header
+    int screenHeight = _tft.height();
 
-    // Screen Button
-    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Screen", BUTTON_BORDER_ACTIVE, [this]() {
+    // Grid layout for main buttons - 3 buttons in a row
+    int gridButtonWidth = 130; // Wider square buttons
+    int gridButtonHeight = 80; // Taller for better touch
+    int gridSpacing = 15;      // Space between grid buttons
+
+    // Calculate total grid width and center it
+    int totalGridWidth = 3 * gridButtonWidth + 2 * gridSpacing;
+    int gridStartX = (screenWidth - totalGridWidth) / 2;
+    int gridY = 140; // Center vertically between header and bottom buttons
+
+    // Screen Button (left) with icon
+    createButton(_mainButtons, gridStartX, gridY, gridButtonWidth, gridButtonHeight, "Screen", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::BRIGHTNESS;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
-    yPos += BUTTON_SPACING;
-    // Alarm Button
-    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Alarm", BUTTON_BORDER_ACTIVE, [this]() {
+    // Alarm Button (center) with icon
+    createButton(_mainButtons, gridStartX + gridButtonWidth + gridSpacing, gridY, gridButtonWidth, gridButtonHeight, "Alarm", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::ALARM;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
-    yPos += BUTTON_SPACING;
-    // Info Button
-    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Info", BUTTON_BORDER_ACTIVE, [this]() {
+    // Info Button (right) with icon
+    createButton(_mainButtons, gridStartX + 2 * (gridButtonWidth + gridSpacing), gridY, gridButtonWidth, gridButtonHeight, "Info", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::INFORMATION;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
-    // Exit Button
-    createButton(_mainButtons, 0, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Exit", ACCENT_RED, [this]() { exit(); });
-
-    // Save Button
-    createButton(_mainButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Save", ACCENT_GREEN, [this]() {
+    // Back Button (bottom center) - saves config and exits
+    createButton(_mainButtons, screenWidth / 2 - BACK_BUTTON_WIDTH / 2, screenHeight - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _config.checkSave();
         Utils::beepTick();
         delay(100);
@@ -249,15 +254,65 @@ void Settings::drawScreenTitle(const char *title) {
 }
 
 /**
- * Fő képernyő megjelenítése
+ * Fő képernyő megjelenítése modern grid layout-tal
  */
 void Settings::drawMainScreen() {
     // Képernyő címének megjelenítése
     drawScreenTitle("Settings");
 
-    for (auto &button : _mainButtons) {
-        button.draw();
+    // Draw shadows for the three main grid buttons first
+    int screenWidth = _tft.width();
+    int gridButtonWidth = 130;
+    int gridButtonHeight = 80;
+    int gridSpacing = 15;
+    int totalGridWidth = 3 * gridButtonWidth + 2 * gridSpacing;
+    int gridStartX = (screenWidth - totalGridWidth) / 2;
+    int gridY = 140;
+    int shadowOffset = 4;
+
+    // Draw shadows for grid buttons
+    uint16_t shadowColor = RGB565(15, 15, 25); // Very dark shadow
+    for (int i = 0; i < 3; i++) {
+        int buttonX = gridStartX + i * (gridButtonWidth + gridSpacing);
+        _tft.fillRoundRect(buttonX + shadowOffset, gridY + shadowOffset, gridButtonWidth, gridButtonHeight, 15, shadowColor);
     }
+
+    // Draw the first 3 buttons (grid buttons) with special layout
+    for (int i = 0; i < 3; i++) {
+        _mainButtons[i].drawWithTextAtBottom();
+    }
+
+    // Draw the remaining button (Back) normally
+    for (int i = 3; i < _mainButtons.size(); i++) {
+        _mainButtons[i].draw();
+    }
+
+    // Add icons to the grid buttons using the new icon function
+    int iconY = gridY + 25; // Position for icons
+
+    // Screen icon (sun symbol)
+    int screenButtonCenterX = gridStartX + gridButtonWidth / 2;
+    drawButtonIcon(screenButtonCenterX, iconY, "sun", TFT_YELLOW);
+
+    // Alarm icon (warning triangle)
+    int alarmButtonCenterX = gridStartX + gridButtonWidth + gridSpacing + gridButtonWidth / 2;
+    drawButtonIcon(alarmButtonCenterX, iconY, "warning", ACCENT_RED);
+
+    // Info icon (i in circle)
+    int infoButtonCenterX = gridStartX + 2 * (gridButtonWidth + gridSpacing) + gridButtonWidth / 2;
+    drawButtonIcon(infoButtonCenterX, iconY, "info", BUTTON_BORDER_ACTIVE);
+
+    // Add icon to Back button (centered at bottom)
+    int backButtonCenterX = screenWidth / 2;
+    int backButtonCenterY = _tft.height() - BUTTON_HEIGHT / 2;
+    drawButtonIcon(backButtonCenterX - 50, backButtonCenterY, "back", ACCENT_ORANGE); // Offset further left to avoid text overlap
+
+    // Add subtle title to the grid area
+    _tft.setTextFont(2);
+    _tft.setTextSize(2);
+    _tft.setTextColor(TFT_LIGHTGREY);
+    _tft.setTextDatum(MC_DATUM);
+    _tft.drawString("Select Category", screenWidth / 2, 110);
 }
 
 /**
@@ -283,6 +338,29 @@ void Settings::drawBrightnessScreen() {
     for (auto &button : _brightnessButtons) {
         button.draw();
     }
+
+    // Add icons to buttons
+    int screenWidth = _tft.width();
+
+    // Toggle switch icon for auto brightness
+    int toggleX = BUTTON_MARGIN + (screenWidth - 2 * BUTTON_MARGIN) / 2;
+    int toggleY = 100 + BUTTON_HEIGHT / 2;
+    drawButtonIcon(toggleX - 100, toggleY, "toggle", _config.data.tftAutoBrightnessActive ? ACCENT_GREEN : BUTTON_BORDER_DISABLED);
+
+    // Minus icon
+    int minusX = BUTTON_MARGIN + CONTROL_BUTTON_WIDTH / 2;
+    int minusY = 190 + BUTTON_HEIGHT / 2;
+    drawButtonIcon(minusX, minusY, "minus", disabledColor);
+
+    // Plus icon
+    int plusX = screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH / 2;
+    int plusY = 190 + BUTTON_HEIGHT / 2;
+    drawButtonIcon(plusX, plusY, "plus", enabledColor);
+
+    // Back arrow icon - position it to the left of the text
+    int backX = screenWidth - BACK_BUTTON_WIDTH + 30; // Left side of the button + margin
+    int backY = _tft.height() - BUTTON_HEIGHT / 2;
+    drawButtonIcon(backX, backY, "back", ACCENT_ORANGE);
 
     // Draw value display background with rounded corners
     int centerX = _tft.width() / 2;
@@ -320,6 +398,29 @@ void Settings::drawAlarmScreen() {
     for (auto &button : _alarmButtons) {
         button.draw();
     }
+
+    // Add icons to buttons
+    int screenWidth = _tft.width();
+
+    // Toggle switch icon for alarm enable
+    int toggleX = BUTTON_MARGIN + (screenWidth - 2 * BUTTON_MARGIN) / 2;
+    int toggleY = 100 + BUTTON_HEIGHT / 2;
+    drawButtonIcon(toggleX - 100, toggleY, "toggle", _config.data.gpsTrafiAlarmEnabled ? ACCENT_GREEN : BUTTON_BORDER_DISABLED);
+
+    // Minus icon
+    int minusX = BUTTON_MARGIN + CONTROL_BUTTON_WIDTH / 2;
+    int minusY = 190 + BUTTON_HEIGHT / 2;
+    drawButtonIcon(minusX, minusY, "minus", disabledColor);
+
+    // Plus icon
+    int plusX = screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH / 2;
+    int plusY = 190 + BUTTON_HEIGHT / 2;
+    drawButtonIcon(plusX, plusY, "plus", enabledColor);
+
+    // Back arrow icon - position it to the left of the text
+    int backX = screenWidth - BACK_BUTTON_WIDTH + 30; // Left side of the button + margin
+    int backY = _tft.height() - BUTTON_HEIGHT / 2;
+    drawButtonIcon(backX, backY, "back", ACCENT_ORANGE);
 
     // Draw value display background with rounded corners
     int centerX = _tft.width() / 2;
@@ -389,6 +490,11 @@ void Settings::drawInformationScreen() {
     for (auto &button : _informationButtons) {
         button.draw();
     }
+
+    // Add back arrow icon to the Back button - position it to the left of the text
+    int backButtonCenterX = _tft.width() - BACK_BUTTON_WIDTH + 30; // Left side of the button + margin
+    int backButtonCenterY = _tft.height() - BUTTON_HEIGHT / 2;
+    drawButtonIcon(backButtonCenterX, backButtonCenterY, "back", TFT_WHITE);
 }
 
 /**
@@ -457,13 +563,19 @@ void Settings::handleTouchForButtonList(std::vector<Button> &buttonList, uint16_
 }
 
 void Settings::updateValueDisplay(int value, const char *disabledText, bool isEnabled) {
-    // Display new value without clearing background (already drawn)
+    // Clear the value display area first
+    int centerX = _tft.width() / 2;
+    int centerY = 220;
+    int clearWidth = 120;
+    int clearHeight = 50;
+
+    _tft.fillRoundRect(centerX - clearWidth / 2, centerY - clearHeight / 2, clearWidth, clearHeight, 10, VALUE_DISPLAY_BG);
+    _tft.drawRoundRect(centerX - clearWidth / 2, centerY - clearHeight / 2, clearWidth, clearHeight, 10, BUTTON_BORDER_ACTIVE);
+
+    // Display new value centered vertically and horizontally
     _tft.setTextFont(4);
     _tft.setTextSize(2);
     _tft.setTextDatum(MC_DATUM);
-
-    int centerX = _tft.width() / 2;
-    int centerY = 220;
 
     if (isEnabled) {
         _tft.setTextColor(TFT_WHITE);
@@ -475,4 +587,57 @@ void Settings::updateValueDisplay(int value, const char *disabledText, bool isEn
 
     _tft.setTextFont(1); // Restore default font
     _tft.setTextSize(1); // Restore default text size
+}
+
+void Settings::drawButtonIcon(int16_t centerX, int16_t centerY, const char *iconType, uint16_t color) {
+    _tft.setTextFont(2);
+    _tft.setTextColor(TFT_WHITE);
+    _tft.setTextDatum(MC_DATUM);
+
+    if (strcmp(iconType, "sun") == 0) {
+        // Brightness/Screen icon (sun)
+        _tft.fillCircle(centerX, centerY, 8, TFT_YELLOW);
+        // Simple rays
+        _tft.drawLine(centerX, centerY - 12, centerX, centerY - 16, TFT_YELLOW);
+        _tft.drawLine(centerX, centerY + 12, centerX, centerY + 16, TFT_YELLOW);
+        _tft.drawLine(centerX - 12, centerY, centerX - 16, centerY, TFT_YELLOW);
+        _tft.drawLine(centerX + 12, centerY, centerX + 16, centerY, TFT_YELLOW);
+    } else if (strcmp(iconType, "warning") == 0) {
+        // Alarm icon (warning triangle)
+        _tft.fillTriangle(centerX, centerY - 10, centerX - 10, centerY + 6, centerX + 10, centerY + 6, ACCENT_RED);
+        _tft.setTextColor(TFT_WHITE);
+        _tft.drawString("!", centerX, centerY - 1);
+    } else if (strcmp(iconType, "info") == 0) {
+        // Info icon (i in circle)
+        _tft.fillCircle(centerX, centerY, 10, BUTTON_BORDER_ACTIVE);
+        _tft.setTextColor(TFT_WHITE);
+        _tft.drawString("i", centerX, centerY);
+    } else if (strcmp(iconType, "minus") == 0) {
+        // Minus icon
+        _tft.fillRoundRect(centerX - 8, centerY - 2, 16, 4, 2, color);
+    } else if (strcmp(iconType, "plus") == 0) {
+        // Plus icon
+        _tft.fillRoundRect(centerX - 8, centerY - 2, 16, 4, 2, color);
+        _tft.fillRoundRect(centerX - 2, centerY - 8, 4, 16, 2, color);
+    } else if (strcmp(iconType, "back") == 0) {
+        // Back arrow icon
+        _tft.fillTriangle(centerX - 8, centerY, centerX + 2, centerY - 6, centerX + 2, centerY + 6, color);
+        _tft.fillRoundRect(centerX + 2, centerY - 2, 8, 4, 2, color);
+    } else if (strcmp(iconType, "exit") == 0) {
+        // Exit icon (X)
+        _tft.drawLine(centerX - 6, centerY - 6, centerX + 6, centerY + 6, color);
+        _tft.drawLine(centerX + 6, centerY - 6, centerX - 6, centerY + 6, color);
+        _tft.drawLine(centerX - 5, centerY - 6, centerX + 7, centerY + 6, color);
+        _tft.drawLine(centerX + 5, centerY - 6, centerX - 7, centerY + 6, color);
+    } else if (strcmp(iconType, "save") == 0) {
+        // Save icon (checkmark)
+        _tft.drawLine(centerX - 6, centerY, centerX - 2, centerY + 4, color);
+        _tft.drawLine(centerX - 2, centerY + 4, centerX + 6, centerY - 4, color);
+        _tft.drawLine(centerX - 6, centerY + 1, centerX - 2, centerY + 5, color);
+        _tft.drawLine(centerX - 2, centerY + 5, centerX + 6, centerY - 3, color);
+    } else if (strcmp(iconType, "toggle") == 0) {
+        // Toggle switch icon
+        _tft.fillRoundRect(centerX - 10, centerY - 4, 20, 8, 4, BUTTON_BORDER_DISABLED);
+        _tft.fillCircle(centerX + 6, centerY, 5, color);
+    }
 }

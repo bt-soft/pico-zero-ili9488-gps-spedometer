@@ -9,10 +9,12 @@ class Button {
     Button(TFT_eSPI &tft, int16_t x, int16_t y, int16_t w, int16_t h, const char *label, uint16_t bgColor, uint16_t textColor, uint16_t borderColor, uint8_t font);
 
     void draw();
+    void drawWithTextAtBottom(); // Special draw method for grid buttons
+    void drawPressed();          // Special draw method for pressed state with smaller font
     bool contains(int16_t x, int16_t y);
     void press();
     void setCallback(std::function<void()> callback);
-    void setText(const String& newLabel);
+    void setText(const String &newLabel);
     void setBorderColor(uint16_t color);
 
   private:
