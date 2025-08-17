@@ -5,6 +5,9 @@
 #include "Utils.h" // For beeping and other utilities
 #include "defines.h"
 
+// Define title bar height
+const int TITLE_BAR_HEIGHT = 61; // Adjust as needed
+
 /**
  *  A beállítások menü inicializálása
  */
@@ -26,7 +29,7 @@ void Settings::init() {
     });
 
     // Alarm Button
-    _mainButtons.emplace_back(_tft, 50, 150, _tft.width() - 100, 50, "Alarm", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
+    _mainButtons.emplace_back(_tft, 50, 140, _tft.width() - 100, 50, "Alarm", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
     _mainButtons.back().setCallback([this]() {
         _currentState = ScreenState::ALARM;
         draw();
@@ -34,7 +37,7 @@ void Settings::init() {
     });
 
     // Info Button
-    _mainButtons.emplace_back(_tft, 50, 220, _tft.width() - 100, 50, "Info", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
+    _mainButtons.emplace_back(_tft, 50, 200, _tft.width() - 100, 50, "Info", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
     _mainButtons.back().setCallback([this]() {
         _currentState = ScreenState::INFORMATION;
         draw();
@@ -42,11 +45,11 @@ void Settings::init() {
     });
 
     // Exit Button
-    _mainButtons.emplace_back(_tft, 30, _tft.height() - 70, 150, 50, "Exit", TFT_BLACK, TFT_WHITE, TFT_RED, 4);
+    _mainButtons.emplace_back(_tft, 0, _tft.height() - 50, 150, 50, "Exit", TFT_BLACK, TFT_WHITE, TFT_RED, 4);
     _mainButtons.back().setCallback([this]() { exit(); });
 
     // Save Button
-    _mainButtons.emplace_back(_tft, _tft.width() - 180, _tft.height() - 70, 150, 50, "Save", TFT_BLACK, TFT_WHITE, TFT_GREEN, 4);
+    _mainButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Save", TFT_BLACK, TFT_WHITE, TFT_GREEN, 4);
     _mainButtons.back().setCallback([this]() {
         _config.checkSave();
         Utils::beepTick();
@@ -63,7 +66,7 @@ void Settings::initInformationButtons() {
     _informationButtons.reserve(1);
 
     // Back Button
-    _informationButtons.emplace_back(_tft, 30, _tft.height() - 70, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
+    _informationButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
     _informationButtons.back().setCallback([this]() {
         _currentState = ScreenState::MAIN;
         draw();
@@ -118,7 +121,7 @@ void Settings::initBrightnessButtons() {
     });
 
     // Back Button
-    _brightnessButtons.emplace_back(_tft, 30, _tft.height() - 70, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
+    _brightnessButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
     _brightnessButtons.back().setCallback([this]() {
         _currentState = ScreenState::MAIN;
         draw();
@@ -160,7 +163,7 @@ void Settings::initAlarmButtons() {
     });
 
     // Back Button
-    _alarmButtons.emplace_back(_tft, 30, _tft.height() - 70, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
+    _alarmButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
     _alarmButtons.back().setCallback([this]() {
         _currentState = ScreenState::MAIN;
         draw();
@@ -201,26 +204,39 @@ void Settings::draw() {
     }
 }
 
-void Settings::drawMainScreen() {
+/**
+ * Képernyő címének megjelenítése
+ */
+void Settings::drawScreenTitle(const char *title) {
+    _tft.fillRect(0, 0, _tft.width(), TITLE_BAR_HEIGHT, TFT_WHITE);
+
     _tft.setTextFont(4);
     _tft.setTextSize(2);
-    _tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    _tft.setTextColor(TFT_BLACK, TFT_WHITE); // Black text, white background
     _tft.setTextDatum(MC_DATUM);
-    _tft.drawString("Settings", _tft.width() / 2, 30);
+    _tft.drawString(title, _tft.width() / 2, TITLE_BAR_HEIGHT / 2 + 5); // Center text vertically within the bar
     _tft.setTextSize(1);
+}
+
+/**
+ * Fő képernyő megjelenítése
+ */
+void Settings::drawMainScreen() {
+    // Képernyő címének megjelenítése
+    drawScreenTitle("Settings");
 
     for (auto &button : _mainButtons) {
         button.draw();
     }
 }
 
+/**
+ * Képernyő világosítása
+ */
 void Settings::drawBrightnessScreen() {
-    _tft.setTextFont(4);
-    _tft.setTextSize(2);
-    _tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    _tft.setTextDatum(MC_DATUM);
-    _tft.drawString("Brightness", _tft.width() / 2, 30);
-    _tft.setTextSize(1);
+
+    // Képernyő címének megjelenítése
+    drawScreenTitle("Brightness");
 
     // Update Auto-Brightness button text
     String autoText = "Auto: ";
@@ -245,13 +261,13 @@ void Settings::drawBrightnessScreen() {
     updateBrightnessValueDisplay();
 }
 
+/**
+ * Riasztási képernyő megjelenítése
+ */
 void Settings::drawAlarmScreen() {
-    _tft.setTextFont(4);
-    _tft.setTextSize(2);
-    _tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    _tft.setTextDatum(MC_DATUM);
-    _tft.drawString("Alarm Settings", _tft.width() / 2, 30);
-    _tft.setTextSize(1);
+
+    // Képernyő címének megjelenítése
+    drawScreenTitle("Alarm Settings");
 
     // Update GPS Trafi Alarm Enabled button text
     String enabledText = "Trafi Alarm: ";
@@ -276,13 +292,13 @@ void Settings::drawAlarmScreen() {
     updateAlarmValueDisplay();
 }
 
+/**
+ * Információs képernyő megjelenítése
+ */
 void Settings::drawInformationScreen() {
-    _tft.setTextFont(4);
-    _tft.setTextSize(2);
-    _tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    _tft.setTextDatum(MC_DATUM);
-    _tft.drawString("Information", _tft.width() / 2, 30);
-    _tft.setTextSize(1);
+
+    // Képernyő címének megjelenítése
+    drawScreenTitle("Information");
 
     char buf[64];
 
@@ -306,6 +322,9 @@ void Settings::drawInformationScreen() {
     }
 }
 
+/**
+ * Képernyő világosítása
+ */
 void Settings::updateBrightnessValueDisplay() {
     // Clear previous value
     _tft.setTextFont(4);

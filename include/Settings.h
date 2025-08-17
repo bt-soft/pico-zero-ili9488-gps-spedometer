@@ -1,9 +1,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "Button.h"
 #include <TFT_eSPI.h>
 #include <vector>
-#include "Button.h"
 
 // Forward declare dependencies
 class Config;
@@ -12,15 +12,15 @@ class TftBackLightAdjuster;
 class TrafipaxManager;
 
 class Settings {
-public:
-    Settings(TFT_eSPI& tft, Config& config, TftBackLightAdjuster& tftBackLightAdjuster, TrafipaxManager& trafipaxManager);
+  public:
+    Settings(TFT_eSPI &tft, Config &config, TftBackLightAdjuster &tftBackLightAdjuster, TrafipaxManager &trafipaxManager);
 
     void init();
     void enter();
     void loop();
     bool isActive();
 
-private:
+  private:
     enum class ScreenState { MAIN, BRIGHTNESS, ALARM, INFORMATION };
 
     void draw();
@@ -42,17 +42,18 @@ private:
 
     void initInformationButtons();
 
-        void drawInformationScreen();
+    void drawInformationScreen();
     void handleInformationTouch(uint16_t x, uint16_t y);
 
+    void drawScreenTitle(const char *title);
 
-    TFT_eSPI& _tft;
-    Config& _config;
+    TFT_eSPI &_tft;
+    Config &_config;
     bool _active;
     ScreenState _currentState;
-    TftBackLightAdjuster& _tftBackLightAdjuster;
-    TrafipaxManager& _trafipaxManager;
-    
+    TftBackLightAdjuster &_tftBackLightAdjuster;
+    TrafipaxManager &_trafipaxManager;
+
     std::vector<Button> _mainButtons;
     std::vector<Button> _brightnessButtons;
     std::vector<Button> _alarmButtons;
