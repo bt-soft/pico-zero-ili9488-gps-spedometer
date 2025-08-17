@@ -80,23 +80,11 @@ struct SatelliteInfo {
     bool updated; // Flag to indicate if this satellite's data was updated in the current GSV block
 };
 
-// Array to store info for up to 12 satellites (common max for GSV)
-// You might need to adjust this size based on your GPS receiver's capabilities
-static const int MAX_SATELLITES = 40;
-SatelliteInfo satellites[MAX_SATELLITES];
-int currentSatelliteCount = 0;
-
-// TinyGPSCustom objects for parsing GSV sentences
-// We need 4 sets of these, as each GSV sentence can contain data for up to 4 satellites
-TinyGPSCustom satNumber[4];
-TinyGPSCustom satElevation[4];
-TinyGPSCustom satAzimuth[4];
-TinyGPSCustom satSnr[4];
-
-// Variables to track GSV message parts
-TinyGPSCustom gpgsvTotalMessages(gps, "$GPGSV", 1); // Message number, $GPGSV sentence, first element
-TinyGPSCustom gpgsvMessageNumber(gps, "$GPGSV", 2); // Total number of messages,  $GPGSV sentence, second element
-TinyGPSCustom gpgsvSatsInView(gps, "$GPGSV", 3);    // Number of satellites in view, $GPGSV sentence, third element
+TinyGPSCustom totalGPGSVMessages(gps, "GPGSV", 1); // $GPGSV sentence, first element
+TinyGPSCustom messageNumber(gps, "GPGSV", 2);      // $GPGSV sentence, second element
+TinyGPSCustom satsInView(gps, "GPGSV", 3);         // $GPGSV sentence, third element
+TinyGPSCustom satNumber[4];                        // to be initialized later
+TinyGPSCustom snr[4];
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 /**
@@ -528,6 +516,82 @@ void drawSplashScreen() {
 }
 
 /**
+ * Read GSV messages from the GPS module
+ */
+void readGSVMessages() {
+
+    if (!totalGPGSVMessages.isValid()) {
+        // DEBUG("Not all $GPGSV messages processed yet\n");
+        return;
+    }
+
+    for (byte i = 0; i < 4; ++i) {
+
+        // sat PRN number and SNR value
+        // sat PRN number and SNR value
+        uint8_t prnNo = atoi(satNumber[i].value());
+        uint8_t snrVal = atoi(snr[i].value());
+
+        // ez valami szemét?
+        if (prnNo == 0) {
+            continue;
+        }
+        DEBUG("Satellite %d: PRN=%d, SNR=%d\n", i + 1, prnNo, snrVal);
+    }
+
+    // totalMessages ==  currentMessage ?
+    if (atoi(totalGPGSVMessages.value()) != atoi(messageNumber.value())) {
+        DEBUG("Not complete yet\n");
+        return;
+    }
+}
+
+/**
+ * GPS adatok kiolvasása
+ */
+void readGPS() {
+
+    // Lockolunk egyet
+    CoreMutex m(&_gpsMutex);
+
+    // Ha nem sikerül a lock, akkor nem megyünk tovább
+    if (!m) {
+        DEBUG("GPS read lock failed, skipping read.\n");
+        return;
+    }
+
+    // Kiolvassuk és dekódoljuk az összes GPS adatot
+    while (Serial1.available() > 0) {
+        char c = Serial1.read();
+
+        // LED villogtatása, ha van érvéynes bejövő GPS mondat
+        if (gps.encode(c)) {
+            leds[0] = INTERNAL_LED_COLOR;
+            FastLED.show();
+
+            leds[0] = CRGB::Black;
+            FastLED.show();
+        }
+
+        //Serial.print(c); // Debug: kiírjuk a bejövő karaktereket
+    }
+}
+
+/**
+ * Akkumulátor feszültség mérése
+ */
+float readBatterry() {
+#define V_REFERENCE 3.3f
+#define EXTERNAL_VBUSDIVIDER_RATIO ((15.0f + 4.7f) / 4.7f) // A feszültségosztó ellenállások értéke
+#define CONVERSION_FACTOR (1 << AD_RESOLUTION)
+
+    float voltageOut = (analogRead(PIN_BATTERRY_MEASURE) * V_REFERENCE) / CONVERSION_FACTOR;
+    float vBusExtVoltage = voltageOut * EXTERNAL_VBUSDIVIDER_RATIO;
+
+    return vBusExtVoltage;
+}
+
+/**
  * Core-0 Setup
  */
 void setup(void) {
@@ -541,13 +605,11 @@ void setup(void) {
     //    Field indices start from 0, so for $GPGSV,1,2,3,4,5,6,7,...
     //    4th field is PRN, 5th is Elevation, 6th is Azimuth, 7th is SNR
     //    For the first satellite in the sentence:
+    // Initialize all the uninitialized TinyGPSCustom objects
     for (byte i = 0; i < 4; ++i) {
-        satNumber[i].begin(gps, "GPGSV", 4 + 4 * i);    // offsets 4, 8, 12, 16
-        satElevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
-        satAzimuth[i].begin(gps, "GPGSV", 6 + 4 * i);   // offsets 6, 10, 14, 18
-        satSnr[i].begin(gps, "GPGSV", 7 + 4 * i);       // offsets 7, 11, 15, 19
+        satNumber[i].begin(gps, "GPGSV", 4 + 4 * i); // offsets 4, 8, 12, 16
+        snr[i].begin(gps, "GPGSV", 7 + 4 * i);       // offsets 7, 11, 15, 19
     }
-
     // Beeper
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW);
@@ -642,6 +704,19 @@ void setup(void) {
 
     // Azonnal le is kérjük a hőmérsékletet
     nonBlockingDallasTemperatureSensor.requestTemperature();
+
+    //-------------------------
+    // GPS Serial
+    Serial1.setRX(PIN_SERIAL1_RX_NEW);
+    Serial1.setTX(PIN_SERIAL1_TX_NEW);
+    Serial1.begin(9600);
+
+    // initialize digital pin LED_BUILTIN as an output.
+    FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
+    FastLED.setBrightness(20);
+
+    // AD felbontás beállítása a feszültségméréshez
+    analogReadResolution(AD_RESOLUTION);
 }
 
 /**
@@ -694,190 +769,8 @@ void loop() {
             }
         }
     }
-}
 
-//---------------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------------
-//
-//      CORE - 1
-//
-//---------------------------------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-/**
- * Read GSV messages from the GPS module
- */
-void readGSVMessages() {
-
-    if (!gpgsvTotalMessages.isValid()) {
-        // DEBUG("Not all $GPGSV messages processed yet\n");
-        return;
-    }
-
-    for (byte i = 0; i < 4; ++i) {
-
-        // sat PRN number and SNR value
-        int prn = atoi(satNumber[i].value());
-        int elevation = atoi(satElevation[i].value());
-        int azimuth = atoi(satAzimuth[i].value());
-        int snr = atoi(satSnr[i].value());
-
-        // ez valami szemét?
-        if (prn == 0) {
-            continue;
-        }
-
-        DEBUG("Satellite %d: PRN=%d, Elevation=%d, Azimuth=%d, SNR=%d\n", i + 1, prn, elevation, azimuth, snr);
-    }
-
-    // totalMessages ==  currentMessage ?
-    if (atoi(gpgsvTotalMessages.value()) != atoi(gpgsvMessageNumber.value())) {
-        DEBUG("Not complete yet\n");
-        return;
-    }
-
-    //------------------------------------------------------------------------------------------
-
-    // Check if a new GSV message has been fully processed
-    if (gpgsvMessageNumber.isUpdated()) {
-        int msg_num = atoi(gpgsvMessageNumber.value());
-        int total_msgs = atoi(gpgsvTotalMessages.value());
-        int num_sats_in_view = atoi(gpgsvSatsInView.value());
-
-        // If this is the first message in a new GSV block, reset satellite updated flags
-        if (msg_num == 1) {
-            for (int i = 0; i < currentSatelliteCount; ++i) {
-                satellites[i].updated = false;
-            }
-            currentSatelliteCount = 0; // Reset count for new block
-        }
-
-        // Process up to 4 satellites per GSV message
-        for (int i = 0; i < 4; ++i) {
-            if (satNumber[i].isUpdated() && satNumber[i].isValid()) {
-                int prn = atoi(satNumber[i].value());
-                int elevation = atoi(satElevation[i].value());
-                int azimuth = atoi(satAzimuth[i].value());
-                int snr = atoi(satSnr[i].value());
-
-                // Find if this satellite is already in our list
-                bool found = false;
-                for (int j = 0; j < currentSatelliteCount; ++j) {
-                    if (satellites[j].prn == prn) {
-                        satellites[j].elevation = elevation;
-                        satellites[j].azimuth = azimuth;
-                        satellites[j].snr = snr;
-                        satellites[j].updated = true;
-                        found = true;
-                        break;
-                    }
-                }
-
-                // If not found, add it to the list
-                if (!found && currentSatelliteCount < MAX_SATELLITES) {
-                    satellites[currentSatelliteCount].prn = prn;
-                    satellites[currentSatelliteCount].elevation = elevation;
-                    satellites[currentSatelliteCount].azimuth = azimuth;
-                    satellites[currentSatelliteCount].snr = snr;
-                    satellites[currentSatelliteCount].updated = true;
-                    currentSatelliteCount++;
-                }
-            }
-        }
-
-        // If this is the last message in the GSV block, print/display results
-        if (msg_num == total_msgs) {
-            Serial.println(F("\n--- Visible Satellites ---"));
-            Serial.print(F("Total in view (from GSV): "));
-            Serial.println(num_sats_in_view);
-            Serial.println(F("PRN | Elev | Azim | SNR"));
-            Serial.println(F("----|------|------|-----"));
-
-            for (int i = 0; i < currentSatelliteCount; ++i) {
-                // Only display satellites that were updated in the current block
-                // This handles cases where a satellite might drop out of view
-                if (satellites[i].updated) {
-                    Serial.print(satellites[i].prn);
-                    Serial.print(F("  | "));
-                    Serial.print(satellites[i].elevation);
-                    Serial.print(F("   | "));
-                    Serial.print(satellites[i].azimuth);
-                    Serial.print(F("  | "));
-                    Serial.println(satellites[i].snr);
-                }
-            }
-            Serial.println(F("--------------------------"));
-        }
-    }
-}
-
-/**
- * GPS adatok kiolvasása
- */
-void readGPS() {
-
-    // Lockolunk egyet
-    CoreMutex m(&_gpsMutex);
-
-    // Ha nem sikerül a lock, akkor nem megyünk tovább
-    if (!m) {
-        DEBUG("GPS read lock failed, skipping read.\n");
-        return;
-    }
-
-    // Kiolvassuk és dekódoljuk az összes GPS adatot
-    while (Serial1.available() > 0) {
-        char c = Serial1.read();
-
-        // LED villogtatása, ha van érvéynes bejövő GPS mondat
-        if (gps.encode(c)) {
-            leds[0] = INTERNAL_LED_COLOR;
-            FastLED.show();
-
-            leds[0] = CRGB::Black;
-            FastLED.show();
-        }
-
-        Serial.print(c); // Debug: kiírjuk a bejövő karaktereket
-    }
-}
-
-/**
- * Akkumulátor feszültség mérése
- */
-float readBatterry() {
-#define V_REFERENCE 3.3f
-#define EXTERNAL_VBUSDIVIDER_RATIO ((15.0f + 4.7f) / 4.7f) // A feszültségosztó ellenállások értéke
-#define CONVERSION_FACTOR (1 << AD_RESOLUTION)
-
-    float voltageOut = (analogRead(PIN_BATTERRY_MEASURE) * V_REFERENCE) / CONVERSION_FACTOR;
-    float vBusExtVoltage = voltageOut * EXTERNAL_VBUSDIVIDER_RATIO;
-
-    return vBusExtVoltage;
-}
-
-/**
- * Core-1 Setup
- */
-void setup1(void) {
-    // GPS Serial
-    Serial1.setRX(PIN_SERIAL1_RX_NEW);
-    Serial1.setTX(PIN_SERIAL1_TX_NEW);
-    Serial1.begin(9600);
-
-    // initialize digital pin LED_BUILTIN as an output.
-    FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
-    FastLED.setBrightness(20);
-
-    // AD felbontás beállítása a feszültségméréshez
-    analogReadResolution(AD_RESOLUTION);
-}
-
-/**
- * Core-1 - GPS process
- */
-void loop1(void) {
-
+    //--------------------------------------------
     // Van GPS adat?
     if (Serial1.available()) {
         readGPS();
@@ -897,3 +790,21 @@ void loop1(void) {
     // Háttérvilágitás bazseválása
     tftBackLightAdjuster.adjust();
 }
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------------------------
+//
+//      CORE - 1
+//
+//---------------------------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * Core-1 Setup
+ */
+void setup1(void) {}
+
+/**
+ * Core-1 - GPS process
+ */
+void loop1(void) {}
