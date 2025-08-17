@@ -209,91 +209,6 @@ const TrafipaxInternal *TrafipaxManager::getClosestTrafipax(double currentLat, d
 }
 
 /**
- * Teszt metódus - litéri trafipax közeledés/távolodás szimulálása
- * Litéri trafipax koordinátái: 47.100934, 18.011792
- * A teszt 1000m-ről indul és 200m-ig közeledik, majd 1000m-ig távolodik
- */
-void TrafipaxManager::testLiteriTrafipaxApproach() {
-    const double LITERI_LAT = 47.100934;
-    const double LITERI_LON = 18.011792;
-    const double ALERT_DISTANCE = 500.0; // 500 méteres riasztási távolság
-
-    // Kiindulási pont: 1000m távolságban délre a litéri trafipax-tól
-    double startLat = LITERI_LAT - 0.009; // kb. 1000m délre
-    double startLon = LITERI_LON;
-
-    Serial.println("\n=== LITÉRI TRAFIPAX TESZT ===");
-    Serial.println("Közeledés teszt (1000m -> 200m):");
-
-    // 1. KÖZELEDÉS FÁZIS: 1000m-ről 200m-ig
-    for (int step = 0; step <= 10; step++) {
-        // Lineáris interpoláció a kiindulási pont és a trafipax között
-        double progress = step / 10.0;
-        double testLat = startLat + (LITERI_LAT - startLat) * progress * 0.8; // csak 80%-ig megyünk (200m marad)
-        double testLon = startLon;
-
-        // Távolság kiszámítása ellenőrzéshez
-        double distance = TinyGPSPlus::distanceBetween(testLat, testLon, LITERI_LAT, LITERI_LON);
-
-        // Trafipax közeledés ellenőrzése
-        const TrafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);
-
-        Serial.print("Lépés ");
-        Serial.print(step);
-        Serial.print(": Távolság = ");
-        Serial.print(distance, 0);
-        Serial.print("m");
-
-        if (result != nullptr) {
-            Serial.print(" -> RIASZTÁS! ");
-            Serial.print(result->city);
-            Serial.print(", ");
-            Serial.println(result->street_or_km);
-        } else {
-            Serial.println(" -> Nincs riasztás");
-        }
-
-        delay(500); // 500ms várakozás a lépések között
-    }
-
-    Serial.println("\nTávolodás teszt (200m -> 1000m):");
-
-    // 2. TÁVOLODÁS FÁZIS: 200m-ről 1000m-ig
-    for (int step = 0; step <= 10; step++) {
-        // Vissza távolodunk a kiindulási pontig
-        double progress = step / 10.0;
-        double currentLat = LITERI_LAT - 0.0018;                   // 200m-ről indulunk
-        double testLat = currentLat - (0.009 - 0.0018) * progress; // távolodunk 1000m-ig
-        double testLon = startLon;
-
-        // Távolság kiszámítása ellenőrzéshez
-        double distance = TinyGPSPlus::distanceBetween(testLat, testLon, LITERI_LAT, LITERI_LON);
-
-        // Trafipax közeledés ellenőrzése
-        const TrafipaxInternal *result = checkTrafipaxApproach(testLat, testLon, ALERT_DISTANCE);
-
-        Serial.print("Lépés ");
-        Serial.print(step);
-        Serial.print(": Távolság = ");
-        Serial.print(distance, 0);
-        Serial.print("m");
-
-        if (result != nullptr) {
-            Serial.print(" -> RIASZTÁS! ");
-            Serial.print(result->city);
-            Serial.print(", ");
-            Serial.println(result->street_or_km);
-        } else {
-            Serial.println(" -> Nincs riasztás");
-        }
-
-        delay(500); // 500ms várakozás a lépések között
-    }
-
-    Serial.println("=== TESZT BEFEJEZVE ===\n");
-}
-
-/**
  * Demo indítása - 5mp várakozás, majd közeledés/távolodás szimulálása
  */
 void TrafipaxManager::startDemo() {
@@ -333,8 +248,8 @@ void TrafipaxManager::processDemo() {
 
     if (elapsed < TrafipaxDemo::PHASE_WAIT) {
         // Várakozási fázis - messze vagyunk (1500m)
-        simLat = TrafipaxDemo::LITERI_LAT - 0.0135; // kb. 1500m délre
-        simLon = TrafipaxDemo::LITERI_LON;
+        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135; // kb. 1500m délre
+        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
@@ -344,20 +259,20 @@ void TrafipaxManager::processDemo() {
     } else if (elapsed < TrafipaxDemo::PHASE_APPROACH) {
         // Közeledési fázis - 1500m-ről 200m-ig
         float progress = (elapsed - TrafipaxDemo::PHASE_WAIT) / 15.0f; // 0.0 - 1.0 (15s alatt)
-        simLat = TrafipaxDemo::LITERI_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
-        simLon = TrafipaxDemo::LITERI_LON;
+        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
+        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
-            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TrafipaxDemo::LITERI_LAT, TrafipaxDemo::LITERI_LON);
+            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TrafipaxDemo::DEMO_TRAFIPAX_LAT, TrafipaxDemo::DEMO_TRAFIPAX_LON);
             DEBUG("Demo fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
         }
 
     } else if (elapsed < TrafipaxDemo::PHASE_DEPART) {
         // Távolodási fázis - 200m-ről 1500m-ig (lassítva 20s alatt)
         float progress = (elapsed - TrafipaxDemo::PHASE_APPROACH) / 20.0f; // 0.0 - 1.0 (20s alatt)
-        simLat = TrafipaxDemo::LITERI_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
-        simLon = TrafipaxDemo::LITERI_LON;
+        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
+        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
@@ -370,8 +285,8 @@ void TrafipaxManager::processDemo() {
 
     } else {
         // Befejező fázis - messze vagyunk
-        simLat = TrafipaxDemo::LITERI_LAT - 0.0135;
-        simLon = TrafipaxDemo::LITERI_LON;
+        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135;
+        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;

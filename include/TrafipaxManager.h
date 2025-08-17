@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #define MAX_TRAFIPAX_COUNT 400
-#define MAX_CITY_LEN 20
+#define MAX_CITY_LEN 25
 #define MAX_STREET_LEN 30
 
 // Demo trafipax közeledés/távolodás szimulálása működés közben
@@ -25,8 +25,12 @@ struct TrafipaxDemo {
     static constexpr unsigned long PHASE_END = 45;      // 5mp befejezés (40-45mp)
 
     // Litéri trafipax koordinátái
-    static constexpr double LITERI_LAT = 47.100934;
-    static constexpr double LITERI_LON = 18.011792;
+    // Litér
+    // static constexpr double DEMO_TRAFIPAX_LAT = 47.100934;  //Litér
+    // static constexpr double DEMO_TRAFIPAX_LON = 18.011792;
+    // Hódmezővásárhely
+    static constexpr double DEMO_TRAFIPAX_LAT = 46.428704; // Hódmezővásárhely
+    static constexpr double DEMO_TRAFIPAX_LON = 20.326282;
 };
 
 struct TrafipaxInternal {
@@ -52,9 +56,6 @@ class TrafipaxManager {
 
     // Legközelebbi trafipax keresése távolsággal együtt
     const TrafipaxInternal *getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const;
-
-    // Teszt metódus - litéri trafipax közeledés/távolodás szimulálása
-    void testLiteriTrafipaxApproach();
 
     // Demo funkciók
     void startDemo();
