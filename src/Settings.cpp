@@ -25,8 +25,9 @@ void Settings::init() {
 
     // Alarm Button
     _mainButtons.emplace_back(_tft, 50, 150, _tft.width() - 100, 50, "Alarm", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
-    _mainButtons.back().setCallback([]() {
-        // TODO: Alarm settings
+    _mainButtons.back().setCallback([this]() {
+        _currentState = ScreenState::ALARM;
+        draw();
         Utils::beepTick();
     });
 
@@ -44,6 +45,7 @@ void Settings::init() {
     });
 
     initBrightnessButtons();
+    initAlarmButtons();
 }
 
 void Settings::initBrightnessButtons() {
@@ -101,6 +103,48 @@ void Settings::initBrightnessButtons() {
     });
 }
 
+void Settings::initAlarmButtons() {
+    _alarmButtons.reserve(4);
+
+    // GPS Trafi Alarm Enabled Toggle Button
+    _alarmButtons.emplace_back(_tft, 50, 80, _tft.width() - 100, 50, "", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
+    _alarmButtons.back().setCallback([this]() {
+        _config.data.gpsTrafiAlarmEnabled = !_config.data.gpsTrafiAlarmEnabled;
+        draw(); // Redraw to update text and button states
+        Utils::beepTick();
+    });
+
+    // GPS Trafi Alarm Distance Down Button
+    _alarmButtons.emplace_back(_tft, 50, 150, 100, 50, "-", TFT_BLACK, TFT_WHITE, TFT_RED, 4);
+    _alarmButtons.back().setCallback([this]() {
+        if (_config.data.gpsTrafiAlarmEnabled) {
+            uint16_t &val = _config.data.gpsTrafiAlarmDistance;
+            val = (val > 400) ? val - 100 : 400;
+            updateAlarmValueDisplay();
+            Utils::beepTick();
+        }
+    });
+
+    // GPS Trafi Alarm Distance Up Button
+    _alarmButtons.emplace_back(_tft, _tft.width() - 150, 150, 100, 50, "+", TFT_BLACK, TFT_WHITE, TFT_GREEN, 4);
+    _alarmButtons.back().setCallback([this]() {
+        if (_config.data.gpsTrafiAlarmEnabled) {
+            uint16_t &val = _config.data.gpsTrafiAlarmDistance;
+            val = (val < 2000) ? val + 100 : 2000;
+            updateAlarmValueDisplay();
+            Utils::beepTick();
+        }
+    });
+
+    // Back Button
+    _alarmButtons.emplace_back(_tft, 30, _tft.height() - 70, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
+    _alarmButtons.back().setCallback([this]() {
+        _currentState = ScreenState::MAIN;
+        draw();
+        Utils::beepTick();
+    });
+}
+
 bool Settings::isActive() { return _active; }
 
 void Settings::enter() {
@@ -125,13 +169,19 @@ void Settings::draw() {
         case ScreenState::BRIGHTNESS:
             drawBrightnessScreen();
             break;
+        case ScreenState::ALARM:
+            drawAlarmScreen();
+            break;
     }
 }
 
 void Settings::drawMainScreen() {
+    _tft.setTextFont(4);
+    _tft.setTextSize(2);
     _tft.setTextColor(TFT_WHITE, TFT_BLACK);
     _tft.setTextDatum(MC_DATUM);
-    _tft.drawString("Settings", _tft.width() / 2, 30, 4);
+    _tft.drawString("Settings", _tft.width() / 2, 30);
+    _tft.setTextSize(1);
 
     for (auto &button : _mainButtons) {
         button.draw();
@@ -139,9 +189,12 @@ void Settings::drawMainScreen() {
 }
 
 void Settings::drawBrightnessScreen() {
+    _tft.setTextFont(4);
+    _tft.setTextSize(2);
     _tft.setTextColor(TFT_WHITE, TFT_BLACK);
     _tft.setTextDatum(MC_DATUM);
-    _tft.drawString("Brightness", _tft.width() / 2, 30, 4);
+    _tft.drawString("Brightness", _tft.width() / 2, 30);
+    _tft.setTextSize(1);
 
     // Update Auto-Brightness button text
     String autoText = "Auto: ";
@@ -164,6 +217,37 @@ void Settings::drawBrightnessScreen() {
 
     // Display manual brightness value
     updateBrightnessValueDisplay();
+}
+
+void Settings::drawAlarmScreen() {
+    _tft.setTextFont(4);
+    _tft.setTextSize(2);
+    _tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    _tft.setTextDatum(MC_DATUM);
+    _tft.drawString("Alarm Settings", _tft.width() / 2, 30);
+    _tft.setTextSize(1);
+
+    // Update GPS Trafi Alarm Enabled button text
+    String enabledText = "Trafi Alarm: ";
+    enabledText += (_config.data.gpsTrafiAlarmEnabled ? "On" : "Off");
+    _alarmButtons[0].setText(enabledText);
+
+    // Update button states based on alarm enabled mode
+    if (!_config.data.gpsTrafiAlarmEnabled) {
+        _alarmButtons[1].setBorderColor(TFT_DARKGREY);
+        _alarmButtons[2].setBorderColor(TFT_DARKGREY);
+    } else {
+        _alarmButtons[1].setBorderColor(TFT_RED);
+        _alarmButtons[2].setBorderColor(TFT_GREEN);
+    }
+
+    // Draw all buttons
+    for (auto &button : _alarmButtons) {
+        button.draw();
+    }
+
+    // Display alarm distance value
+    updateAlarmValueDisplay();
 }
 
 void Settings::updateBrightnessValueDisplay() {
@@ -192,6 +276,32 @@ void Settings::updateBrightnessValueDisplay() {
     _tft.setTextSize(1); // Restore default text size
 }
 
+void Settings::updateAlarmValueDisplay() {
+    // Clear previous value
+    _tft.setTextFont(4);                     // Set font for calculations and drawing
+    _tft.setTextSize(2);                     // Set text size for better visibility
+    int text_width = _tft.textWidth("2000"); // Max 4 digits
+    int text_height = _tft.fontHeight();
+    int x_center = _tft.width() / 2;
+    int y_center = 175;
+
+    _tft.fillRect(x_center - text_width / 2, y_center - text_height / 2, text_width, text_height, TFT_BLACK);
+
+    // Display new value
+    _tft.setTextDatum(MC_DATUM);
+    _tft.setTextColor(TFT_WHITE); // Set text color without background
+
+    if (_config.data.gpsTrafiAlarmEnabled) {
+        String valStr = String(_config.data.gpsTrafiAlarmDistance);
+        _tft.drawString(valStr, _tft.width() / 2, 175);
+    } else {
+        _tft.setTextColor(TFT_DARKGREY); // Set text color without background
+        _tft.drawString("-", _tft.width() / 2, 175);
+    }
+    _tft.setTextFont(1); // Restore default font
+    _tft.setTextSize(1); // Restore default text size
+}
+
 void Settings::handleTouch() {
     uint16_t x, y;
     if (_tft.getTouch(&x, &y)) {
@@ -201,6 +311,9 @@ void Settings::handleTouch() {
                 break;
             case ScreenState::BRIGHTNESS:
                 handleBrightnessTouch(x, y);
+                break;
+            case ScreenState::ALARM:
+                handleAlarmTouch(x, y);
                 break;
         }
         delay(200); // Debounce
@@ -218,6 +331,15 @@ void Settings::handleMainTouch(uint16_t x, uint16_t y) {
 
 void Settings::handleBrightnessTouch(uint16_t x, uint16_t y) {
     for (auto &button : _brightnessButtons) {
+        if (button.contains(x, y)) {
+            button.press();
+            return;
+        }
+    }
+}
+
+void Settings::handleAlarmTouch(uint16_t x, uint16_t y) {
+    for (auto &button : _alarmButtons) {
         if (button.contains(x, y)) {
             button.press();
             return;

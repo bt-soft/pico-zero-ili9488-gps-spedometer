@@ -19,7 +19,7 @@ public:
     bool isActive();
 
 private:
-    enum class ScreenState { MAIN, BRIGHTNESS };
+    enum class ScreenState { MAIN, BRIGHTNESS, ALARM };
 
     void draw();
     void handleTouch();
@@ -33,6 +33,11 @@ private:
     void handleBrightnessTouch(uint16_t x, uint16_t y);
     void updateBrightnessValueDisplay();
 
+    void initAlarmButtons();
+    void drawAlarmScreen();
+    void handleAlarmTouch(uint16_t x, uint16_t y);
+    void updateAlarmValueDisplay();
+
 
     TFT_eSPI& _tft;
     Config& _config;
@@ -42,6 +47,7 @@ private:
     
     std::vector<Button> _mainButtons;
     std::vector<Button> _brightnessButtons;
+    std::vector<Button> _alarmButtons;
 };
 
 #endif // SETTINGS_H
