@@ -12,6 +12,8 @@ class Button {
     bool contains(int16_t x, int16_t y);
     void press();
     void setCallback(std::function<void()> callback);
+    void setText(const String& newLabel);
+    void setBorderColor(uint16_t color);
 
   private:
     TFT_eSPI &_tft;

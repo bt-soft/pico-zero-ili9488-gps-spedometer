@@ -1,5 +1,3 @@
-//#include <Streaming.h>
-
 #include "TftBackLightAdjuster.h"
 
 /**
@@ -7,45 +5,42 @@
  */
 void TftBackLightAdjuster::adjust(void) {
 
-    if (new_brightness != brightness) {
-        // 15 msec-enként állítgatjuk a fényerőt
-        if (millis() - lastAdjustMsec > LED_ADJUST_MSEC) {
-            lastAdjustMsec = millis();
-
-            new_brightness > brightness ? ++brightness : --brightness;
-
-            if (brightness == 255) {
-                // Maximum fényerőnél: tiszta DC (digitalWrite HIGH)
-                digitalWrite(PIN_TFT_BACKGROUND_LED, HIGH);
-            } else if (brightness == 0) {
-                // Minimumnál: tiszta DC (digitalWrite LOW)
-                digitalWrite(PIN_TFT_BACKGROUND_LED, LOW);
-            } else {
-                // Köztes értékeknél: PWM használata
-                analogWrite(PIN_TFT_BACKGROUND_LED, brightness);
-            }
-        }
-    }
-
-    // 200msec-enként mérünk rá a szenzorra
+    // 200msec-enként frissítjük a célértéket
     if (millis() - lastSensorCheckMsec > SENSOR_CHECK_MSEC) {
         lastSensorCheckMsec = millis();
 
-        // szenzor érték leolvasása
-        int lightSensorValue = analogRead(PIN_LIGHT_SENSOR);
+        if (_tftAutoBrightnessActive) {
+            // Automata mód: szenzor alapján állítunk
+            int lightSensorValue = analogRead(PIN_LIGHT_SENSOR);
 
-        // Sötétben legyen sötétebb, világosban világosabb
-        if (lightSensorValue < SENSOR_VALUE_NIGHT) {
-            new_brightness = NIGHTLY_BRIGHTNESS; // sötét legyen sötétben
-
-        } else if (lightSensorValue > SENSOR_VALUE_DAILY) {
-            new_brightness = DAILY_BRIGHTNESS; // világos legyen világosban
-
+            if (lightSensorValue < SENSOR_VALUE_NIGHT) {
+                new_brightness = NIGHTLY_BRIGHTNESS;
+            } else if (lightSensorValue > SENSOR_VALUE_DAILY) {
+                new_brightness = DAILY_BRIGHTNESS;
+            } else {
+                new_brightness = map(lightSensorValue, SENSOR_VALUE_NIGHT, SENSOR_VALUE_DAILY, DAILY_BRIGHTNESS, NIGHTLY_BRIGHTNESS);
+            }
         } else {
-            // A beállítandó érték kimatekozása (fordított mapping)
-            new_brightness = map(lightSensorValue, SENSOR_VALUE_NIGHT, SENSOR_VALUE_DAILY, DAILY_BRIGHTNESS, NIGHTLY_BRIGHTNESS);
+            // Manuális mód: a beállított értéket használjuk
+            new_brightness = _manualBrightnessValue;
         }
+    }
 
-        //Serial << "lightSensorValue: " << lightSensorValue << ", brightness: " << brightness << ", new_brightness: " << new_brightness << endl;
+    // Fényerő állítása, ha szükséges
+    if (new_brightness != brightness) {
+        // 15 msec-enként léptetünk a fényerőn
+        if (millis() - lastAdjustMsec > LED_ADJUST_MSEC) {
+            lastAdjustMsec = millis();
+
+            if (new_brightness > brightness) {
+                brightness++;
+            } else {
+                brightness--;
+            }
+
+            // A setBacklightLevel már kezeli a 0 és 255 speciális esetet, de PWM-mel.
+            // A direkt digitalWrite hatékonyabb lehet, de a sima analogWrite is megteszi.
+            setBacklightLevel(brightness);
+        }
     }
 }

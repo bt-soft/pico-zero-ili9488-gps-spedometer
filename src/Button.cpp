@@ -43,3 +43,17 @@ void Button::press() {
         _callback();
     }
 }
+
+/**
+ *  Beállítja a gomb feliratát
+ */
+void Button::setText(const String& newLabel) {
+    _label = newLabel;
+}
+
+/**
+ *  Beállítja a gomb keret színét
+ */
+void Button::setBorderColor(uint16_t color) {
+    _borderColor = color;
+}

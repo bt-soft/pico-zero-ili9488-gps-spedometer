@@ -28,6 +28,7 @@ class TftBackLightAdjuster {
     byte brightness;
     byte new_brightness;
     bool _tftAutoBrightnessActive;
+    uint8_t _manualBrightnessValue;
 
   public:
     /**
@@ -40,16 +41,24 @@ class TftBackLightAdjuster {
      */
     void begin(bool tftAutoBrightnessActive = true, uint8_t _backlightLevel = DEFAULT_BRIGHTNESS) {
         _tftAutoBrightnessActive = tftAutoBrightnessActive;
+        _manualBrightnessValue = _backlightLevel;
         pinMode(PIN_TFT_BACKGROUND_LED, OUTPUT);
 
         setBacklightLevel(_backlightLevel);
+    }
+
+    void setAutoBrightnessActive(bool active) {
+        _tftAutoBrightnessActive = active;
+        if (!active) {
+            setBacklightLevel(_manualBrightnessValue);
+        }
     }
 
     /**
      * Beállítja a háttérvilágítás szintjét.
      */
     void setBacklightLevel(uint8_t level) {
-        _backlightLevel = constrain(level, 0, TFT_BACKGROUND_LED_MAX_BRIGHTNESS);
+        _backlightLevel = constrain(level, NIGHTLY_BRIGHTNESS, TFT_BACKGROUND_LED_MAX_BRIGHTNESS);
         analogWrite(PIN_TFT_BACKGROUND_LED, _backlightLevel);
     }
 
