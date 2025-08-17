@@ -208,6 +208,8 @@ const TrafipaxInternal *TrafipaxManager::getClosestTrafipax(double currentLat, d
     return &tafipaxList[closestIdx];
 }
 
+#ifdef DEMO_MODE
+
 /**
  * Demo indítása - 5mp várakozás, majd közeledés/távolodás szimulálása
  */
@@ -316,3 +318,4 @@ bool TrafipaxManager::getDemoCoords(double &lat, double &lon) const {
     }
     return false;
 }
+#endif

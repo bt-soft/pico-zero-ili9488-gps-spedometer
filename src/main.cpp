@@ -203,15 +203,19 @@ void processIntelligentTrafipaxAlert() {
     bool hasValidData = false;
 
     // GPS adatok validálása - optimalizált verzió
+#ifdef DEMO_MODE
     if (trafipaxManager.getDemoCoords(currentLat, currentLon)) {
         // Demo koordináták használata
         hasValidData = true;
-    } else if (gps.location.isValid() && gps.location.age() < GPS_DATA_MAX_AGE) {
+    }
+#else
+    if (gps.location.isValid() && gps.location.age() < GPS_DATA_MAX_AGE) {
         // Valós GPS adatok használata - egy feltétel
         currentLat = gps.location.lat();
         currentLon = gps.location.lng();
         hasValidData = true;
     }
+#endif
 
     // Nincs érvényes GPS adat - riasztás kikapcsolása
     if (!hasValidData) {
@@ -510,6 +514,7 @@ void setup(void) {
     tft.fillScreen(TFT_BLACK);
 
 #ifdef DEBUG_WAIT_FOR_SERIAL
+    tftBackLightAdjuster.begin(true);
     Utils::debugWaitForSerial(tft);
 #endif
 
@@ -571,8 +576,10 @@ void setup(void) {
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
 
+#ifdef DEMO_MODE
     // Valós idejű demo indítása (5mp várakozás után közeledés/távolodás)
     trafipaxManager.startDemo();
+#endif
 
     // --------------------------------------------------------------------------------------------------------
     // Figyelem!!!
@@ -605,14 +612,16 @@ void loop() {
         lastDisplay = millis();
     }
 
+#ifdef DEMO_MODE
     // Demo trafipax közeledés/távolodás (ha aktív)
     if (trafipaxManager.isDemoActive()) {
         trafipaxManager.processDemo();
     }
+#endif
 
     // Intelligens trafipax figyelmeztető rendszer - optimalizált intervallum
     static unsigned long lastTrafipaxCheck = 0;
-    if (millis() - lastTrafipaxCheck >= 500) { // 1000ms->500ms: gyorsabb reagálás
+    if (millis() - lastTrafipaxCheck >= 500) {
         processIntelligentTrafipaxAlert();
         lastTrafipaxCheck = millis();
     }
@@ -656,7 +665,6 @@ float readBatterry() {
 
     float voltageOut = (analogRead(PIN_BATTERRY_MEASURE) * V_REFERENCE) / CONVERSION_FACTOR;
     float vBusExtVoltage = voltageOut * EXTERNAL_VBUSDIVIDER_RATIO;
-    // Serial << "Vout: " << vBusExtVoltage << endl;
 
     return vBusExtVoltage;
 }

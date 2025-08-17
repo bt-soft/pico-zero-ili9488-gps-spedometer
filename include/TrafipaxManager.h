@@ -3,10 +3,13 @@
 
 #include <Arduino.h>
 
+#include "defines.h"
+
 #define MAX_TRAFIPAX_COUNT 400
 #define MAX_CITY_LEN 25
 #define MAX_STREET_LEN 30
 
+#ifdef DEMO_MODE
 // Demo trafipax közeledés/távolodás szimulálása működés közben
 struct TrafipaxDemo {
     bool isActive = false;
@@ -32,6 +35,7 @@ struct TrafipaxDemo {
     static constexpr double DEMO_TRAFIPAX_LAT = 46.428704; // Hódmezővásárhely
     static constexpr double DEMO_TRAFIPAX_LON = 20.326282;
 };
+#endif
 
 struct TrafipaxInternal {
     char city[MAX_CITY_LEN];
@@ -57,11 +61,13 @@ class TrafipaxManager {
     // Legközelebbi trafipax keresése távolsággal együtt
     const TrafipaxInternal *getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const;
 
+#ifdef DEMO_MODE
     // Demo funkciók
     void startDemo();
     void processDemo();
     bool isDemoActive() const;
     bool getDemoCoords(double &lat, double &lon) const;
+#endif
 
   private:
     TrafipaxInternal tafipaxList[MAX_TRAFIPAX_COUNT];
@@ -73,7 +79,9 @@ class TrafipaxManager {
     int lastClosestTrafipaxIdx = -1;
     double lastDistance = 999999.0;
 
+#ifdef DEMO_MODE
     // Demo objektum
     TrafipaxDemo demo;
+#endif
 };
 #endif // __TRAFIPAX_MANAGER_H
