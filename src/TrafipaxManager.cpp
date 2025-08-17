@@ -49,7 +49,7 @@ void TrafipaxManager::loadFromCSV(const char *filename) {
 
     // Skip header
     file.readBytesUntil('\n', line, sizeof(line));
-    while (file.available() && tafipaxCount < MAX_TAFIPAX) {
+    while (file.available() && tafipaxCount < MAX_TRAFIPAX_COUNT) {
 
         int len = file.readBytesUntil('\n', line, sizeof(line) - 1);
 

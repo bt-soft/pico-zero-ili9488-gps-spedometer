@@ -98,7 +98,6 @@ struct TrafipaxAlert {
     unsigned long lastSirenTime = 0;
     unsigned long lastStateChange = 0;
 
-    static constexpr double CRITICAL_DISTANCE = 800.0;     // 800m kritikus távolság
     static constexpr unsigned long SIREN_INTERVAL = 10000; // 10 sec szirénázási intervallum
 };
 
@@ -140,84 +139,49 @@ void displayTrafipaxAlert(const TrafipaxInternal *trafipax, double distance) {
     if (trafipax == nullptr)
         return;
 
-    // Háttérszín meghatározása állapot szerint - egyszerű fix színek
+    // Háttérszín meghatározása állapot szerint
     uint16_t backgroundColor;
     uint16_t textColor;
 
     switch (trafipaxAlert.currentState) {
         case TrafipaxAlert::APPROACHING:
         case TrafipaxAlert::NEARBY_STOPPED:
-            // Közeledéskor fix piros háttér
             backgroundColor = TFT_RED;
             textColor = TFT_WHITE;
             break;
-
         case TrafipaxAlert::DEPARTING:
-            // Távolodáskor fix narancssárga háttér
             backgroundColor = TFT_ORANGE;
             textColor = TFT_BLACK;
             break;
-
         default:
-            return; // INACTIVE esetén nem rajzolunk semmit
+            return; // INACTIVE
     }
 
-    // Sprite törlése és háttér beállítása
     spriteAlertBar.fillSprite(backgroundColor);
-
-    // Szöveg megjelenítése nagyobb fonttal - font beállítások optimalizálva
-    spriteAlertBar.setTextSize(1);
-    spriteAlertBar.setFreeFont(&FreeSansBold18pt7b); // nagyobb font
+    spriteAlertBar.setFreeFont(&FreeSansBold18pt7b);
     spriteAlertBar.setTextColor(textColor, backgroundColor);
-    spriteAlertBar.setTextDatum(MC_DATUM);
 
-    // Distance string - font már be van állítva
+    // Város (első sor, balra igazítva)
+    spriteAlertBar.setTextDatum(TL_DATUM);
+    char cityText[MAX_CITY_LEN];
+    strncpy(cityText, trafipax->city, MAX_CITY_LEN);
+    Utils::convertToASCII(cityText);
+    spriteAlertBar.drawString(cityText, ALERT_TEXT_PADDING, 10);
+
+    // Utca/km (második sor, balra igazítva)
+    char streetText[MAX_STREET_LEN];
+    strncpy(streetText, trafipax->street_or_km, MAX_STREET_LEN);
+    Utils::convertToASCII(streetText);
+    spriteAlertBar.drawString(streetText, ALERT_TEXT_PADDING, 45);
+
+    // Távolság (jobbra, vertikálisan középre)
+    spriteAlertBar.setTextDatum(MR_DATUM);
     char distanceText[16];
-    snprintf(distanceText, sizeof(distanceText), "- %dm", (int)distance);
+    snprintf(distanceText, sizeof(distanceText), "%dm", (int)distance);
     Utils::convertToASCII(distanceText);
-    const int distanceWidth = spriteAlertBar.textWidth(distanceText);
+    spriteAlertBar.drawString(distanceText, tft.width() - ALERT_TEXT_PADDING, ALERT_BAR_HEIGHT / 2);
 
-    // Elérhető hely a város+utca számára
-    const int availableWidth = tft.width() - distanceWidth - ALERT_TEXT_PADDING;
-
-    // Összerakjuk a város+utca szöveget - optimalizált buffer méretek
-    char cityStreet[64]; // 80->64: elegendő a legtöbb esetben
-    snprintf(cityStreet, sizeof(cityStreet), "%s, %s", trafipax->city, trafipax->street_or_km);
-    Utils::convertToASCII(cityStreet);
-
-    // Ha túl hosszú, csonkoljuk úgy, hogy a végére '...' kerüljön
-    int cityStreetWidth = spriteAlertBar.textWidth(cityStreet);
-    if (cityStreetWidth > availableWidth) {
-        int maxLen = strlen(cityStreet);
-        char temp[64]; // 80->64: konzisztens buffer méret
-        strcpy(temp, cityStreet);
-        const int ellipsisWidth = spriteAlertBar.textWidth("...");
-
-        while ((spriteAlertBar.textWidth(temp) + ellipsisWidth) > availableWidth && maxLen > 0) {
-            temp[--maxLen] = '\0';
-        }
-
-        if (maxLen > 3) {
-            snprintf(cityStreet, sizeof(cityStreet), "%s...", temp);
-        } else {
-            strncpy(cityStreet, temp, sizeof(cityStreet));
-        }
-    }
-
-    // Végső szöveg - optimalizált buffer méret
-    char alertText[84]; // 100->84: 64+16+4 (cityStreet + distanceText + space/null)
-    snprintf(alertText, sizeof(alertText), "%s %s", cityStreet, distanceText);
-    Utils::convertToASCII(alertText);
-    spriteAlertBar.setTextDatum(MC_DATUM);
-
-    // Szöveg középre igazítása
-    int textX = tft.width() / 2;
-    int textY = (ALERT_BAR_HEIGHT - spriteAlertBar.fontHeight()) / 2 + spriteAlertBar.fontHeight() / 2;
-
-    spriteAlertBar.drawString(alertText, textX, textY);
     spriteAlertBar.unloadFont();
-
-    // Sprite kirajzolása a képernyőre
     spriteAlertBar.pushSprite(0, 0);
 }
 
@@ -269,7 +233,7 @@ void processIntelligentTrafipaxAlert() {
     const unsigned long currentTime = millis();
 
     // Ha nincs közeli trafipax a kritikus távolságon belül
-    if (minDistance > TrafipaxAlert::CRITICAL_DISTANCE) {
+    if (minDistance > config.data.gpsTrafiAlarmDistance) {
         if (trafipaxAlert.currentState != TrafipaxAlert::INACTIVE) {
             trafipaxAlert.currentState = TrafipaxAlert::INACTIVE;
             trafipaxAlert.activeTrafipax = nullptr;

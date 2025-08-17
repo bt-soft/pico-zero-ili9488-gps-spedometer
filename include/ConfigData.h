@@ -14,7 +14,8 @@ struct Config_t {
     //--- System
     bool beeperEnabled; // Hangjelzés engedélyezése
 
-    bool gpsTrafiAlarmEnabled; // GPS traffipax riasztás engedélyezése
+    uint16_t gpsTrafiAlarmDistance; // GPS traffipax riasztási távolság méterben
+    bool gpsTrafiAlarmEnabled;      // GPS traffipax riasztás engedélyezése
 };
 
 #endif // CONFIG_DATA_H

@@ -3,9 +3,9 @@
 
 #include <Arduino.h>
 
-#define MAX_TAFIPAX 400
-#define MAX_CITY_LEN 32
-#define MAX_STREET_LEN 48
+#define MAX_TRAFIPAX_COUNT 400
+#define MAX_CITY_LEN 20
+#define MAX_STREET_LEN 30
 
 // Demo trafipax közeledés/távolodás szimulálása működés közben
 struct TrafipaxDemo {
@@ -63,7 +63,7 @@ class TrafipaxManager {
     bool getDemoCoords(double &lat, double &lon) const;
 
   private:
-    TrafipaxInternal tafipaxList[MAX_TAFIPAX];
+    TrafipaxInternal tafipaxList[MAX_TRAFIPAX_COUNT];
     int tafipaxCount = 0;
 
     // Távolság követés közeledés detektáláshoz

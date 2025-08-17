@@ -14,6 +14,7 @@ const Config_t DEFAULT_CONFIG = {
     //--- System
     .beeperEnabled = true, // Hangjelzés engedélyezése    // MiniAudioFft módok
 
+    .gpsTrafiAlarmDistance = 800, // GPS traffipax riasztási távolság méterben
     .gpsTrafiAlarmEnabled = true, // GPS traffipax riasztás engedélyezése
 
 };
