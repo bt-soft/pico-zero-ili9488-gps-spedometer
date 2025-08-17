@@ -70,6 +70,34 @@ CRGB leds[NUM_LEDS];
 TFT_eSprite spriteVerticalLinearMeter(&tft);
 TFT_eSprite spriteAlertBar(&tft);
 
+// Satellites in view
+//  Structure to hold satellite data
+struct SatelliteInfo {
+    int prn;
+    int elevation;
+    int azimuth;
+    int snr;
+    bool updated; // Flag to indicate if this satellite's data was updated in the current GSV block
+};
+
+// Array to store info for up to 12 satellites (common max for GSV)
+// You might need to adjust this size based on your GPS receiver's capabilities
+static const int MAX_SATELLITES = 40;
+SatelliteInfo satellites[MAX_SATELLITES];
+int currentSatelliteCount = 0;
+
+// TinyGPSCustom objects for parsing GSV sentences
+// We need 4 sets of these, as each GSV sentence can contain data for up to 4 satellites
+TinyGPSCustom satNumber[4];
+TinyGPSCustom satElevation[4];
+TinyGPSCustom satAzimuth[4];
+TinyGPSCustom satSnr[4];
+
+// Variables to track GSV message parts
+TinyGPSCustom gpgsvTotalMessages(gps, "$GPGSV", 1); // Message number, $GPGSV sentence, first element
+TinyGPSCustom gpgsvMessageNumber(gps, "$GPGSV", 2); // Total number of messages,  $GPGSV sentence, second element
+TinyGPSCustom gpgsvSatsInView(gps, "$GPGSV", 3);    // Number of satellites in view, $GPGSV sentence, third element
+
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 /**
  * Eltelt már annyi idő?
@@ -454,7 +482,7 @@ void displayValues() {
  */
 void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
     ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
-    DEBUG("handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(::temperature, 2).c_str());
+    // DEBUG("handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(::temperature, 2).c_str());
 }
 
 /**
@@ -506,6 +534,19 @@ void setup(void) {
 #ifdef __DEBUG_ON_SERIAL__
     Serial.begin(115200);
 #endif
+
+    // Initialize TinyGPSCustom objects for GSV parsing
+    //    Each GSV sentence contains data for up to 4 satellites
+    //    The fields are: PRN, Elevation, Azimuth, SNR
+    //    Field indices start from 0, so for $GPGSV,1,2,3,4,5,6,7,...
+    //    4th field is PRN, 5th is Elevation, 6th is Azimuth, 7th is SNR
+    //    For the first satellite in the sentence:
+    for (byte i = 0; i < 4; ++i) {
+        satNumber[i].begin(gps, "GPGSV", 4 + 4 * i);    // offsets 4, 8, 12, 16
+        satElevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
+        satAzimuth[i].begin(gps, "GPGSV", 6 + 4 * i);   // offsets 6, 10, 14, 18
+        satSnr[i].begin(gps, "GPGSV", 7 + 4 * i);       // offsets 7, 11, 15, 19
+    }
 
     // Beeper
     pinMode(PIN_BUZZER, OUTPUT);
@@ -664,9 +705,125 @@ void loop() {
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
+ * Read GSV messages from the GPS module
+ */
+void readGSVMessages() {
+
+    if (!gpgsvTotalMessages.isValid()) {
+        // DEBUG("Not all $GPGSV messages processed yet\n");
+        return;
+    }
+
+    for (byte i = 0; i < 4; ++i) {
+
+        // sat PRN number and SNR value
+        int prn = atoi(satNumber[i].value());
+        int elevation = atoi(satElevation[i].value());
+        int azimuth = atoi(satAzimuth[i].value());
+        int snr = atoi(satSnr[i].value());
+
+        // ez valami szemét?
+        if (prn == 0) {
+            continue;
+        }
+
+        DEBUG("Satellite %d: PRN=%d, Elevation=%d, Azimuth=%d, SNR=%d\n", i + 1, prn, elevation, azimuth, snr);
+    }
+
+    // totalMessages ==  currentMessage ?
+    if (atoi(gpgsvTotalMessages.value()) != atoi(gpgsvMessageNumber.value())) {
+        DEBUG("Not complete yet\n");
+        return;
+    }
+
+    //------------------------------------------------------------------------------------------
+
+    // Check if a new GSV message has been fully processed
+    if (gpgsvMessageNumber.isUpdated()) {
+        int msg_num = atoi(gpgsvMessageNumber.value());
+        int total_msgs = atoi(gpgsvTotalMessages.value());
+        int num_sats_in_view = atoi(gpgsvSatsInView.value());
+
+        // If this is the first message in a new GSV block, reset satellite updated flags
+        if (msg_num == 1) {
+            for (int i = 0; i < currentSatelliteCount; ++i) {
+                satellites[i].updated = false;
+            }
+            currentSatelliteCount = 0; // Reset count for new block
+        }
+
+        // Process up to 4 satellites per GSV message
+        for (int i = 0; i < 4; ++i) {
+            if (satNumber[i].isUpdated() && satNumber[i].isValid()) {
+                int prn = atoi(satNumber[i].value());
+                int elevation = atoi(satElevation[i].value());
+                int azimuth = atoi(satAzimuth[i].value());
+                int snr = atoi(satSnr[i].value());
+
+                // Find if this satellite is already in our list
+                bool found = false;
+                for (int j = 0; j < currentSatelliteCount; ++j) {
+                    if (satellites[j].prn == prn) {
+                        satellites[j].elevation = elevation;
+                        satellites[j].azimuth = azimuth;
+                        satellites[j].snr = snr;
+                        satellites[j].updated = true;
+                        found = true;
+                        break;
+                    }
+                }
+
+                // If not found, add it to the list
+                if (!found && currentSatelliteCount < MAX_SATELLITES) {
+                    satellites[currentSatelliteCount].prn = prn;
+                    satellites[currentSatelliteCount].elevation = elevation;
+                    satellites[currentSatelliteCount].azimuth = azimuth;
+                    satellites[currentSatelliteCount].snr = snr;
+                    satellites[currentSatelliteCount].updated = true;
+                    currentSatelliteCount++;
+                }
+            }
+        }
+
+        // If this is the last message in the GSV block, print/display results
+        if (msg_num == total_msgs) {
+            Serial.println(F("\n--- Visible Satellites ---"));
+            Serial.print(F("Total in view (from GSV): "));
+            Serial.println(num_sats_in_view);
+            Serial.println(F("PRN | Elev | Azim | SNR"));
+            Serial.println(F("----|------|------|-----"));
+
+            for (int i = 0; i < currentSatelliteCount; ++i) {
+                // Only display satellites that were updated in the current block
+                // This handles cases where a satellite might drop out of view
+                if (satellites[i].updated) {
+                    Serial.print(satellites[i].prn);
+                    Serial.print(F("  | "));
+                    Serial.print(satellites[i].elevation);
+                    Serial.print(F("   | "));
+                    Serial.print(satellites[i].azimuth);
+                    Serial.print(F("  | "));
+                    Serial.println(satellites[i].snr);
+                }
+            }
+            Serial.println(F("--------------------------"));
+        }
+    }
+}
+
+/**
  * GPS adatok kiolvasása
  */
 void readGPS() {
+
+    // Lockolunk egyet
+    CoreMutex m(&_gpsMutex);
+
+    // Ha nem sikerül a lock, akkor nem megyünk tovább
+    if (!m) {
+        DEBUG("GPS read lock failed, skipping read.\n");
+        return;
+    }
 
     // Kiolvassuk és dekódoljuk az összes GPS adatot
     while (Serial1.available() > 0) {
@@ -680,6 +837,8 @@ void readGPS() {
             leds[0] = CRGB::Black;
             FastLED.show();
         }
+
+        Serial.print(c); // Debug: kiírjuk a bejövő karaktereket
     }
 }
 
@@ -696,34 +855,6 @@ float readBatterry() {
 
     return vBusExtVoltage;
 }
-/**
- *
- */
-void readSensorValues() {
-
-    // Lockolunk egyet
-    CoreMutex m(&_gpsMutex);
-
-    // Ha nem sikerül a lock, akkor nem megyünk tovább
-    if (!m) {
-        return;
-    }
-
-    // GPS adatok olvasása
-    readGPS();
-
-    static long lastReadSensors = millis() - 1000;
-    if (timeHasPassed(lastReadSensors, 1000)) {
-
-        // Akkumulátor feszültség mérése
-        vBatterry = readBatterry();
-
-        lastReadSensors = millis();
-    }
-
-    // Háttérvilágitás bazseválása
-    tftBackLightAdjuster.adjust();
-}
 
 /**
  * Core-1 Setup
@@ -736,7 +867,7 @@ void setup1(void) {
 
     // initialize digital pin LED_BUILTIN as an output.
     FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);
-    FastLED.setBrightness(50);
+    FastLED.setBrightness(20);
 
     // AD felbontás beállítása a feszültségméréshez
     analogReadResolution(AD_RESOLUTION);
@@ -749,6 +880,20 @@ void loop1(void) {
 
     // Van GPS adat?
     if (Serial1.available()) {
-        readSensorValues();
+        readGPS();
     }
+
+    static long lastReadSensors = millis() - 1000;
+    if (timeHasPassed(lastReadSensors, 1000)) {
+
+        // Akkumulátor feszültség mérése
+        vBatterry = readBatterry();
+
+        readGSVMessages();
+
+        lastReadSensors = millis();
+    }
+
+    // Háttérvilágitás bazseválása
+    tftBackLightAdjuster.adjust();
 }

@@ -185,11 +185,11 @@ void verticalLinearMeter(TFT_eSprite *sprite, int meterHeight, int meterWidth, c
         // Bar szöveg meghatározása
         buf[0] = '\0';
         if (b == 1) {
-            dtostrf(minVal, 0, 1, buf);
+            dtostrf(minVal, 0, 1, buf); // Min érték
         } else if (b == n) {
-            dtostrf(maxVal, 0, 1, buf);
+            dtostrf(maxVal, 0, 1, buf); // Max érték
         } else if (b == barVal) {
-            dtostrf(val, 0, 1, buf);
+            dtostrf(val, 0, 2, buf); // Aktuális érték
         }
 
         // Bar szöveg kiírása
