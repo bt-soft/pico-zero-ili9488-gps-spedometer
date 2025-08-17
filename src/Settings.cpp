@@ -6,14 +6,30 @@
 #include "defines.h"
 
 // Define title bar height
-const int TITLE_BAR_HEIGHT = 61; // Adjust as needed
+const int TITLE_BAR_HEIGHT = 80; // Increased height for better visual
 
 // Constants for button layout optimization
-static const int BUTTON_MARGIN = 50;
-static const int BUTTON_HEIGHT = 50;
-static const int BUTTON_SPACING = 60;
-static const int CONTROL_BUTTON_WIDTH = 100;
-static const int BACK_BUTTON_WIDTH = 150;
+static const int BUTTON_MARGIN = 40;
+static const int BUTTON_HEIGHT = 60; // Increased height for better touch
+static const int BUTTON_SPACING = 75;
+static const int CONTROL_BUTTON_WIDTH = 120; // Wider for better touch
+static const int BACK_BUTTON_WIDTH = 160;
+
+// Visual enhancement constants
+static const int BUTTON_CORNER_RADIUS = 15;
+static const int TITLE_SHADOW_OFFSET = 3;
+
+// Color scheme for modern look
+static const uint16_t HEADER_BG_COLOR = RGB565(45, 45, 75); // Dark blue-grey
+static const uint16_t HEADER_TEXT_COLOR = TFT_WHITE;
+static const uint16_t BUTTON_BG_COLOR = RGB565(60, 60, 90); // Slightly lighter
+static const uint16_t BUTTON_TEXT_COLOR = TFT_WHITE;
+static const uint16_t BUTTON_BORDER_ACTIVE = RGB565(100, 150, 255); // Nice blue
+static const uint16_t BUTTON_BORDER_DISABLED = RGB565(100, 100, 100);
+static const uint16_t ACCENT_GREEN = RGB565(50, 200, 100);
+static const uint16_t ACCENT_RED = RGB565(255, 80, 80);
+static const uint16_t ACCENT_ORANGE = RGB565(255, 165, 0);
+static const uint16_t VALUE_DISPLAY_BG = RGB565(30, 30, 50);
 
 /**
  *  A beállítások menü inicializálása
@@ -40,10 +56,10 @@ void Settings::init() {
 void Settings::initMainButtons() {
     int screenWidth = _tft.width();
     int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
-    int yPos = 80;
+    int yPos = 100; // Start lower to accommodate taller header
 
     // Screen Button
-    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Screen", TFT_WHITE, [this]() {
+    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Screen", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::BRIGHTNESS;
         _needsRedraw = true;
         Utils::beepTick();
@@ -51,7 +67,7 @@ void Settings::initMainButtons() {
 
     yPos += BUTTON_SPACING;
     // Alarm Button
-    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Alarm", TFT_WHITE, [this]() {
+    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Alarm", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::ALARM;
         _needsRedraw = true;
         Utils::beepTick();
@@ -59,17 +75,17 @@ void Settings::initMainButtons() {
 
     yPos += BUTTON_SPACING;
     // Info Button
-    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Info", TFT_WHITE, [this]() {
+    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Info", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::INFORMATION;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
     // Exit Button
-    createButton(_mainButtons, 0, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Exit", TFT_RED, [this]() { exit(); });
+    createButton(_mainButtons, 0, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Exit", ACCENT_RED, [this]() { exit(); });
 
     // Save Button
-    createButton(_mainButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Save", TFT_GREEN, [this]() {
+    createButton(_mainButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Save", ACCENT_GREEN, [this]() {
         _config.checkSave();
         Utils::beepTick();
         delay(100);
@@ -79,7 +95,7 @@ void Settings::initMainButtons() {
 
 void Settings::initInformationButtons() {
     // Back Button
-    createButton(_informationButtons, _tft.width() - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", TFT_ORANGE, [this]() {
+    createButton(_informationButtons, _tft.width() - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
         _needsRedraw = true;
         Utils::beepTick();
@@ -91,7 +107,7 @@ void Settings::initBrightnessButtons() {
     int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
 
     // Auto Brightness Toggle Button
-    createButton(_brightnessButtons, BUTTON_MARGIN, 80, buttonWidth, BUTTON_HEIGHT, "", TFT_WHITE, [this]() {
+    createButton(_brightnessButtons, BUTTON_MARGIN, 100, buttonWidth, BUTTON_HEIGHT, "", BUTTON_BORDER_ACTIVE, [this]() {
         _config.data.tftAutoBrightnessActive = !_config.data.tftAutoBrightnessActive;
         _tftBackLightAdjuster.setAutoBrightnessActive(_config.data.tftAutoBrightnessActive);
         _needsRedraw = true;
@@ -99,7 +115,7 @@ void Settings::initBrightnessButtons() {
     });
 
     // Manual Brightness Down Button
-    createButton(_brightnessButtons, BUTTON_MARGIN, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", TFT_RED, [this]() {
+    createButton(_brightnessButtons, BUTTON_MARGIN, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", ACCENT_RED, [this]() {
         if (!_config.data.tftAutoBrightnessActive) {
             uint8_t &val = _config.data.tftManualBrightnessValue;
             val = (val > 5) ? val - 5 : NIGHTLY_BRIGHTNESS;
@@ -111,7 +127,7 @@ void Settings::initBrightnessButtons() {
     });
 
     // Manual Brightness Up Button
-    createButton(_brightnessButtons, screenWidth - 150, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", TFT_GREEN, [this]() {
+    createButton(_brightnessButtons, screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", ACCENT_GREEN, [this]() {
         if (!_config.data.tftAutoBrightnessActive) {
             uint8_t &val = _config.data.tftManualBrightnessValue;
             val = (val < TFT_BACKGROUND_LED_MAX_BRIGHTNESS - 5) ? val + 5 : TFT_BACKGROUND_LED_MAX_BRIGHTNESS;
@@ -123,7 +139,7 @@ void Settings::initBrightnessButtons() {
     });
 
     // Back Button
-    createButton(_brightnessButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", TFT_ORANGE, [this]() {
+    createButton(_brightnessButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
         _needsRedraw = true;
         Utils::beepTick();
@@ -135,14 +151,14 @@ void Settings::initAlarmButtons() {
     int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
 
     // GPS Trafi Alarm Enabled Toggle Button
-    createButton(_alarmButtons, BUTTON_MARGIN, 80, buttonWidth, BUTTON_HEIGHT, "", TFT_WHITE, [this]() {
+    createButton(_alarmButtons, BUTTON_MARGIN, 100, buttonWidth, BUTTON_HEIGHT, "", BUTTON_BORDER_ACTIVE, [this]() {
         _config.data.gpsTrafiAlarmEnabled = !_config.data.gpsTrafiAlarmEnabled;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
     // GPS Trafi Alarm Distance Down Button
-    createButton(_alarmButtons, BUTTON_MARGIN, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", TFT_RED, [this]() {
+    createButton(_alarmButtons, BUTTON_MARGIN, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", ACCENT_RED, [this]() {
         if (_config.data.gpsTrafiAlarmEnabled) {
             uint16_t &val = _config.data.gpsTrafiAlarmDistance;
             val = (val > 400) ? val - 100 : 400;
@@ -152,7 +168,7 @@ void Settings::initAlarmButtons() {
     });
 
     // GPS Trafi Alarm Distance Up Button
-    createButton(_alarmButtons, screenWidth - 150, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", TFT_GREEN, [this]() {
+    createButton(_alarmButtons, screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", ACCENT_GREEN, [this]() {
         if (_config.data.gpsTrafiAlarmEnabled) {
             uint16_t &val = _config.data.gpsTrafiAlarmDistance;
             val = (val < 2000) ? val + 100 : 2000;
@@ -162,7 +178,7 @@ void Settings::initAlarmButtons() {
     });
 
     // Back Button
-    createButton(_alarmButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", TFT_ORANGE, [this]() {
+    createButton(_alarmButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
         _needsRedraw = true;
         Utils::beepTick();
@@ -185,7 +201,7 @@ void Settings::exit() {
 }
 
 void Settings::draw() {
-    _tft.fillScreen(TFT_BLACK);
+    _tft.fillScreen(RGB565(25, 25, 35)); // Dark modern background
     switch (_currentState) {
         case ScreenState::MAIN:
             drawMainScreen();
@@ -203,17 +219,33 @@ void Settings::draw() {
 }
 
 /**
- * Képernyő címének megjelenítése
+ * Képernyő címének megjelenítése modern dizájnnal
  */
 void Settings::drawScreenTitle(const char *title) {
-    _tft.fillRect(0, 0, _tft.width(), TITLE_BAR_HEIGHT, TFT_WHITE);
+    // Modern gradient-like header background
+    _tft.fillRect(0, 0, _tft.width(), TITLE_BAR_HEIGHT, HEADER_BG_COLOR);
 
+    // Add a subtle border at the bottom
+    _tft.fillRect(0, TITLE_BAR_HEIGHT - 3, _tft.width(), 3, BUTTON_BORDER_ACTIVE);
+
+    // Shadow effect for text
     _tft.setTextFont(4);
     _tft.setTextSize(2);
-    _tft.setTextColor(TFT_BLACK, TFT_WHITE); // Black text, white background
     _tft.setTextDatum(MC_DATUM);
-    _tft.drawString(title, _tft.width() / 2, TITLE_BAR_HEIGHT / 2 + 5); // Center text vertically within the bar
-    _tft.setTextSize(1);
+
+    // Draw shadow
+    _tft.setTextColor(RGB565(20, 20, 40)); // Dark shadow
+    _tft.drawString(title, _tft.width() / 2 + TITLE_SHADOW_OFFSET, TITLE_BAR_HEIGHT / 2 + TITLE_SHADOW_OFFSET);
+
+    // Draw main text
+    _tft.setTextColor(HEADER_TEXT_COLOR);
+    _tft.drawString(title, _tft.width() / 2, TITLE_BAR_HEIGHT / 2);
+
+    // Add decorative corner elements
+    _tft.fillCircle(20, 20, 8, BUTTON_BORDER_ACTIVE);
+    _tft.fillCircle(_tft.width() - 20, 20, 8, BUTTON_BORDER_ACTIVE);
+
+    _tft.setTextSize(1); // Restore default
 }
 
 /**
@@ -241,8 +273,8 @@ void Settings::drawBrightnessScreen() {
     _brightnessButtons[0].setText(autoText);
 
     // Update button states based on auto-brightness mode
-    uint16_t disabledColor = _config.data.tftAutoBrightnessActive ? TFT_DARKGREY : TFT_RED;
-    uint16_t enabledColor = _config.data.tftAutoBrightnessActive ? TFT_DARKGREY : TFT_GREEN;
+    uint16_t disabledColor = _config.data.tftAutoBrightnessActive ? BUTTON_BORDER_DISABLED : ACCENT_RED;
+    uint16_t enabledColor = _config.data.tftAutoBrightnessActive ? BUTTON_BORDER_DISABLED : ACCENT_GREEN;
 
     _brightnessButtons[1].setBorderColor(disabledColor);
     _brightnessButtons[2].setBorderColor(enabledColor);
@@ -251,6 +283,15 @@ void Settings::drawBrightnessScreen() {
     for (auto &button : _brightnessButtons) {
         button.draw();
     }
+
+    // Draw value display background with rounded corners
+    int centerX = _tft.width() / 2;
+    int centerY = 220;
+    int boxWidth = 100;
+    int boxHeight = 50;
+
+    _tft.fillRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, VALUE_DISPLAY_BG);
+    _tft.drawRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, BUTTON_BORDER_ACTIVE);
 
     // Display manual brightness value
     updateBrightnessValueDisplay();
@@ -269,8 +310,8 @@ void Settings::drawAlarmScreen() {
     _alarmButtons[0].setText(enabledText);
 
     // Update button states based on alarm enabled mode
-    uint16_t disabledColor = !_config.data.gpsTrafiAlarmEnabled ? TFT_DARKGREY : TFT_RED;
-    uint16_t enabledColor = !_config.data.gpsTrafiAlarmEnabled ? TFT_DARKGREY : TFT_GREEN;
+    uint16_t disabledColor = !_config.data.gpsTrafiAlarmEnabled ? BUTTON_BORDER_DISABLED : ACCENT_RED;
+    uint16_t enabledColor = !_config.data.gpsTrafiAlarmEnabled ? BUTTON_BORDER_DISABLED : ACCENT_GREEN;
 
     _alarmButtons[1].setBorderColor(disabledColor);
     _alarmButtons[2].setBorderColor(enabledColor);
@@ -280,33 +321,69 @@ void Settings::drawAlarmScreen() {
         button.draw();
     }
 
+    // Draw value display background with rounded corners
+    int centerX = _tft.width() / 2;
+    int centerY = 220;
+    int boxWidth = 120;
+    int boxHeight = 50;
+
+    _tft.fillRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, VALUE_DISPLAY_BG);
+    _tft.drawRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, BUTTON_BORDER_ACTIVE);
+
     // Display alarm distance value
     updateAlarmValueDisplay();
+
+    // Add unit text
+    if (_config.data.gpsTrafiAlarmEnabled) {
+        _tft.setTextFont(2);
+        _tft.setTextColor(TFT_LIGHTGREY);
+        _tft.setTextDatum(MC_DATUM);
+        _tft.drawString("meters", centerX, centerY + 35);
+    }
 }
 
 /**
  * Információs képernyő megjelenítése
  */
 void Settings::drawInformationScreen() {
-
     // Képernyő címének megjelenítése
     drawScreenTitle("Information");
 
     char buf[64];
+    int yPos = 120;
+    int lineSpacing = 45;
 
-    // Program Version
+    // Create info card background
+    int cardX = 30;
+    int cardY = 110;
+    int cardWidth = _tft.width() - 60;
+    int cardHeight = 160;
+
+    _tft.fillRoundRect(cardX, cardY, cardWidth, cardHeight, 15, VALUE_DISPLAY_BG);
+    _tft.drawRoundRect(cardX, cardY, cardWidth, cardHeight, 15, BUTTON_BORDER_ACTIVE);
+
     _tft.setTextDatum(TL_DATUM);
-    _tft.setTextColor(TFT_CYAN);
+    _tft.setTextFont(2);
+
+    // Program Version with icon-like bullet
+    _tft.fillCircle(50, yPos + 10, 5, ACCENT_GREEN);
+    _tft.setTextColor(TFT_WHITE);
     sprintf(buf, "Version: V%s", APP_VERSION);
-    _tft.drawString(buf, 50, 100);
+    _tft.drawString(buf, 70, yPos);
 
+    yPos += lineSpacing;
     // Build Time
+    _tft.fillCircle(50, yPos + 10, 5, BUTTON_BORDER_ACTIVE);
+    _tft.setTextColor(TFT_LIGHTGREY);
     sprintf(buf, "Build: %s %s", __DATE__, __TIME__);
-    _tft.drawString(buf, 50, 140);
+    _tft.drawString(buf, 70, yPos);
 
+    yPos += lineSpacing;
     // Trafipax Count
+    _tft.fillCircle(50, yPos + 10, 5, ACCENT_ORANGE);
+    _tft.setTextColor(TFT_YELLOW);
     sprintf(buf, "Trafipax Count: %d", _trafipaxManager.count());
-    _tft.drawString(buf, 50, 180);
+    _tft.drawString(buf, 70, yPos);
 
     // Draw all buttons
     for (auto &button : _informationButtons) {
@@ -366,7 +443,7 @@ void Settings::loop() {
 
 // Helper function implementations
 void Settings::createButton(std::vector<Button> &buttonList, int16_t x, int16_t y, int16_t w, int16_t h, const char *label, uint16_t borderColor, std::function<void()> callback) {
-    buttonList.emplace_back(_tft, x, y, w, h, label, TFT_BLACK, TFT_WHITE, borderColor, 4);
+    buttonList.emplace_back(_tft, x, y, w, h, label, BUTTON_BG_COLOR, BUTTON_TEXT_COLOR, borderColor, 4);
     buttonList.back().setCallback(callback);
 }
 
@@ -380,25 +457,20 @@ void Settings::handleTouchForButtonList(std::vector<Button> &buttonList, uint16_
 }
 
 void Settings::updateValueDisplay(int value, const char *disabledText, bool isEnabled) {
-    // Clear previous value
+    // Display new value without clearing background (already drawn)
     _tft.setTextFont(4);
     _tft.setTextSize(2);
-    int text_width = _tft.textWidth("2000"); // Max width for safety
-    int text_height = _tft.fontHeight();
-    int x_center = _tft.width() / 2;
-    int y_center = 175;
-
-    _tft.fillRect(x_center - text_width / 2, y_center - text_height / 2, text_width, text_height, TFT_BLACK);
-
-    // Display new value
     _tft.setTextDatum(MC_DATUM);
+
+    int centerX = _tft.width() / 2;
+    int centerY = 220;
 
     if (isEnabled) {
         _tft.setTextColor(TFT_WHITE);
-        _tft.drawString(String(value), x_center, y_center);
+        _tft.drawString(String(value), centerX, centerY);
     } else {
-        _tft.setTextColor(TFT_DARKGREY);
-        _tft.drawString(disabledText, x_center, y_center);
+        _tft.setTextColor(BUTTON_BORDER_DISABLED);
+        _tft.drawString(disabledText, centerX, centerY);
     }
 
     _tft.setTextFont(1); // Restore default font

@@ -10,9 +10,9 @@ Button::Button(TFT_eSPI &tft, int16_t x, int16_t y, int16_t w, int16_t h, const 
  *  A gomb kirajzolása a képernyőre
  */
 void Button::draw() {
-    // Draw the button with a border
-    _tft.fillRoundRect(_x, _y, _w, _h, 10, _bgColor);
-    _tft.drawRoundRect(_x, _y, _w, _h, 10, _borderColor);
+    // Draw the button with a border using more rounded corners
+    _tft.fillRoundRect(_x, _y, _w, _h, 15, _bgColor);
+    _tft.drawRoundRect(_x, _y, _w, _h, 15, _borderColor);
 
     // Draw the label centered in the button, ensuring transparent background
     _tft.setTextColor(_textColor);
@@ -38,6 +38,22 @@ void Button::setCallback(std::function<void()> callback) { _callback = callback;
  *  A gomb megnyomása
  */
 void Button::press() {
+    // Visual feedback: briefly show pressed state
+    uint16_t originalBg = _bgColor;
+    uint16_t originalBorder = _borderColor;
+
+    // Darken the button for press effect
+    _bgColor = originalBg >> 1; // Simple way to darken
+    _borderColor = 0xFFFF;      // White border for press
+
+    draw();     // Redraw with pressed appearance
+    delay(100); // Brief delay for visual feedback
+
+    // Restore original colors
+    _bgColor = originalBg;
+    _borderColor = originalBorder;
+    draw(); // Redraw with normal appearance
+
     // Execute the callback function if it's set
     if (_callback) {
         _callback();
@@ -47,13 +63,9 @@ void Button::press() {
 /**
  *  Beállítja a gomb feliratát
  */
-void Button::setText(const String& newLabel) {
-    _label = newLabel;
-}
+void Button::setText(const String &newLabel) { _label = newLabel; }
 
 /**
  *  Beállítja a gomb keret színét
  */
-void Button::setBorderColor(uint16_t color) {
-    _borderColor = color;
-}
+void Button::setBorderColor(uint16_t color) { _borderColor = color; }
