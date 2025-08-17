@@ -28,6 +28,7 @@ class Settings {
     void exit();
 
     // Screen-specific methods
+    void initMainButtons();
     void initBrightnessButtons();
     void drawMainScreen();
     void handleMainTouch(uint16_t x, uint16_t y);
@@ -47,9 +48,15 @@ class Settings {
 
     void drawScreenTitle(const char *title);
 
+    // Helper functions for optimization
+    void createButton(std::vector<Button> &buttonList, int16_t x, int16_t y, int16_t w, int16_t h, const char *label, uint16_t borderColor, std::function<void()> callback);
+    void handleTouchForButtonList(std::vector<Button> &buttonList, uint16_t x, uint16_t y);
+    void updateValueDisplay(int value, const char *disabledText, bool isEnabled);
+
     TFT_eSPI &_tft;
     Config &_config;
     bool _active;
+    bool _needsRedraw;
     ScreenState _currentState;
     TftBackLightAdjuster &_tftBackLightAdjuster;
     TrafipaxManager &_trafipaxManager;

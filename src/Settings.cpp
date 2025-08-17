@@ -8,141 +8,141 @@
 // Define title bar height
 const int TITLE_BAR_HEIGHT = 61; // Adjust as needed
 
+// Constants for button layout optimization
+static const int BUTTON_MARGIN = 50;
+static const int BUTTON_HEIGHT = 50;
+static const int BUTTON_SPACING = 60;
+static const int CONTROL_BUTTON_WIDTH = 100;
+static const int BACK_BUTTON_WIDTH = 150;
+
 /**
  *  A beállítások menü inicializálása
  */
 Settings::Settings(TFT_eSPI &tft, Config &config, TftBackLightAdjuster &tftBackLightAdjuster, TrafipaxManager &trafipaxManager)
-    : _tft(tft), _config(config), _active(false), _currentState(ScreenState::MAIN), _tftBackLightAdjuster(tftBackLightAdjuster), _trafipaxManager(trafipaxManager) {}
+    : _tft(tft), _config(config), _active(false), _currentState(ScreenState::MAIN), _needsRedraw(true), _tftBackLightAdjuster(tftBackLightAdjuster), _trafipaxManager(trafipaxManager) {}
 
 /**
  *  A beállítások menü inicializálása
  */
 void Settings::init() {
+    // Reserve memory to avoid reallocations
     _mainButtons.reserve(5);
+    _brightnessButtons.reserve(4);
+    _alarmButtons.reserve(4);
+    _informationButtons.reserve(1);
 
-    // Screen Button
-    _mainButtons.emplace_back(_tft, 50, 80, _tft.width() - 100, 50, "Screen", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
-    _mainButtons.back().setCallback([this]() {
-        _currentState = ScreenState::BRIGHTNESS;
-        draw();
-        Utils::beepTick();
-    });
-
-    // Alarm Button
-    _mainButtons.emplace_back(_tft, 50, 140, _tft.width() - 100, 50, "Alarm", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
-    _mainButtons.back().setCallback([this]() {
-        _currentState = ScreenState::ALARM;
-        draw();
-        Utils::beepTick();
-    });
-
-    // Info Button
-    _mainButtons.emplace_back(_tft, 50, 200, _tft.width() - 100, 50, "Info", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
-    _mainButtons.back().setCallback([this]() {
-        _currentState = ScreenState::INFORMATION;
-        draw();
-        Utils::beepTick();
-    });
-
-    // Exit Button
-    _mainButtons.emplace_back(_tft, 0, _tft.height() - 50, 150, 50, "Exit", TFT_BLACK, TFT_WHITE, TFT_RED, 4);
-    _mainButtons.back().setCallback([this]() { exit(); });
-
-    // Save Button
-    _mainButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Save", TFT_BLACK, TFT_WHITE, TFT_GREEN, 4);
-    _mainButtons.back().setCallback([this]() {
-        _config.checkSave();
-        Utils::beepTick();
-        delay(100); // Short pause for feedback
-        exit();
-    });
-
+    initMainButtons();
     initBrightnessButtons();
     initAlarmButtons();
     initInformationButtons();
 }
 
-void Settings::initInformationButtons() {
-    _informationButtons.reserve(1);
+void Settings::initMainButtons() {
+    int screenWidth = _tft.width();
+    int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
+    int yPos = 80;
 
+    // Screen Button
+    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Screen", TFT_WHITE, [this]() {
+        _currentState = ScreenState::BRIGHTNESS;
+        _needsRedraw = true;
+        Utils::beepTick();
+    });
+
+    yPos += BUTTON_SPACING;
+    // Alarm Button
+    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Alarm", TFT_WHITE, [this]() {
+        _currentState = ScreenState::ALARM;
+        _needsRedraw = true;
+        Utils::beepTick();
+    });
+
+    yPos += BUTTON_SPACING;
+    // Info Button
+    createButton(_mainButtons, BUTTON_MARGIN, yPos, buttonWidth, BUTTON_HEIGHT, "Info", TFT_WHITE, [this]() {
+        _currentState = ScreenState::INFORMATION;
+        _needsRedraw = true;
+        Utils::beepTick();
+    });
+
+    // Exit Button
+    createButton(_mainButtons, 0, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Exit", TFT_RED, [this]() { exit(); });
+
+    // Save Button
+    createButton(_mainButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Save", TFT_GREEN, [this]() {
+        _config.checkSave();
+        Utils::beepTick();
+        delay(100);
+        exit();
+    });
+}
+
+void Settings::initInformationButtons() {
     // Back Button
-    _informationButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
-    _informationButtons.back().setCallback([this]() {
+    createButton(_informationButtons, _tft.width() - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", TFT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
-        draw();
+        _needsRedraw = true;
         Utils::beepTick();
     });
 }
 
 void Settings::initBrightnessButtons() {
-    _brightnessButtons.reserve(4);
+    int screenWidth = _tft.width();
+    int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
 
     // Auto Brightness Toggle Button
-    _brightnessButtons.emplace_back(_tft, 50, 80, _tft.width() - 100, 50, "", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
-    _brightnessButtons.back().setCallback([this]() {
+    createButton(_brightnessButtons, BUTTON_MARGIN, 80, buttonWidth, BUTTON_HEIGHT, "", TFT_WHITE, [this]() {
         _config.data.tftAutoBrightnessActive = !_config.data.tftAutoBrightnessActive;
         _tftBackLightAdjuster.setAutoBrightnessActive(_config.data.tftAutoBrightnessActive);
-
-        draw(); // Redraw to update text and button states
-
+        _needsRedraw = true;
         Utils::beepTick();
     });
 
     // Manual Brightness Down Button
-    _brightnessButtons.emplace_back(_tft, 50, 150, 100, 50, "-", TFT_BLACK, TFT_WHITE, TFT_RED, 4);
-    _brightnessButtons.back().setCallback([this]() {
+    createButton(_brightnessButtons, BUTTON_MARGIN, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", TFT_RED, [this]() {
         if (!_config.data.tftAutoBrightnessActive) {
-
             uint8_t &val = _config.data.tftManualBrightnessValue;
             val = (val > 5) ? val - 5 : NIGHTLY_BRIGHTNESS;
-
-            _tftBackLightAdjuster.setBacklightLevel(val);                                      // beállítjuk
-            _config.data.tftManualBrightnessValue = _tftBackLightAdjuster.getBacklightLevel(); // lekérdezzük az  értéket és azt toljuk be a konfigurációba
+            _tftBackLightAdjuster.setBacklightLevel(val);
+            _config.data.tftManualBrightnessValue = _tftBackLightAdjuster.getBacklightLevel();
             updateBrightnessValueDisplay();
-
             Utils::beepTick();
         }
     });
 
     // Manual Brightness Up Button
-    _brightnessButtons.emplace_back(_tft, _tft.width() - 150, 150, 100, 50, "+", TFT_BLACK, TFT_WHITE, TFT_GREEN, 4);
-    _brightnessButtons.back().setCallback([this]() {
+    createButton(_brightnessButtons, screenWidth - 150, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", TFT_GREEN, [this]() {
         if (!_config.data.tftAutoBrightnessActive) {
-
             uint8_t &val = _config.data.tftManualBrightnessValue;
             val = (val < TFT_BACKGROUND_LED_MAX_BRIGHTNESS - 5) ? val + 5 : TFT_BACKGROUND_LED_MAX_BRIGHTNESS;
-
-            _tftBackLightAdjuster.setBacklightLevel(val);                                      // beállítjuk
-            _config.data.tftManualBrightnessValue = _tftBackLightAdjuster.getBacklightLevel(); // lekérdezzük az  értéket és azt toljuk be a konfigurációba
+            _tftBackLightAdjuster.setBacklightLevel(val);
+            _config.data.tftManualBrightnessValue = _tftBackLightAdjuster.getBacklightLevel();
             updateBrightnessValueDisplay();
-
             Utils::beepTick();
         }
     });
 
     // Back Button
-    _brightnessButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
-    _brightnessButtons.back().setCallback([this]() {
+    createButton(_brightnessButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", TFT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
-        draw();
+        _needsRedraw = true;
         Utils::beepTick();
     });
 }
 
 void Settings::initAlarmButtons() {
-    _alarmButtons.reserve(4);
+    int screenWidth = _tft.width();
+    int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
 
     // GPS Trafi Alarm Enabled Toggle Button
-    _alarmButtons.emplace_back(_tft, 50, 80, _tft.width() - 100, 50, "", TFT_BLACK, TFT_WHITE, TFT_WHITE, 4);
-    _alarmButtons.back().setCallback([this]() {
+    createButton(_alarmButtons, BUTTON_MARGIN, 80, buttonWidth, BUTTON_HEIGHT, "", TFT_WHITE, [this]() {
         _config.data.gpsTrafiAlarmEnabled = !_config.data.gpsTrafiAlarmEnabled;
-        draw(); // Redraw to update text and button states
+        _needsRedraw = true;
         Utils::beepTick();
     });
 
     // GPS Trafi Alarm Distance Down Button
-    _alarmButtons.emplace_back(_tft, 50, 150, 100, 50, "-", TFT_BLACK, TFT_WHITE, TFT_RED, 4);
-    _alarmButtons.back().setCallback([this]() {
+    createButton(_alarmButtons, BUTTON_MARGIN, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", TFT_RED, [this]() {
         if (_config.data.gpsTrafiAlarmEnabled) {
             uint16_t &val = _config.data.gpsTrafiAlarmDistance;
             val = (val > 400) ? val - 100 : 400;
@@ -152,8 +152,7 @@ void Settings::initAlarmButtons() {
     });
 
     // GPS Trafi Alarm Distance Up Button
-    _alarmButtons.emplace_back(_tft, _tft.width() - 150, 150, 100, 50, "+", TFT_BLACK, TFT_WHITE, TFT_GREEN, 4);
-    _alarmButtons.back().setCallback([this]() {
+    createButton(_alarmButtons, screenWidth - 150, 150, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", TFT_GREEN, [this]() {
         if (_config.data.gpsTrafiAlarmEnabled) {
             uint16_t &val = _config.data.gpsTrafiAlarmDistance;
             val = (val < 2000) ? val + 100 : 2000;
@@ -163,10 +162,9 @@ void Settings::initAlarmButtons() {
     });
 
     // Back Button
-    _alarmButtons.emplace_back(_tft, _tft.width() - 150, _tft.height() - 50, 150, 50, "Back", TFT_BLACK, TFT_WHITE, TFT_ORANGE, 4);
-    _alarmButtons.back().setCallback([this]() {
+    createButton(_alarmButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", TFT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
-        draw();
+        _needsRedraw = true;
         Utils::beepTick();
     });
 }
@@ -176,7 +174,7 @@ bool Settings::isActive() { return _active; }
 void Settings::enter() {
     _active = true;
     _currentState = ScreenState::MAIN;
-    draw();
+    _needsRedraw = true;
     Utils::beepTick();
     delay(200);
 }
@@ -234,23 +232,20 @@ void Settings::drawMainScreen() {
  * Képernyő világosítása
  */
 void Settings::drawBrightnessScreen() {
-
     // Képernyő címének megjelenítése
     drawScreenTitle("Brightness");
 
     // Update Auto-Brightness button text
-    String autoText = "Auto: ";
-    autoText += (_config.data.tftAutoBrightnessActive ? "On" : "Off");
+    char autoText[20];
+    sprintf(autoText, "Auto: %s", _config.data.tftAutoBrightnessActive ? "On" : "Off");
     _brightnessButtons[0].setText(autoText);
 
     // Update button states based on auto-brightness mode
-    if (_config.data.tftAutoBrightnessActive) {
-        _brightnessButtons[1].setBorderColor(TFT_DARKGREY);
-        _brightnessButtons[2].setBorderColor(TFT_DARKGREY);
-    } else {
-        _brightnessButtons[1].setBorderColor(TFT_RED);
-        _brightnessButtons[2].setBorderColor(TFT_GREEN);
-    }
+    uint16_t disabledColor = _config.data.tftAutoBrightnessActive ? TFT_DARKGREY : TFT_RED;
+    uint16_t enabledColor = _config.data.tftAutoBrightnessActive ? TFT_DARKGREY : TFT_GREEN;
+
+    _brightnessButtons[1].setBorderColor(disabledColor);
+    _brightnessButtons[2].setBorderColor(enabledColor);
 
     // Draw all buttons
     for (auto &button : _brightnessButtons) {
@@ -265,23 +260,20 @@ void Settings::drawBrightnessScreen() {
  * Riasztási képernyő megjelenítése
  */
 void Settings::drawAlarmScreen() {
-
     // Képernyő címének megjelenítése
     drawScreenTitle("Alarm Settings");
 
     // Update GPS Trafi Alarm Enabled button text
-    String enabledText = "Trafi Alarm: ";
-    enabledText += (_config.data.gpsTrafiAlarmEnabled ? "On" : "Off");
+    char enabledText[20];
+    sprintf(enabledText, "Trafi Alarm: %s", _config.data.gpsTrafiAlarmEnabled ? "On" : "Off");
     _alarmButtons[0].setText(enabledText);
 
     // Update button states based on alarm enabled mode
-    if (!_config.data.gpsTrafiAlarmEnabled) {
-        _alarmButtons[1].setBorderColor(TFT_DARKGREY);
-        _alarmButtons[2].setBorderColor(TFT_DARKGREY);
-    } else {
-        _alarmButtons[1].setBorderColor(TFT_RED);
-        _alarmButtons[2].setBorderColor(TFT_GREEN);
-    }
+    uint16_t disabledColor = !_config.data.gpsTrafiAlarmEnabled ? TFT_DARKGREY : TFT_RED;
+    uint16_t enabledColor = !_config.data.gpsTrafiAlarmEnabled ? TFT_DARKGREY : TFT_GREEN;
+
+    _alarmButtons[1].setBorderColor(disabledColor);
+    _alarmButtons[2].setBorderColor(enabledColor);
 
     // Draw all buttons
     for (auto &button : _alarmButtons) {
@@ -325,118 +317,90 @@ void Settings::drawInformationScreen() {
 /**
  * Képernyő világosítása
  */
-void Settings::updateBrightnessValueDisplay() {
-    // Clear previous value
-    _tft.setTextFont(4);
-    _tft.setTextSize(2);
-    int text_width = _tft.textWidth("255"); // Max 3 digits
-    int text_height = _tft.fontHeight();
-    int x_center = _tft.width() / 2;
-    int y_center = 175;
+void Settings::updateBrightnessValueDisplay() { updateValueDisplay(_config.data.tftManualBrightnessValue, "-", !_config.data.tftAutoBrightnessActive); }
 
-    _tft.fillRect(x_center - text_width / 2, y_center - text_height / 2, text_width, text_height, TFT_BLACK);
-
-    // Display new value
-    _tft.setTextDatum(MC_DATUM);
-    _tft.setTextColor(TFT_WHITE); // Set text color without background
-
-    if (!_config.data.tftAutoBrightnessActive) {
-        String valStr = String(_config.data.tftManualBrightnessValue);
-        _tft.drawString(valStr, _tft.width() / 2, 175);
-    } else {
-        _tft.setTextColor(TFT_DARKGREY); // Set text color without background
-        _tft.drawString("-", _tft.width() / 2, 175);
-    }
-    _tft.setTextFont(1); // Restore default font
-    _tft.setTextSize(1); // Restore default text size
-}
-
-void Settings::updateAlarmValueDisplay() {
-    // Clear previous value
-    _tft.setTextFont(4);
-    _tft.setTextSize(2);
-    int text_width = _tft.textWidth("2000"); // Max 4 digits
-    int text_height = _tft.fontHeight();
-    int x_center = _tft.width() / 2;
-    int y_center = 175;
-
-    _tft.fillRect(x_center - text_width / 2, y_center - text_height / 2, text_width, text_height, TFT_BLACK);
-
-    // Display new value
-    _tft.setTextDatum(MC_DATUM);
-    _tft.setTextColor(TFT_WHITE); // Set text color without background
-
-    if (_config.data.gpsTrafiAlarmEnabled) {
-        String valStr = String(_config.data.gpsTrafiAlarmDistance);
-        _tft.drawString(valStr, _tft.width() / 2, 175);
-    } else {
-        _tft.setTextColor(TFT_DARKGREY); // Set text color without background
-        _tft.drawString("-", _tft.width() / 2, 175);
-    }
-    _tft.setTextFont(1); // Restore default font
-    _tft.setTextSize(1); // Restore default text size
-}
+void Settings::updateAlarmValueDisplay() { updateValueDisplay(_config.data.gpsTrafiAlarmDistance, "-", _config.data.gpsTrafiAlarmEnabled); }
 
 void Settings::handleTouch() {
     uint16_t x, y;
     if (_tft.getTouch(&x, &y)) {
         switch (_currentState) {
             case ScreenState::MAIN:
-                handleMainTouch(x, y);
+                handleTouchForButtonList(_mainButtons, x, y);
                 break;
             case ScreenState::BRIGHTNESS:
-                handleBrightnessTouch(x, y);
+                handleTouchForButtonList(_brightnessButtons, x, y);
                 break;
             case ScreenState::ALARM:
-                handleAlarmTouch(x, y);
+                handleTouchForButtonList(_alarmButtons, x, y);
                 break;
             case ScreenState::INFORMATION:
-                handleInformationTouch(x, y);
+                handleTouchForButtonList(_informationButtons, x, y);
                 break;
         }
         delay(200); // Debounce
     }
 }
 
-void Settings::handleMainTouch(uint16_t x, uint16_t y) {
-    for (auto &button : _mainButtons) {
-        if (button.contains(x, y)) {
-            button.press();
-            return;
-        }
-    }
-}
+// Legacy touch handlers kept for compatibility but simplified
+void Settings::handleMainTouch(uint16_t x, uint16_t y) { handleTouchForButtonList(_mainButtons, x, y); }
 
-void Settings::handleBrightnessTouch(uint16_t x, uint16_t y) {
-    for (auto &button : _brightnessButtons) {
-        if (button.contains(x, y)) {
-            button.press();
-            return;
-        }
-    }
-}
+void Settings::handleBrightnessTouch(uint16_t x, uint16_t y) { handleTouchForButtonList(_brightnessButtons, x, y); }
 
-void Settings::handleAlarmTouch(uint16_t x, uint16_t y) {
-    for (auto &button : _alarmButtons) {
-        if (button.contains(x, y)) {
-            button.press();
-            return;
-        }
-    }
-}
+void Settings::handleAlarmTouch(uint16_t x, uint16_t y) { handleTouchForButtonList(_alarmButtons, x, y); }
 
-void Settings::handleInformationTouch(uint16_t x, uint16_t y) {
-    for (auto &button : _informationButtons) {
-        if (button.contains(x, y)) {
-            button.press();
-            return;
-        }
-    }
-}
+void Settings::handleInformationTouch(uint16_t x, uint16_t y) { handleTouchForButtonList(_informationButtons, x, y); }
 
 void Settings::loop() {
     if (!_active) {
         return;
     }
+
+    if (_needsRedraw) {
+        draw();
+        _needsRedraw = false;
+    }
+
     handleTouch();
+}
+
+// Helper function implementations
+void Settings::createButton(std::vector<Button> &buttonList, int16_t x, int16_t y, int16_t w, int16_t h, const char *label, uint16_t borderColor, std::function<void()> callback) {
+    buttonList.emplace_back(_tft, x, y, w, h, label, TFT_BLACK, TFT_WHITE, borderColor, 4);
+    buttonList.back().setCallback(callback);
+}
+
+void Settings::handleTouchForButtonList(std::vector<Button> &buttonList, uint16_t x, uint16_t y) {
+    for (auto &button : buttonList) {
+        if (button.contains(x, y)) {
+            button.press();
+            return;
+        }
+    }
+}
+
+void Settings::updateValueDisplay(int value, const char *disabledText, bool isEnabled) {
+    // Clear previous value
+    _tft.setTextFont(4);
+    _tft.setTextSize(2);
+    int text_width = _tft.textWidth("2000"); // Max width for safety
+    int text_height = _tft.fontHeight();
+    int x_center = _tft.width() / 2;
+    int y_center = 175;
+
+    _tft.fillRect(x_center - text_width / 2, y_center - text_height / 2, text_width, text_height, TFT_BLACK);
+
+    // Display new value
+    _tft.setTextDatum(MC_DATUM);
+
+    if (isEnabled) {
+        _tft.setTextColor(TFT_WHITE);
+        _tft.drawString(String(value), x_center, y_center);
+    } else {
+        _tft.setTextColor(TFT_DARKGREY);
+        _tft.drawString(disabledText, x_center, y_center);
+    }
+
+    _tft.setTextFont(1); // Restore default font
+    _tft.setTextSize(1); // Restore default text size
 }
