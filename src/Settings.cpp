@@ -1,31 +1,31 @@
 #include "Settings.h"
-#include "Config.h"               // Include the full header for implementation
-#include "TftBackLightAdjuster.h" // Include full definition
+#include "Config.h"               // A teljes fejléc implementációhoz való beillesztése
+#include "TftBackLightAdjuster.h" // Teljes definíció beillesztése
 #include "TrafipaxManager.h"
-#include "Utils.h" // For beeping and other utilities
+#include "Utils.h" // Csipogáshoz és egyéb segédprogramokhoz
 #include "defines.h"
-#include <math.h> // For trigonometric functions
+#include <math.h> // Trigonometrikus függvényekhez
 
-// Define title bar height
-const int TITLE_BAR_HEIGHT = 80; // Increased height for better visual
+// Címsor magasságának meghatározása
+const int TITLE_BAR_HEIGHT = 80; // Megnövelt magasság a jobb vizuális megjelenésért
 
-// Constants for button layout optimization
+// Konstansok a gombelrendezés optimalizálásához
 static const int BUTTON_MARGIN = 40;
-static const int BUTTON_HEIGHT = 60; // Increased height for better touch
+static const int BUTTON_HEIGHT = 60; // Megnövelt magasság a jobb érintésérzékelésért
 static const int BUTTON_SPACING = 75;
-static const int CONTROL_BUTTON_WIDTH = 120; // Wider for better touch
+static const int CONTROL_BUTTON_WIDTH = 120; // Szélesebb a jobb érintésérzékelésért
 static const int BACK_BUTTON_WIDTH = 160;
 
-// Visual enhancement constants
+// Vizuális fejlesztési konstansok
 static const int BUTTON_CORNER_RADIUS = 15;
 static const int TITLE_SHADOW_OFFSET = 3;
 
-// Color scheme for modern look
-static const uint16_t HEADER_BG_COLOR = RGB565(45, 45, 75); // Dark blue-grey
+// Színséma modern megjelenéshez
+static const uint16_t HEADER_BG_COLOR = RGB565(45, 45, 75); // Sötét kékes-szürke
 static const uint16_t HEADER_TEXT_COLOR = TFT_WHITE;
-static const uint16_t BUTTON_BG_COLOR = RGB565(60, 60, 90); // Slightly lighter
+static const uint16_t BUTTON_BG_COLOR = RGB565(60, 60, 90); // Kissé világosabb
 static const uint16_t BUTTON_TEXT_COLOR = TFT_WHITE;
-static const uint16_t BUTTON_BORDER_ACTIVE = RGB565(100, 150, 255); // Nice blue
+static const uint16_t BUTTON_BORDER_ACTIVE = RGB565(100, 150, 255); // Szép kék
 static const uint16_t BUTTON_BORDER_DISABLED = RGB565(100, 100, 100);
 static const uint16_t ACCENT_GREEN = RGB565(50, 200, 100);
 static const uint16_t ACCENT_RED = RGB565(255, 80, 80);
@@ -42,8 +42,8 @@ Settings::Settings(TFT_eSPI &tft, Config &config, TftBackLightAdjuster &tftBackL
  *  A beállítások menü inicializálása
  */
 void Settings::init() {
-    // Reserve memory to avoid reallocations
-    _mainButtons.reserve(4); // 3 grid buttons + 1 back button
+    // Memória foglalása az újraallokációk elkerülése érdekében
+    _mainButtons.reserve(4); // 3 rács gomb + 1 vissza gomb
     _brightnessButtons.reserve(4);
     _alarmButtons.reserve(4);
     _informationButtons.reserve(1);
@@ -58,38 +58,38 @@ void Settings::initMainButtons() {
     int screenWidth = _tft.width();
     int screenHeight = _tft.height();
 
-    // Grid layout for main buttons - 3 buttons in a row
-    int gridButtonWidth = 130; // Wider square buttons
-    int gridButtonHeight = 80; // Taller for better touch
-    int gridSpacing = 15;      // Space between grid buttons
+    // Rács elrendezés a fő gombokhoz - 3 gomb egy sorban
+    int gridButtonWidth = 130; // Szélesebb négyzetes gombok
+    int gridButtonHeight = 80; // Magasabb a jobb érintésérzékelésért
+    int gridSpacing = 15;      // Térköz a rács gombok között
 
-    // Calculate total grid width and center it
+    // Teljes rács szélességének kiszámítása és középre igazítása
     int totalGridWidth = 3 * gridButtonWidth + 2 * gridSpacing;
     int gridStartX = (screenWidth - totalGridWidth) / 2;
-    int gridY = 140; // Center vertically between header and bottom buttons
+    int gridY = 140; // Függőlegesen középre igazítás a fejléc és az alsó gombok között
 
-    // Screen Button (left) with icon
+    // Képernyő gomb (balra) ikonnal
     createButton(_mainButtons, gridStartX, gridY, gridButtonWidth, gridButtonHeight, "Screen", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::BRIGHTNESS;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
-    // Alarm Button (center) with icon
+    // Riasztás gomb (középen) ikonnal
     createButton(_mainButtons, gridStartX + gridButtonWidth + gridSpacing, gridY, gridButtonWidth, gridButtonHeight, "Alarm", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::ALARM;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
-    // Info Button (right) with icon
+    // Infó gomb (jobbra) ikonnal
     createButton(_mainButtons, gridStartX + 2 * (gridButtonWidth + gridSpacing), gridY, gridButtonWidth, gridButtonHeight, "Info", BUTTON_BORDER_ACTIVE, [this]() {
         _currentState = ScreenState::INFORMATION;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
-    // Back Button (bottom center) - saves config and exits
+    // Vissza gomb (alul középen) - menti a konfigurációt és kilép
     createButton(_mainButtons, screenWidth / 2 - BACK_BUTTON_WIDTH / 2, screenHeight - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _config.checkSave();
         Utils::beepTick();
@@ -99,7 +99,7 @@ void Settings::initMainButtons() {
 }
 
 void Settings::initInformationButtons() {
-    // Back Button
+    // Vissza gomb
     createButton(_informationButtons, _tft.width() - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
         _needsRedraw = true;
@@ -111,7 +111,7 @@ void Settings::initBrightnessButtons() {
     int screenWidth = _tft.width();
     int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
 
-    // Auto Brightness Toggle Button
+    // Automatikus fényerő kapcsoló gomb
     createButton(_brightnessButtons, BUTTON_MARGIN, 100, buttonWidth, BUTTON_HEIGHT, "", BUTTON_BORDER_ACTIVE, [this]() {
         _config.data.tftAutoBrightnessActive = !_config.data.tftAutoBrightnessActive;
         _tftBackLightAdjuster.setAutoBrightnessActive(_config.data.tftAutoBrightnessActive);
@@ -119,7 +119,7 @@ void Settings::initBrightnessButtons() {
         Utils::beepTick();
     });
 
-    // Manual Brightness Down Button
+    // Kézi fényerő csökkentő gomb
     createButton(_brightnessButtons, BUTTON_MARGIN, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", ACCENT_RED, [this]() {
         if (!_config.data.tftAutoBrightnessActive) {
             uint8_t &val = _config.data.tftManualBrightnessValue;
@@ -131,7 +131,7 @@ void Settings::initBrightnessButtons() {
         }
     });
 
-    // Manual Brightness Up Button
+    // Kézi fényerő növelő gomb
     createButton(_brightnessButtons, screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", ACCENT_GREEN, [this]() {
         if (!_config.data.tftAutoBrightnessActive) {
             uint8_t &val = _config.data.tftManualBrightnessValue;
@@ -143,7 +143,7 @@ void Settings::initBrightnessButtons() {
         }
     });
 
-    // Back Button
+    // Vissza gomb
     createButton(_brightnessButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
         _needsRedraw = true;
@@ -155,14 +155,14 @@ void Settings::initAlarmButtons() {
     int screenWidth = _tft.width();
     int buttonWidth = screenWidth - 2 * BUTTON_MARGIN;
 
-    // GPS Trafi Alarm Enabled Toggle Button
+    // GPS Trafi riasztás engedélyezése kapcsoló gomb
     createButton(_alarmButtons, BUTTON_MARGIN, 100, buttonWidth, BUTTON_HEIGHT, "", BUTTON_BORDER_ACTIVE, [this]() {
         _config.data.gpsTrafiAlarmEnabled = !_config.data.gpsTrafiAlarmEnabled;
         _needsRedraw = true;
         Utils::beepTick();
     });
 
-    // GPS Trafi Alarm Distance Down Button
+    // GPS Trafi riasztás távolság csökkentő gomb
     createButton(_alarmButtons, BUTTON_MARGIN, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "-", ACCENT_RED, [this]() {
         if (_config.data.gpsTrafiAlarmEnabled) {
             uint16_t &val = _config.data.gpsTrafiAlarmDistance;
@@ -172,7 +172,7 @@ void Settings::initAlarmButtons() {
         }
     });
 
-    // GPS Trafi Alarm Distance Up Button
+    // GPS Trafi riasztás távolság növelő gomb
     createButton(_alarmButtons, screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH, 190, CONTROL_BUTTON_WIDTH, BUTTON_HEIGHT, "+", ACCENT_GREEN, [this]() {
         if (_config.data.gpsTrafiAlarmEnabled) {
             uint16_t &val = _config.data.gpsTrafiAlarmDistance;
@@ -182,7 +182,7 @@ void Settings::initAlarmButtons() {
         }
     });
 
-    // Back Button
+    // Vissza gomb
     createButton(_alarmButtons, screenWidth - BACK_BUTTON_WIDTH, _tft.height() - BUTTON_HEIGHT, BACK_BUTTON_WIDTH, BUTTON_HEIGHT, "Back", ACCENT_ORANGE, [this]() {
         _currentState = ScreenState::MAIN;
         _needsRedraw = true;
@@ -206,7 +206,7 @@ void Settings::exit() {
 }
 
 void Settings::draw() {
-    _tft.fillScreen(RGB565(25, 25, 35)); // Dark modern background
+    _tft.fillScreen(RGB565(25, 25, 35)); // Sötét modern háttér
     switch (_currentState) {
         case ScreenState::MAIN:
             drawMainScreen();
@@ -227,30 +227,30 @@ void Settings::draw() {
  * Képernyő címének megjelenítése modern dizájnnal
  */
 void Settings::drawScreenTitle(const char *title) {
-    // Modern gradient-like header background
+    // Modern, gradiens-szerű fejléc háttér
     _tft.fillRect(0, 0, _tft.width(), TITLE_BAR_HEIGHT, HEADER_BG_COLOR);
 
-    // Add a subtle border at the bottom
+    // Finom szegély hozzáadása alulra
     _tft.fillRect(0, TITLE_BAR_HEIGHT - 3, _tft.width(), 3, BUTTON_BORDER_ACTIVE);
 
-    // Shadow effect for text
+    // Árnyék effektus a szöveghez
     _tft.setTextFont(4);
     _tft.setTextSize(2);
     _tft.setTextDatum(MC_DATUM);
 
-    // Draw shadow
-    _tft.setTextColor(RGB565(20, 20, 40)); // Dark shadow
+    // Árnyék rajzolása
+    _tft.setTextColor(RGB565(20, 20, 40)); // Sötét árnyék
     _tft.drawString(title, _tft.width() / 2 + TITLE_SHADOW_OFFSET, TITLE_BAR_HEIGHT / 2 + TITLE_SHADOW_OFFSET);
 
-    // Draw main text
+    // Fő szöveg rajzolása
     _tft.setTextColor(HEADER_TEXT_COLOR);
     _tft.drawString(title, _tft.width() / 2, TITLE_BAR_HEIGHT / 2);
 
-    // Add decorative corner elements
+    // Dekoratív sarokelemek hozzáadása
     _tft.fillCircle(20, 20, 8, BUTTON_BORDER_ACTIVE);
     _tft.fillCircle(_tft.width() - 20, 20, 8, BUTTON_BORDER_ACTIVE);
 
-    _tft.setTextSize(1); // Restore default
+    _tft.setTextSize(1); // Alapértelmezett visszaállítása
 }
 
 /**
@@ -260,7 +260,7 @@ void Settings::drawMainScreen() {
     // Képernyő címének megjelenítése
     drawScreenTitle("Settings");
 
-    // Draw shadows for the three main grid buttons first
+    // Árnyékok rajzolása a három fő rács gombhoz először
     int screenWidth = _tft.width();
     int gridButtonWidth = 130;
     int gridButtonHeight = 80;
@@ -270,44 +270,44 @@ void Settings::drawMainScreen() {
     int gridY = 140;
     int shadowOffset = 4;
 
-    // Draw shadows for grid buttons
-    uint16_t shadowColor = RGB565(15, 15, 25); // Very dark shadow
+    // Árnyékok rajzolása a rács gombokhoz
+    uint16_t shadowColor = RGB565(15, 15, 25); // Nagyon sötét árnyék
     for (int i = 0; i < 3; i++) {
         int buttonX = gridStartX + i * (gridButtonWidth + gridSpacing);
         _tft.fillRoundRect(buttonX + shadowOffset, gridY + shadowOffset, gridButtonWidth, gridButtonHeight, 15, shadowColor);
     }
 
-    // Draw the first 3 buttons (grid buttons) with special layout
+    // Az első 3 gomb (rács gombok) rajzolása speciális elrendezéssel
     for (int i = 0; i < 3; i++) {
         _mainButtons[i].drawWithTextAtBottom();
     }
 
-    // Draw the remaining button (Back) normally
+    // A fennmaradó gomb (Vissza) normál rajzolása
     for (int i = 3; i < _mainButtons.size(); i++) {
         _mainButtons[i].draw();
     }
 
-    // Add icons to the grid buttons using the new icon function
-    int iconY = gridY + 25; // Position for icons
+    // Ikonok hozzáadása a rács gombokhoz az új ikon funkcióval
+    int iconY = gridY + 25; // Ikonok pozíciója
 
-    // Screen icon (sun symbol)
+    // Képernyő ikon (nap szimbólum)
     int screenButtonCenterX = gridStartX + gridButtonWidth / 2;
     drawButtonIcon(screenButtonCenterX, iconY, "sun", TFT_YELLOW);
 
-    // Alarm icon (warning triangle)
+    // Riasztás ikon (figyelmeztető háromszög)
     int alarmButtonCenterX = gridStartX + gridButtonWidth + gridSpacing + gridButtonWidth / 2;
     drawButtonIcon(alarmButtonCenterX, iconY, "warning", ACCENT_RED);
 
-    // Info icon (i in circle)
+    // Infó ikon (i körben)
     int infoButtonCenterX = gridStartX + 2 * (gridButtonWidth + gridSpacing) + gridButtonWidth / 2;
     drawButtonIcon(infoButtonCenterX, iconY, "info", BUTTON_BORDER_ACTIVE);
 
-    // Add icon to Back button (centered at bottom)
+    // Ikon hozzáadása a Vissza gombhoz (alul középen)
     int backButtonCenterX = screenWidth / 2;
     int backButtonCenterY = _tft.height() - BUTTON_HEIGHT / 2;
-    drawButtonIcon(backButtonCenterX - 50, backButtonCenterY, "back", ACCENT_ORANGE); // Offset further left to avoid text overlap
+    drawButtonIcon(backButtonCenterX - 50, backButtonCenterY, "back", ACCENT_ORANGE); // Eltolás balra a szöveg átfedésének elkerülése érdekében
 
-    // Add subtle title to the grid area
+    // Finom cím hozzáadása a rács területéhez
     _tft.setTextFont(2);
     _tft.setTextSize(2);
     _tft.setTextColor(TFT_LIGHTGREY);
@@ -322,47 +322,47 @@ void Settings::drawBrightnessScreen() {
     // Képernyő címének megjelenítése
     drawScreenTitle("Brightness");
 
-    // Update Auto-Brightness button text
+    // Automatikus fényerő gomb szövegének frissítése
     char autoText[20];
     sprintf(autoText, "Auto: %s", _config.data.tftAutoBrightnessActive ? "On" : "Off");
     _brightnessButtons[0].setText(autoText);
 
-    // Update button states based on auto-brightness mode
+    // Gomb állapotok frissítése az automatikus fényerő mód alapján
     uint16_t disabledColor = _config.data.tftAutoBrightnessActive ? BUTTON_BORDER_DISABLED : ACCENT_RED;
     uint16_t enabledColor = _config.data.tftAutoBrightnessActive ? BUTTON_BORDER_DISABLED : ACCENT_GREEN;
 
     _brightnessButtons[1].setBorderColor(disabledColor);
     _brightnessButtons[2].setBorderColor(enabledColor);
 
-    // Draw all buttons
+    // Összes gomb rajzolása
     for (auto &button : _brightnessButtons) {
         button.draw();
     }
 
-    // Add icons to buttons
+    // Ikonok hozzáadása a gombokhoz
     int screenWidth = _tft.width();
 
-    // Toggle switch icon for auto brightness
+    // Kapcsoló ikon az automatikus fényerőhöz
     int toggleX = BUTTON_MARGIN + (screenWidth - 2 * BUTTON_MARGIN) / 2;
     int toggleY = 100 + BUTTON_HEIGHT / 2;
     drawButtonIcon(toggleX - 100, toggleY, "toggle", _config.data.tftAutoBrightnessActive ? ACCENT_GREEN : BUTTON_BORDER_DISABLED);
 
-    // Minus icon
+    // Mínusz ikon
     int minusX = BUTTON_MARGIN + CONTROL_BUTTON_WIDTH / 2;
     int minusY = 190 + BUTTON_HEIGHT / 2;
     drawButtonIcon(minusX, minusY, "minus", disabledColor);
 
-    // Plus icon
+    // Plusz ikon
     int plusX = screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH / 2;
     int plusY = 190 + BUTTON_HEIGHT / 2;
     drawButtonIcon(plusX, plusY, "plus", enabledColor);
 
-    // Back arrow icon - position it to the left of the text
-    int backX = screenWidth - BACK_BUTTON_WIDTH + 30; // Left side of the button + margin
+    // Vissza nyíl ikon - pozícionálás a szövegtől balra
+    int backX = screenWidth - BACK_BUTTON_WIDTH + 30; // Gomb bal oldala + margó
     int backY = _tft.height() - BUTTON_HEIGHT / 2;
     drawButtonIcon(backX, backY, "back", ACCENT_ORANGE);
 
-    // Draw value display background with rounded corners
+    // Érték kijelző háttér rajzolása lekerekített sarkokkal
     int centerX = _tft.width() / 2;
     int centerY = 220;
     int boxWidth = 100;
@@ -371,7 +371,7 @@ void Settings::drawBrightnessScreen() {
     _tft.fillRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, VALUE_DISPLAY_BG);
     _tft.drawRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, BUTTON_BORDER_ACTIVE);
 
-    // Display manual brightness value
+    // Kézi fényerő értékének megjelenítése
     updateBrightnessValueDisplay();
 }
 
@@ -382,47 +382,47 @@ void Settings::drawAlarmScreen() {
     // Képernyő címének megjelenítése
     drawScreenTitle("Alarm Settings");
 
-    // Update GPS Trafi Alarm Enabled button text
+    // GPS Trafi riasztás engedélyezése gomb szövegének frissítése
     char enabledText[20];
     sprintf(enabledText, "Trafi Alarm: %s", _config.data.gpsTrafiAlarmEnabled ? "On" : "Off");
     _alarmButtons[0].setText(enabledText);
 
-    // Update button states based on alarm enabled mode
+    // Gomb állapotok frissítése a riasztás engedélyezési mód alapján
     uint16_t disabledColor = !_config.data.gpsTrafiAlarmEnabled ? BUTTON_BORDER_DISABLED : ACCENT_RED;
     uint16_t enabledColor = !_config.data.gpsTrafiAlarmEnabled ? BUTTON_BORDER_DISABLED : ACCENT_GREEN;
 
     _alarmButtons[1].setBorderColor(disabledColor);
     _alarmButtons[2].setBorderColor(enabledColor);
 
-    // Draw all buttons
+    // Összes gomb rajzolása
     for (auto &button : _alarmButtons) {
         button.draw();
     }
 
-    // Add icons to buttons
+    // Ikonok hozzáadása a gombokhoz
     int screenWidth = _tft.width();
 
-    // Toggle switch icon for alarm enable
+    // Kapcsoló ikon a riasztás engedélyezéséhez
     int toggleX = BUTTON_MARGIN + (screenWidth - 2 * BUTTON_MARGIN) / 2;
     int toggleY = 100 + BUTTON_HEIGHT / 2;
     drawButtonIcon(toggleX - 100, toggleY, "toggle", _config.data.gpsTrafiAlarmEnabled ? ACCENT_GREEN : BUTTON_BORDER_DISABLED);
 
-    // Minus icon
+    // Mínusz ikon
     int minusX = BUTTON_MARGIN + CONTROL_BUTTON_WIDTH / 2;
     int minusY = 190 + BUTTON_HEIGHT / 2;
     drawButtonIcon(minusX, minusY, "minus", disabledColor);
 
-    // Plus icon
+    // Plusz ikon
     int plusX = screenWidth - BUTTON_MARGIN - CONTROL_BUTTON_WIDTH / 2;
     int plusY = 190 + BUTTON_HEIGHT / 2;
     drawButtonIcon(plusX, plusY, "plus", enabledColor);
 
-    // Back arrow icon - position it to the left of the text
-    int backX = screenWidth - BACK_BUTTON_WIDTH + 30; // Left side of the button + margin
+    // Vissza nyíl ikon - pozícionálás a szövegtől balra
+    int backX = screenWidth - BACK_BUTTON_WIDTH + 30; // Gomb bal oldala + margó
     int backY = _tft.height() - BUTTON_HEIGHT / 2;
     drawButtonIcon(backX, backY, "back", ACCENT_ORANGE);
 
-    // Draw value display background with rounded corners
+    // Érték kijelző háttér rajzolása lekerekített sarkokkal
     int centerX = _tft.width() / 2;
     int centerY = 220;
     int boxWidth = 120;
@@ -431,10 +431,10 @@ void Settings::drawAlarmScreen() {
     _tft.fillRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, VALUE_DISPLAY_BG);
     _tft.drawRoundRect(centerX - boxWidth / 2, centerY - boxHeight / 2, boxWidth, boxHeight, 10, BUTTON_BORDER_ACTIVE);
 
-    // Display alarm distance value
+    // Riasztási távolság értékének megjelenítése
     updateAlarmValueDisplay();
 
-    // Add unit text
+    // Egység szöveg hozzáadása
     if (_config.data.gpsTrafiAlarmEnabled) {
         _tft.setTextFont(2);
         _tft.setTextColor(TFT_LIGHTGREY);
@@ -454,7 +454,7 @@ void Settings::drawInformationScreen() {
     int yPos = 120;
     int lineSpacing = 45;
 
-    // Create info card background
+    // Infókártya háttér létrehozása
     int cardX = 30;
     int cardY = 110;
     int cardWidth = _tft.width() - 60;
@@ -466,33 +466,33 @@ void Settings::drawInformationScreen() {
     _tft.setTextDatum(TL_DATUM);
     _tft.setTextFont(2);
 
-    // Program Version with icon-like bullet
+    // Program verzió ikon-szerű ponttal
     _tft.fillCircle(50, yPos + 10, 5, ACCENT_GREEN);
     _tft.setTextColor(TFT_WHITE);
     sprintf(buf, "Version: V%s", APP_VERSION);
     _tft.drawString(buf, 70, yPos);
 
     yPos += lineSpacing;
-    // Build Time
+    // Fordítási idő
     _tft.fillCircle(50, yPos + 10, 5, BUTTON_BORDER_ACTIVE);
     _tft.setTextColor(TFT_LIGHTGREY);
     sprintf(buf, "Build: %s %s", __DATE__, __TIME__);
     _tft.drawString(buf, 70, yPos);
 
     yPos += lineSpacing;
-    // Trafipax Count
+    // Trafipaxok száma
     _tft.fillCircle(50, yPos + 10, 5, ACCENT_ORANGE);
     _tft.setTextColor(TFT_YELLOW);
     sprintf(buf, "Trafipax Count: %d", _trafipaxManager.count());
     _tft.drawString(buf, 70, yPos);
 
-    // Draw all buttons
+    // Összes gomb rajzolása
     for (auto &button : _informationButtons) {
         button.draw();
     }
 
-    // Add back arrow icon to the Back button - position it to the left of the text
-    int backButtonCenterX = _tft.width() - BACK_BUTTON_WIDTH + 30; // Left side of the button + margin
+    // Vissza nyíl ikon hozzáadása a Vissza gombhoz - pozícionálás a szövegtől balra
+    int backButtonCenterX = _tft.width() - BACK_BUTTON_WIDTH + 30; // Gomb bal oldala + margó
     int backButtonCenterY = _tft.height() - BUTTON_HEIGHT / 2;
     drawButtonIcon(backButtonCenterX, backButtonCenterY, "back", TFT_WHITE);
 }
@@ -521,11 +521,11 @@ void Settings::handleTouch() {
                 handleTouchForButtonList(_informationButtons, x, y);
                 break;
         }
-        delay(200); // Debounce
+        delay(200); // Gombnyomás késleltetés
     }
 }
 
-// Legacy touch handlers kept for compatibility but simplified
+// Régebbi érintéskezelők kompatibilitási okokból megtartva, de egyszerűsítve
 void Settings::handleMainTouch(uint16_t x, uint16_t y) { handleTouchForButtonList(_mainButtons, x, y); }
 
 void Settings::handleBrightnessTouch(uint16_t x, uint16_t y) { handleTouchForButtonList(_brightnessButtons, x, y); }
@@ -547,7 +547,7 @@ void Settings::loop() {
     handleTouch();
 }
 
-// Helper function implementations
+// Segédfüggvény implementációk
 void Settings::createButton(std::vector<Button> &buttonList, int16_t x, int16_t y, int16_t w, int16_t h, const char *label, uint16_t borderColor, std::function<void()> callback) {
     buttonList.emplace_back(_tft, x, y, w, h, label, BUTTON_BG_COLOR, BUTTON_TEXT_COLOR, borderColor, 4);
     buttonList.back().setCallback(callback);
@@ -563,7 +563,7 @@ void Settings::handleTouchForButtonList(std::vector<Button> &buttonList, uint16_
 }
 
 void Settings::updateValueDisplay(int value, const char *disabledText, bool isEnabled) {
-    // Clear the value display area first
+    // Először törölje az érték kijelző területét
     int centerX = _tft.width() / 2;
     int centerY = 220;
     int clearWidth = 120;
@@ -572,7 +572,7 @@ void Settings::updateValueDisplay(int value, const char *disabledText, bool isEn
     _tft.fillRoundRect(centerX - clearWidth / 2, centerY - clearHeight / 2, clearWidth, clearHeight, 10, VALUE_DISPLAY_BG);
     _tft.drawRoundRect(centerX - clearWidth / 2, centerY - clearHeight / 2, clearWidth, clearHeight, 10, BUTTON_BORDER_ACTIVE);
 
-    // Display new value centered vertically and horizontally
+    // Új érték megjelenítése függőlegesen és vízszintesen középre igazítva
     _tft.setTextFont(4);
     _tft.setTextSize(2);
     _tft.setTextDatum(MC_DATUM);
@@ -585,8 +585,8 @@ void Settings::updateValueDisplay(int value, const char *disabledText, bool isEn
         _tft.drawString(disabledText, centerX, centerY);
     }
 
-    _tft.setTextFont(1); // Restore default font
-    _tft.setTextSize(1); // Restore default text size
+    _tft.setTextFont(1); // Alapértelmezett betűtípus visszaállítása
+    _tft.setTextSize(1); // Alapértelmezett szövegméret visszaállítása
 }
 
 void Settings::drawButtonIcon(int16_t centerX, int16_t centerY, const char *iconType, uint16_t color) {
@@ -595,48 +595,48 @@ void Settings::drawButtonIcon(int16_t centerX, int16_t centerY, const char *icon
     _tft.setTextDatum(MC_DATUM);
 
     if (strcmp(iconType, "sun") == 0) {
-        // Brightness/Screen icon (sun)
+        // Fényerő/Képernyő ikon (nap)
         _tft.fillCircle(centerX, centerY, 8, TFT_YELLOW);
-        // Simple rays
+        // Egyszerű sugarak
         _tft.drawLine(centerX, centerY - 12, centerX, centerY - 16, TFT_YELLOW);
         _tft.drawLine(centerX, centerY + 12, centerX, centerY + 16, TFT_YELLOW);
         _tft.drawLine(centerX - 12, centerY, centerX - 16, centerY, TFT_YELLOW);
         _tft.drawLine(centerX + 12, centerY, centerX + 16, centerY, TFT_YELLOW);
     } else if (strcmp(iconType, "warning") == 0) {
-        // Alarm icon (warning triangle)
+        // Riasztás ikon (figyelmeztető háromszög)
         _tft.fillTriangle(centerX, centerY - 10, centerX - 10, centerY + 6, centerX + 10, centerY + 6, ACCENT_RED);
         _tft.setTextColor(TFT_WHITE);
         _tft.drawString("!", centerX, centerY - 1);
     } else if (strcmp(iconType, "info") == 0) {
-        // Info icon (i in circle)
+        // Infó ikon (i körben)
         _tft.fillCircle(centerX, centerY, 10, BUTTON_BORDER_ACTIVE);
         _tft.setTextColor(TFT_WHITE);
         _tft.drawString("i", centerX, centerY);
     } else if (strcmp(iconType, "minus") == 0) {
-        // Minus icon
+        // Mínusz ikon
         _tft.fillRoundRect(centerX - 8, centerY - 2, 16, 4, 2, color);
     } else if (strcmp(iconType, "plus") == 0) {
-        // Plus icon
+        // Plusz ikon
         _tft.fillRoundRect(centerX - 8, centerY - 2, 16, 4, 2, color);
         _tft.fillRoundRect(centerX - 2, centerY - 8, 4, 16, 2, color);
     } else if (strcmp(iconType, "back") == 0) {
-        // Back arrow icon
+        // Vissza nyíl ikon
         _tft.fillTriangle(centerX - 8, centerY, centerX + 2, centerY - 6, centerX + 2, centerY + 6, color);
         _tft.fillRoundRect(centerX + 2, centerY - 2, 8, 4, 2, color);
     } else if (strcmp(iconType, "exit") == 0) {
-        // Exit icon (X)
+        // Kilépés ikon (X)
         _tft.drawLine(centerX - 6, centerY - 6, centerX + 6, centerY + 6, color);
         _tft.drawLine(centerX + 6, centerY - 6, centerX - 6, centerY + 6, color);
         _tft.drawLine(centerX - 5, centerY - 6, centerX + 7, centerY + 6, color);
         _tft.drawLine(centerX + 5, centerY - 6, centerX - 7, centerY + 6, color);
     } else if (strcmp(iconType, "save") == 0) {
-        // Save icon (checkmark)
+        // Mentés ikon (pipa)
         _tft.drawLine(centerX - 6, centerY, centerX - 2, centerY + 4, color);
         _tft.drawLine(centerX - 2, centerY + 4, centerX + 6, centerY - 4, color);
         _tft.drawLine(centerX - 6, centerY + 1, centerX - 2, centerY + 5, color);
         _tft.drawLine(centerX - 2, centerY + 5, centerX + 6, centerY - 3, color);
     } else if (strcmp(iconType, "toggle") == 0) {
-        // Toggle switch icon
+        // Kapcsoló ikon
         _tft.fillRoundRect(centerX - 10, centerY - 4, 20, 8, 4, BUTTON_BORDER_DISABLED);
         _tft.fillCircle(centerX + 6, centerY, 5, color);
     }

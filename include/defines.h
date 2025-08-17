@@ -1,11 +1,11 @@
-#ifndef __COMMONS_H__
-#define __COMMONS_H__
+#ifndef __DEFINES_H
+#define __DEFINES_H
 
 #define APP_VERSION "0.0.1"
 
 #define __DEBUG
-#define DEBUG_WAIT_FOR_SERIAL
-// #define DEMO_MODE
+// #define DEBUG_WAIT_FOR_SERIAL
+//  #define DEMO_MODE
 
 // Színsémák
 #define RED2RED 0
@@ -67,4 +67,4 @@
 #define DEBUG(fmt, ...) // Üres makró, ha __DEBUG nincs definiálva
 #endif
 
-#endif
+#endif // __DEFINES_H

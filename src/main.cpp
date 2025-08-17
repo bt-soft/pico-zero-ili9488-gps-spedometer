@@ -688,7 +688,7 @@ void readGPS() {
  */
 float readBatterry() {
 #define V_REFERENCE 3.3f
-#define EXTERNAL_VBUSDIVIDER_RATIO ((22.0f + 4.69f) / 4.69f) // A feszültségosztó ellenállások értéke
+#define EXTERNAL_VBUSDIVIDER_RATIO ((15.0f + 4.7f) / 4.7f) // A feszültségosztó ellenállások értéke
 #define CONVERSION_FACTOR (1 << AD_RESOLUTION)
 
     float voltageOut = (analogRead(PIN_BATTERRY_MEASURE) * V_REFERENCE) / CONVERSION_FACTOR;
