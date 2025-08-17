@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __TRAFIPAX_MANAGER_H
+#define __TRAFIPAX_MANAGER_H
+
 #include <Arduino.h>
 
 #define MAX_TAFIPAX 400
@@ -34,11 +36,11 @@ struct TrafipaxInternal {
     double lon;
 };
 
-class TafipaxList {
+class TrafipaxManager {
   public:
     constexpr static const char *CSV_FILE_NAME = "/trafipaxes.csv";
 
-    TafipaxList();
+    TrafipaxManager();
 
     // Fájl kezelés/betöltés
     boolean checkFile(const char *filename);
@@ -73,3 +75,4 @@ class TafipaxList {
     // Demo objektum
     TrafipaxDemo demo;
 };
+#endif // __TRAFIPAX_MANAGER_H

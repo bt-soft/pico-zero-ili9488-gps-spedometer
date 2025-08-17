@@ -13,6 +13,9 @@ const Config_t DEFAULT_CONFIG = {
 
     //--- System
     .beeperEnabled = true, // Hangjelzés engedélyezése    // MiniAudioFft módok
+
+    .gpsTrafiAlarmEnabled = true, // GPS traffipax riasztás engedélyezése
+
 };
 
 // Globális konfiguráció példány

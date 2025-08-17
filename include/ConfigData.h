@@ -13,6 +13,8 @@ struct Config_t {
 
     //--- System
     bool beeperEnabled; // Hangjelzés engedélyezése
+
+    bool gpsTrafiAlarmEnabled; // GPS traffipax riasztás engedélyezése
 };
 
 #endif // CONFIG_DATA_H

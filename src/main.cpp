@@ -11,7 +11,6 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and heigh
 #include "Config.h"
 
 #include "Large_Font.h"
-#include "TafipaxList.h"
 #include "Utils.h"
 #include "defines.h"
 #include "linearMeter.h"
@@ -38,7 +37,8 @@ int maxSpeed = 0;
 #include "TftBackLightAdjuster.h"
 TftBackLightAdjuster tftBackLightAdjuster;
 
-TafipaxList tafipax; // Automatikusan betölti a CSV-t
+#include "TrafipaxManager.h"
+TrafipaxManager trafipaxManager; // Automatikusan betölti a CSV-t
 
 // Optimalizált konstansok
 constexpr int ALERT_BAR_HEIGHT = 80;
@@ -239,7 +239,7 @@ void processIntelligentTrafipaxAlert() {
     bool hasValidData = false;
 
     // GPS adatok validálása - optimalizált verzió
-    if (tafipax.getDemoCoords(currentLat, currentLon)) {
+    if (trafipaxManager.getDemoCoords(currentLat, currentLon)) {
         // Demo koordináták használata
         hasValidData = true;
     } else if (gps.location.isValid() && gps.location.age() < GPS_DATA_MAX_AGE) {
@@ -264,7 +264,7 @@ void processIntelligentTrafipaxAlert() {
 
     // Legközelebbi trafipax keresése
     double minDistance = 999999.0;
-    const TrafipaxInternal *closestTrafipax = tafipax.getClosestTrafipax(currentLat, currentLon, minDistance);
+    const TrafipaxInternal *closestTrafipax = trafipaxManager.getClosestTrafipax(currentLat, currentLon, minDistance);
 
     const unsigned long currentTime = millis();
 
@@ -523,7 +523,7 @@ void drawSplashScreen() {
     tft.drawString(buf, tft.width() / 2, 180, 1);
 
     // Trafipaxok száma
-    sprintf(buf, "Traffi cnt: %d", tafipax.count());
+    sprintf(buf, "Traffi cnt: %d", trafipaxManager.count());
     tft.setTextColor(TFT_YELLOW);
     tft.drawString(buf, tft.width() / 2, 250, 4);
 }
@@ -579,11 +579,12 @@ void setup(void) {
 
     // LittleFS filesystem indítása
     LittleFS.begin();
-    // Trafipax adatok betöltése CSV-ből
-    if (tafipax.checkFile(TafipaxList::CSV_FILE_NAME)) {
-        tafipax.loadFromCSV(TafipaxList::CSV_FILE_NAME);
+
+    // Trafipax adatok betöltése CSV-ből ha a LittleFS fájl létezik
+    if (trafipaxManager.checkFile(TrafipaxManager::CSV_FILE_NAME)) {
+        trafipaxManager.loadFromCSV(TrafipaxManager::CSV_FILE_NAME);
     }
-    DEBUG("Tafipaxok száma: %d\n", tafipax.count());
+    DEBUG("trafipaxManagerok száma: %d\n", trafipaxManager.count());
 
     drawSplashScreen();
 
@@ -607,12 +608,13 @@ void setup(void) {
     Utils::beepTick();
 
     // Valós idejű demo indítása (5mp várakozás után közeledés/távolodás)
-    // tafipax.startDemo();
+    // trafiPaxManager.startDemo();
 
+    // --------------------------------------------------------------------------------------------------------
     // Figyelem!!!
     // NEM LEHET a loop() és a Non-blocking Dallas között hosszú idő, mert a lib leáll az idő méréssel.
     //  Szerintem hibás a matek a NonBlockingDallas::waitNextReading() metódusban
-    //
+    // --------------------------------------------------------------------------------------------------------
     //  Hőmérséklet szenzor inicializálása
     //  Non-blocking Dallas temperature sensor - 1500ms ajánlott 12 bites felbontáshoz
     nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
@@ -640,8 +642,8 @@ void loop() {
     }
 
     // Demo trafipax közeledés/távolodás (ha aktív)
-    if (tafipax.isDemoActive()) {
-        tafipax.processDemo();
+    if (trafipaxManager.isDemoActive()) {
+        trafipaxManager.processDemo();
     }
 
     // Intelligens trafipax figyelmeztető rendszer - optimalizált intervallum

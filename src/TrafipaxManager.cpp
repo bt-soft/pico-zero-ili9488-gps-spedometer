@@ -3,7 +3,7 @@
 #include <TinyGPS++.h>
 #include <math.h>
 
-#include "TafipaxList.h"
+#include "TrafiPaxManager.h"
 #include "Utils.h"
 #include "defines.h"
 
@@ -16,12 +16,12 @@
 /**
  *
  */
-TafipaxList::TafipaxList() {}
+TrafipaxManager::TrafipaxManager() {}
 
 /**
  * Ellenőrizzük, hogy létezik-e a CSV fájl
  */
-boolean TafipaxList::checkFile(const char *filename) {
+boolean TrafipaxManager::checkFile(const char *filename) {
     //
     if (LittleFS.exists(filename)) {
         File file = LittleFS.open(filename, "r");
@@ -37,7 +37,7 @@ boolean TafipaxList::checkFile(const char *filename) {
 /**
  * Betölti a Trafipax adatokat CSV fájlból
  */
-void TafipaxList::loadFromCSV(const char *filename) {
+void TrafipaxManager::loadFromCSV(const char *filename) {
     tafipaxCount = 0;
     File file = LittleFS.open(filename, "r");
     if (!file) {
@@ -119,7 +119,7 @@ void TafipaxList::loadFromCSV(const char *filename) {
 /**
  * Visszaadja a Trafipaxok számát
  */
-int TafipaxList::count() const { return tafipaxCount; }
+int TrafipaxManager::count() const { return tafipaxCount; }
 
 /**
  * Trafipax riasztás - csak közeledés esetén riaszt
@@ -128,7 +128,7 @@ int TafipaxList::count() const { return tafipaxCount; }
  * @param alertDistanceMeters riasztási távolság méterben
  * @return trafipax rekord ha közeledünk és a távolság <= alertDistanceMeters, egyébként nullptr
  */
-const TrafipaxInternal *TafipaxList::checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
+const TrafipaxInternal *TrafipaxManager::checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
 
     // Legközelebbi trafipax keresése
     int closestIdx = -1;
@@ -181,7 +181,7 @@ const TrafipaxInternal *TafipaxList::checkTrafipaxApproach(double currentLat, do
  * @param outDistance kimeneti paraméter a távolsághoz
  * @return legközelebbi trafipax rekord vagy nullptr ha nincs
  */
-const TrafipaxInternal *TafipaxList::getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const {
+const TrafipaxInternal *TrafipaxManager::getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const {
 
     if (tafipaxCount == 0) {
         outDistance = 999999.0;
@@ -213,7 +213,7 @@ const TrafipaxInternal *TafipaxList::getClosestTrafipax(double currentLat, doubl
  * Litéri trafipax koordinátái: 47.100934, 18.011792
  * A teszt 1000m-ről indul és 200m-ig közeledik, majd 1000m-ig távolodik
  */
-void TafipaxList::testLiteriTrafipaxApproach() {
+void TrafipaxManager::testLiteriTrafipaxApproach() {
     const double LITERI_LAT = 47.100934;
     const double LITERI_LON = 18.011792;
     const double ALERT_DISTANCE = 500.0; // 500 méteres riasztási távolság
@@ -296,7 +296,7 @@ void TafipaxList::testLiteriTrafipaxApproach() {
 /**
  * Demo indítása - 5mp várakozás, majd közeledés/távolodás szimulálása
  */
-void TafipaxList::startDemo() {
+void TrafipaxManager::startDemo() {
     demo.isActive = true;
     demo.startTime = millis();
     demo.currentPhase = 0;
@@ -313,7 +313,7 @@ void TafipaxList::startDemo() {
 /**
  * Demo feldolgozása - szimulált GPS koordináták generálása
  */
-void TafipaxList::processDemo() {
+void TrafipaxManager::processDemo() {
     if (!demo.isActive) {
         return;
     }
@@ -388,12 +388,12 @@ void TafipaxList::processDemo() {
 /**
  * Visszaadja, hogy aktív-e a demo
  */
-bool TafipaxList::isDemoActive() const { return demo.isActive; }
+bool TrafipaxManager::isDemoActive() const { return demo.isActive; }
 
 /**
  * Demo koordináták lekérése
  */
-bool TafipaxList::getDemoCoords(double &lat, double &lon) const {
+bool TrafipaxManager::getDemoCoords(double &lat, double &lon) const {
     if (demo.isActive && demo.hasValidCoords) {
         lat = demo.currentLat;
         lon = demo.currentLon;
