@@ -4,8 +4,7 @@
 #define APP_VERSION "0.0.1"
 
 #define __DEBUG
-// #define DEBUG_WAIT_FOR_SERIAL
-
+ #define DEBUG_WAIT_FOR_SERIAL
 //#define DEMO_MODE
 
 // Színsémák

@@ -475,17 +475,6 @@ void displayValues() {
 }
 
 /**
- * @brief callback function a hőmérséklet intervallum lejáratakor
- * Minden mérési ciklusban meghívódik, függetlenül attól, hogy változott-e az érték
- * @param deviceIndex A szenzor eszköz indexe
- * @param temperatureRAW A nyers hőmérséklet érték
- */
-void handleIntervalElapsed(int deviceIndex, int32_t temperatureRAW) {
-    ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
-    Serial << "handleIntervalElapsed:: " << temperatureRAW << " -> " << ::temperature << " °C\n";
-}
-
-/**
  * @brief callback function a hőmérséklet változás kezelésére
  * CSAK akkor hívódik meg, ha a hőmérséklet két ÉRVÉNYES szenzorleolvasás között megváltozik.
  * @param deviceIndex A szenzor eszköz indexe
@@ -493,7 +482,7 @@ void handleIntervalElapsed(int deviceIndex, int32_t temperatureRAW) {
  */
 void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
     ::temperature = nonBlockingDallasTemperatureSensor.rawToCelsius(temperatureRAW);
-    Serial << "handleTemperatureChange:: " << temperatureRAW << " -> " << ::temperature << " °C\n";
+    DEBUG("handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(::temperature, 1).c_str());
 }
 
 /**
@@ -559,6 +548,10 @@ void setup(void) {
     // TFT háttérvilágítás beállítása
     tftBackLightAdjuster.begin();
 
+#ifdef DEBUG_WAIT_FOR_SERIAL
+    Utils::debugWaitForSerial(tft);
+#endif
+
     // LittleFS filesystem indítása
     LittleFS.begin();
     // Trafipax adatok betöltése CSV-ből
@@ -569,24 +562,10 @@ void setup(void) {
 
     drawSplashScreen();
 
-#ifdef DEBUG_WAIT_FOR_SERIAL
-    Utils::debugWaitForSerial(tft);
-#endif
-
     // TFT érintőképernyő kalibrálása
     uint16_t tftCalibrateData[5] = {209, 3692, 254, 3547, 7};
     // Utils::tftTouchCalibrate(tft, tftCalibrateData);
     tft.setTouch(tftCalibrateData);
-
-    // Non-blocking Dallas temperature sensor - 1500ms ajánlott 12 bites felbontáshoz
-    nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
-
-    // Non-blocking Dallas temperature sensor callback-ek
-    nonBlockingDallasTemperatureSensor.onIntervalElapsed(handleIntervalElapsed);
-    nonBlockingDallasTemperatureSensor.onTemperatureChange(handleTemperatureChange);
-
-    // Azonnal le is kérjük a hőmérsékletet
-    nonBlockingDallasTemperatureSensor.requestTemperature();
 
     // Még egy picit mutatjuk a splash screent
     delay(3000);
@@ -598,7 +577,21 @@ void setup(void) {
     Utils::beepTick();
 
     // Valós idejű demo indítása (5mp várakozás után közeledés/távolodás)
-    tafipax.startDemo();
+    // tafipax.startDemo();
+
+    // Figyelem!!!
+    // NEM LEHET a loop() és a Non-blocking Dallas között hosszú idő, mert a lib leáll az idő méréssel.
+    //  Szerintem hibás a matek a NonBlockingDallas::waitNextReading() metódusban
+    //
+    //  Hőmérséklet szenzor inicializálása
+    //  Non-blocking Dallas temperature sensor - 1500ms ajánlott 12 bites felbontáshoz
+    nonBlockingDallasTemperatureSensor.begin(NonBlockingDallas::resolution_12, 1500);
+
+    // Non-blocking Dallas temperature sensor callback-ek
+    nonBlockingDallasTemperatureSensor.onTemperatureChange(handleTemperatureChange);
+
+    // Azonnal le is kérjük a hőmérsékletet
+    nonBlockingDallasTemperatureSensor.requestTemperature();
 }
 
 /**
