@@ -10,6 +10,7 @@
             "includePath": [
                 "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/include",
                 "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/src",
+                "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/EEPROM/src",
                 "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/.pio/libdeps/pico/Streaming",
                 "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/.pio/libdeps/pico/FastLED/src",
                 "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/.pio/libdeps/pico/NonBlockingDallas",
@@ -109,7 +110,6 @@
                 "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/BluetoothHCI/src",
                 "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/BluetoothHIDMaster/src",
                 "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/DNSServer/src",
-                "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/EEPROM/src",
                 "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/ESPHost/src",
                 "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/FatFS/src",
                 "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/FatFSUSB/src",
@@ -173,6 +173,7 @@
                 "path": [
                     "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/include",
                     "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/src",
+                    "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/EEPROM/src",
                     "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/.pio/libdeps/pico/Streaming",
                     "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/.pio/libdeps/pico/FastLED/src",
                     "f:/Elektro/!Pico/PlatformIO/pico-zero-ili9488-gps-spedometer/.pio/libdeps/pico/NonBlockingDallas",
@@ -272,7 +273,6 @@
                     "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/BluetoothHCI/src",
                     "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/BluetoothHIDMaster/src",
                     "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/DNSServer/src",
-                    "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/EEPROM/src",
                     "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/ESPHost/src",
                     "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/FatFS/src",
                     "C:/Users/BT/.platformio/packages/framework-arduinopico/libraries/FatFSUSB/src",

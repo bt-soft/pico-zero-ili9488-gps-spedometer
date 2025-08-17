@@ -9,6 +9,7 @@ TFT_eSPI tft = TFT_eSPI(); // Invoke custom library with default width and heigh
 
 //-------------------- Config
 #include "Config.h"
+#include "Settings.h"
 
 #include "Large_Font.h"
 #include "Utils.h"
@@ -39,6 +40,9 @@ TftBackLightAdjuster tftBackLightAdjuster;
 
 #include "TrafipaxManager.h"
 TrafipaxManager trafipaxManager; // Automatikusan betölti a CSV-t
+
+// Settings class instance
+Settings settings(tft, config);
 
 // Optimalizált konstansok
 constexpr int ALERT_BAR_HEIGHT = 80;
@@ -80,16 +84,15 @@ bool timeHasPassed(long fromWhen, int howLong) { return millis() - fromWhen >= h
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+// Előre deklaráljuk a függvényeket
+void displayValues();
+void drawStaticLabels();
+
 bool traffiAlarmActive = false;
 
 // Intelligens trafipax figyelmeztető rendszer
 struct TrafipaxAlert {
-    enum State {
-        INACTIVE,       // Nincs aktív riasztás
-        APPROACHING,    // Közeledik - piros háttér + szirénázás
-        NEARBY_STOPPED, // Közel van, de megállt - piros háttér, nincs szirénázás
-        DEPARTING       // Távolodik - narancssárga háttér, nincs szirénázás
-    };
+    enum State { INACTIVE, APPROACHING, NEARBY_STOPPED, DEPARTING };
 
     State currentState = INACTIVE;
     const TrafipaxInternal *activeTrafipax = nullptr;
@@ -567,6 +570,9 @@ void setup(void) {
     // Beállítjuk a touch scren-t
     tft.setTouch(config.data.tftCalibrateData);
 
+    // Settings gombok inicializálása
+    settings.init();
+
     // Még egy picit mutatjuk a splash screent
     delay(3000);
 
@@ -602,28 +608,50 @@ void setup(void) {
  */
 void loop() {
 
-    // Hőmérséklet frissítése
-    nonBlockingDallasTemperatureSensor.update();
+    // Check if the settings menu is active
+    if (settings.isActive()) {
+        settings.loop(); // Let the settings object handle its own loop
 
-    // Értékek kiírása - optimalizált intervallum
-    static unsigned long lastDisplay = 0;
-    if (millis() - lastDisplay >= 1000) {
-        displayValues();
-        lastDisplay = millis();
-    }
+        // If the settings were just exited, redraw the main screen
+        if (!settings.isActive()) {
+            drawStaticLabels();
+            displayValues();
+        }
+    } else {
+        // --- Main screen logic ---
+
+        // Update temperature
+        nonBlockingDallasTemperatureSensor.update();
+
+        // Update display at intervals
+        static unsigned long lastDisplay = 0;
+        if (millis() - lastDisplay >= 1000) {
+            displayValues();
+            lastDisplay = millis();
+        }
 
 #ifdef DEMO_MODE
-    // Demo trafipax közeledés/távolodás (ha aktív)
-    if (trafipaxManager.isDemoActive()) {
-        trafipaxManager.processDemo();
-    }
+        // Demo mode processing
+        if (trafipaxManager.isDemoActive()) {
+            trafipaxManager.processDemo();
+        }
 #endif
 
-    // Intelligens trafipax figyelmeztető rendszer - optimalizált intervallum
-    static unsigned long lastTrafipaxCheck = 0;
-    if (millis() - lastTrafipaxCheck >= 500) {
-        processIntelligentTrafipaxAlert();
-        lastTrafipaxCheck = millis();
+        // Process traffic camera alerts
+        static unsigned long lastTrafipaxCheck = 0;
+        if (millis() - lastTrafipaxCheck >= 500) {
+            processIntelligentTrafipaxAlert();
+            lastTrafipaxCheck = millis();
+        }
+
+        // Check for touch on the speed area to enter settings
+        uint16_t x, y;
+        if (tft.getTouch(&x, &y)) {
+            // Speed area is roughly the bottom half of the screen, above the vertical bars
+            if (y > 150 && y < 300) {
+                settings.enter(); // Enter the settings menu
+            }
+        }
     }
 }
 
