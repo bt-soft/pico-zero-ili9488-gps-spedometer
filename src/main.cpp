@@ -71,21 +71,24 @@ TFT_eSprite spriteVerticalLinearMeter(&tft);
 TFT_eSprite spriteAlertBar(&tft);
 
 //---------------------------------------------------------------------------------------------------
-TinyGPSCustom totalGPGSVMessages(gps, "GPGSV", 1); // $GPGSV sentence, first element
-TinyGPSCustom messageNumber(gps, "GPGSV", 2);      // $GPGSV sentence, second element
-TinyGPSCustom satsInView(gps, "GPGSV", 3);         // $GPGSV sentence, third element
-TinyGPSCustom satNumber[4];                        // to be initialized later
-TinyGPSCustom snr[4];
-TinyGPSCustom elevation[4];
-TinyGPSCustom azimuth[4];
+TinyGPSCustom gsv_msg_num(gps, "GPGSV", 1);          // gsv_msg_num
+TinyGPSCustom gsv_total_msgs(gps, "GPGSV", 2);       // gsv_total_msgs
+TinyGPSCustom gsv_num_sats_in_view(gps, "GPGSV", 3); // gsv_num_sats_in_view
+
+TinyGPSCustom gsv_prn[4];       // gsv_prn
+TinyGPSCustom gsv_elevation[4]; // gsv_elevation
+TinyGPSCustom gsv_azimuth[4];   // gsv_azimuth
+TinyGPSCustom gsv_snr[4];       // gsv_snr
 
 static const int MAX_SATELLITES = 50;
 struct {
-    bool active;
+    int prn;
     int elevation;
     int azimuth;
     int snr;
+    bool updated; // Flag to indicate if this satellite's data was updated in the current GSV block
 } satellites[MAX_SATELLITES];
+uint8_t currentSatelliteCount = 0; // Number of satellites currently being tracked
 
 //---------------------------------------------------------------------------------------------------------------------------------------------------------
 /**
@@ -690,66 +693,82 @@ void loop() {
  */
 void readGSVMessages() {
 
-    // if (!totalGPGSVMessages.isValid()) {
-    //     // DEBUG("Not all $GPGSV messages processed yet\n");
-    //     return;
-    // }
+    // Check if all GSV messages have been received
+    if (!gsv_total_msgs.isValid()) {
+        // DEBUG("Not all $GPGSV messages processed yet\n");
+        return;
+    }
 
-    // if (totalGPGSVMessages.isUpdated()) {
+    // Check if this message is a new GSV block
+    if (!gsv_msg_num.isUpdated()) {
+        return;
+    }
 
-    //     for (byte i = 0; i < 4; ++i) {
+    uint8_t msg_num = atoi(gsv_msg_num.value());
+    uint8_t total_msgs = atoi(gsv_total_msgs.value());
+    uint8_t num_sats_in_view = atoi(gsv_num_sats_in_view.value());
 
-    //         // sat PRN number and SNR value
-    //         // sat PRN number and SNR value
-    //         uint8_t prnNo = atoi(satNumber[i].value());
-    //         uint8_t snrVal = atoi(snr[i].value());
+    // If this is the first message in a new GSV block, reset satellite updated flags
+    if (msg_num == 1) {
+        for (uint8_t i = 0; i < currentSatelliteCount; ++i) {
+            satellites[i].updated = false;
+        }
+        currentSatelliteCount = 0; // Reset count for new block
+    }
 
-    //         // ez valami szemét?
-    //         if (prnNo == 0) {
-    //             continue;
-    //         }
-    //         DEBUG("Satellite %d: PRN=%d, SNR=%d\n", i + 1, prnNo, snrVal);
-    //     }
+    // Process up to 4 satellites per GSV message
+    for (byte i = 0; i < 4; ++i) {
+        if (gsv_prn[i].isUpdated() && gsv_prn[i].isValid()) {
+            int _prn = atoi(gsv_prn[i].value());
+            int _elevation = atoi(gsv_elevation[i].value());
+            int _azimuth = atoi(gsv_azimuth[i].value());
+            int _snr = atoi(gsv_snr[i].value());
 
-    //     // totalMessages ==  currentMessage ?
-    //     if (atoi(totalGPGSVMessages.value()) != atoi(messageNumber.value())) {
-    //         DEBUG("Not complete yet\n");
-    //         return;
-    //     }
-    // }
-    //------------------------------------------------------------------------------------
-    if (totalGPGSVMessages.isUpdated()) {
-
-        for (int i = 0; i < 4; ++i) {
-            int satNo = atoi(satNumber[i].value()); // Műhold száma
-            if (satNo >= 1 && satNo <= MAX_SATELLITES) {
-                satellites[satNo - 1].elevation = atoi(elevation[i].value());
-                satellites[satNo - 1].azimuth = atoi(azimuth[i].value());
-                satellites[satNo - 1].snr = atoi(snr[i].value());
-                satellites[satNo - 1].active = true;
+            // Find if this satellite is already in our list
+            bool found = false;
+            for (uint8_t j = 0; j < currentSatelliteCount; ++j) {
+                if (satellites[j].prn == _prn) {
+                    satellites[j].elevation = _elevation;
+                    satellites[j].azimuth = _azimuth;
+                    satellites[j].snr = _snr;
+                    satellites[j].updated = true;
+                    found = true;
+                    break;
+                }
             }
-        }
 
-        // totalMessagesNumber ==currentMessageNumber?
-        if (atoi(totalGPGSVMessages.value()) != atoi(messageNumber.value())) {
-            // DEBUG("Not complete yet\n");
-            return;
-        }
-
-        DEBUG("Tracked satellites: %d\n", gps.satellites.value());
-
-        for (int i = 0; i < MAX_SATELLITES; i++) {
-            if (satellites[i].active) {
-                DEBUG("PRN=%d, Elevation=%d, Azimuth=%d, SNR=%d\n", //
-                      i + 1, satellites[i].elevation, satellites[i].azimuth, satellites[i].snr);
+            // If not found, add it to the list
+            if (!found && currentSatelliteCount < MAX_SATELLITES) {
+                satellites[currentSatelliteCount].prn = _prn;
+                satellites[currentSatelliteCount].elevation = _elevation;
+                satellites[currentSatelliteCount].azimuth = _azimuth;
+                satellites[currentSatelliteCount].snr = _snr;
+                satellites[currentSatelliteCount].updated = true;
+                currentSatelliteCount++;
             }
-        }
-
-        // Deactivate all satellites
-        for (int i = 0; i < MAX_SATELLITES; ++i) {
-            satellites[i].active = false;
         }
     }
+
+    // totalMessages ==  currentMessage ?
+    if (total_msgs != msg_num) {
+        // DEBUG("Not complete yet\n");
+        return;
+    }
+
+    // If this is the last message in the GSV block, print/display results
+    DEBUG("\n--- Visible Satellites ---\n");
+    DEBUG("Total in view (from GSV): %d\n", num_sats_in_view);
+    DEBUG("PRN | Elev | Azim | SNR\n");
+    DEBUG("----|------|------|-----\n");
+
+    for (uint8_t i = 0; i < currentSatelliteCount; ++i) {
+        // Only display satellites that were updated in the current block
+        // This handles cases where a satellite might drop out of view
+        if (satellites[i].updated) {
+            DEBUG("%2d  | %2d   | %3d  | %2d\n", satellites[i].prn, satellites[i].elevation, satellites[i].azimuth, satellites[i].snr);
+        }
+    }
+    DEBUG("--------------------------\n");
 }
 
 /**
@@ -821,10 +840,10 @@ void setup1(void) {
     //    For the first satellite in the sentence:
     // Initialize all the uninitialized TinyGPSCustom objects
     for (byte i = 0; i < 4; ++i) {
-        satNumber[i].begin(gps, "GPGSV", 4 + 4 * i); // offsets 4, 8, 12, 16
-        elevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
-        azimuth[i].begin(gps, "GPGSV", 6 + 4 * i);   // offsets 6, 10, 14, 18
-        snr[i].begin(gps, "GPGSV", 7 + 4 * i);       // offsets 7, 11, 15, 19
+        gsv_prn[i].begin(gps, "GPGSV", 4 + 4 * i);       // offsets 4, 8, 12, 16
+        gsv_elevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
+        gsv_azimuth[i].begin(gps, "GPGSV", 6 + 4 * i);   // offsets 6, 10, 14, 18
+        gsv_snr[i].begin(gps, "GPGSV", 7 + 4 * i);       // offsets 7, 11, 15, 19
     }
 }
 
