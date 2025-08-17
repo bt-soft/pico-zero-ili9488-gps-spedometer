@@ -487,7 +487,6 @@ void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
  * @brief Splash screen kirajzolása
  */
 void drawSplashScreen() {
-    // Modern splash screen ---
     // Gradient háttér
     for (int y = 0; y < tft.height(); y++) {
         uint16_t color = tft.color565(0, 40 + y / 4, 120 + y / 8); // kékes-lila gradient
