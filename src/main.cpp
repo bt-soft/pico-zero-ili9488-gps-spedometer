@@ -45,13 +45,14 @@ void drawSplashScreen() {
     // Nagy cím árnyékkal
     tft.setTextSize(6);
     tft.setTextColor(TFT_BLACK); // árnyék
-    tft.drawString("Pico GPS", tft.width() / 2 + 4, 60 + 4);
+    tft.drawString(PROGRAM_NAME, tft.width() / 2 + 4, 60 + 4);
     tft.setTextColor(TFT_WHITE);
-    tft.drawString("Pico GPS", tft.width() / 2, 60);
+    tft.drawString(PROGRAM_NAME, tft.width() / 2, 60);
 
     // leírás
+    tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE);
-    tft.drawString(PROGRAM_NAME, tft.width() / 2, 110, 2);
+    tft.drawString(PROGRAM_DESC, tft.width() / 2, 110, 2);
 
     // Verzió
     tft.setTextColor(TFT_YELLOW);
@@ -154,13 +155,22 @@ void setup() {
     // Szenzor inicializálása
     sensorUtils.init();
 
+    // ScreenManager inicializálása itt, amikor minden más már kész
+    if (screenManager == nullptr) {
+        screenManager = new ScreenManager();
+    }
+    screenManager->switchToScreen(SCREEN_NAME_TEST); // A kezdő képernyő
+
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
 }
 
+/**
+ *
+ */
 void loop() {
 
-    // Szenzor frissítése
+    // ----  Szenzor frissítése
     sensorUtils.loop();
 
     //------------------- Touch esemény kezelése
@@ -189,6 +199,19 @@ void loop() {
     }
 
     lastTouchState = touched;
+
+    if (screenManager) {
+        // Deferred actions feldolgozása - biztonságos képernyőváltások végrehajtása
+        screenManager->loop();
+    }
+
+//------------------- EEPROM mentés figyelése
+#define EEPROM_SAVE_CHECK_INTERVAL 1000 * 60 * 5 // 5 perc
+    static uint32_t lastEepromSaveCheck = 0;
+    if (millis() - lastEepromSaveCheck >= EEPROM_SAVE_CHECK_INTERVAL) {
+        config.checkSave();
+        lastEepromSaveCheck = millis();
+    }
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------

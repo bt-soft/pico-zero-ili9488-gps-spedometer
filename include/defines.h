@@ -3,7 +3,8 @@
 
 //---- Program Information ------------------------------------------
 
-#define PROGRAM_NAME "GPS SpeedoMeter"
+#define PROGRAM_NAME "Pico GPS"
+#define PROGRAM_DESC "RP2040 Zero GPS SpeedoMeter"
 #define PROGRAM_VERSION "V0.0.3"
 #define PROGRAM_AUTHOR "BT-Soft"
 
