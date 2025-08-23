@@ -121,6 +121,7 @@ float SensorUtils::readExternalTemperature() {
     // if (externalTemperatureValue == 0.0f) {
     //     return readCoreTemperature();
     // }
+    DEBUG("SensorUtils::readExternalTemperature() -> value: %s °C\n", Utils::floatToString(externalTemperatureValue, 2).c_str());
     return externalTemperatureValue;
 }
 

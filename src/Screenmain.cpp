@@ -246,7 +246,7 @@ void ScreenMain::drawSpeedometerIcon(int16_t x, int16_t y) {
  */
 void ScreenMain::handleOwnLoop() {
 
-    // Update satellite information
+    // 1 másodperces frissítés
     static long lastUpdate = millis() - 1000;
     if (!Utils::timeHasPassed(lastUpdate, 1000)) {
         return;
@@ -485,46 +485,48 @@ void ScreenMain::handleOwnLoop() {
         lastSpeed = speedValid ? currentSpeed : -1.0;
     }
 
-    // -- Vertikális bar komponensek (Dallas szenzor nélkül)
-    static uint32_t lastSpriteUpdate = 0;
-    if (millis() - lastSpriteUpdate >= 5000) { // 5 másodpercenként
-        lastSpriteUpdate = millis();
+    // -- Vertikális bar komponensek - 5 másodperces frissítés ------------------------------------
 
-        // Sprite legyártása, ha még nem létezik
-        if (!spriteVerticalLinearMeter.created()) {
-            spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
-        }
+    static uint32_t lastSpriteUpdate = 0;
+    if (!Utils::timeHasPassed(lastSpriteUpdate, 5000)) {
+        return;
+    }
+    lastSpriteUpdate = millis();
+
+    // Sprite legyártása, ha még nem létezik
+    if (!spriteVerticalLinearMeter.created()) {
+        spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
+    }
 
 #define VERTICAL_BARS_Y 290
-        // Vertical Line bar - Battery (sprite-os)
-        float batteryVoltage = sensorUtils.readVBusExternal();
-        verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                            "Batt [V]",           // category
-                            batteryVoltage,       // val
-                            BATT_BARMETER_MIN,    // minVal
-                            BATT_BARMETER_MAX,    // maxVal
-                            0,                    // x
-                            VERTICAL_BARS_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
-                            30,                   // bar-w
-                            10,                   // bar-h
-                            2,                    // gap
-                            10,                   // n
-                            BLUE2RED);            // color
+    // Vertical Line bar - Battery (sprite-os)
+    float batteryVoltage = sensorUtils.readVBusExternal();
+    verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
+                        "Batt [V]",           // category
+                        batteryVoltage,       // val
+                        BATT_BARMETER_MIN,    // minVal
+                        BATT_BARMETER_MAX,    // maxVal
+                        0,                    // x
+                        VERTICAL_BARS_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                   // bar-w
+                        10,                   // bar-h
+                        2,                    // gap
+                        10,                   // n
+                        BLUE2RED);            // color
 
-        // Vertical Line bar - Core Temperature (sprite-os) - DALLAS HELYETT
-        float coreTemp = sensorUtils.readCoreTemperature();
-        verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                            "Core [C]",                                       // category
-                            coreTemp,                                         // val
-                            TEMP_BARMETER_MIN,                                // minVal
-                            TEMP_BARMETER_MAX,                                // maxVal
-                            tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH, // x: sprite szélesség beszámítva
-                            VERTICAL_BARS_Y + 10,                             // y: sprite alsó éle, +10 hogy ne lógjon le
-                            30,                                               // bar-w
-                            10,                                               // bar-h
-                            2,                                                // gap
-                            10,                                               // n
-                            BLUE2RED,                                         // color
-                            true);                                            // bal oldalt legyenek az értékek
-    }
+    // Vertical Line bar - External Temperature (DS18B20) - DALLAS SZENZOR
+    float externalTemp = sensorUtils.readExternalTemperature();
+    verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
+                        "Ext [C]",                                        // category
+                        externalTemp,                                     // val
+                        TEMP_BARMETER_MIN,                                // minVal
+                        TEMP_BARMETER_MAX,                                // maxVal
+                        tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH, // x: sprite szélesség beszámítva
+                        VERTICAL_BARS_Y + 10,                             // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                                               // bar-w
+                        10,                                               // bar-h
+                        2,                                                // gap
+                        10,                                               // n
+                        BLUE2RED,                                         // color
+                        true);                                            // bal oldalt legyenek az értékek
 }

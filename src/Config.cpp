@@ -18,9 +18,9 @@ const Config_t DEFAULT_CONFIG = {
     .gpsTrafiAlarmEnabled = true, // GPS traffipax riasztás engedélyezése
 
     // GPS
-    .debugGpsSerialOnInternalFastLed = true,
-    .debugGpsSerialData = true,
-    .debugGpsSatellitesDatabase = true,
+    .debugGpsSerialOnInternalFastLed = true, // GPS soros adat kiírása a belső gyors LED-re
+    .debugGpsSerialData = false,             // GPS soros adat kiírása a soros portra
+    .debugGpsSatellitesDatabase = false,
 
 };
 

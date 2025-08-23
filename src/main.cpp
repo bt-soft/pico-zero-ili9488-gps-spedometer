@@ -176,7 +176,7 @@ void setup() {
  */
 void loop() {
 
-    // Szenzorok karbantartása - DALLAS SZENZOR MOST ÚJRA BEKAPCSOLVA statikus objektumokkal
+    // Szenzorok karbantartása
     sensorUtils.loop();
 
     //------------------- Touch esemény kezelése
