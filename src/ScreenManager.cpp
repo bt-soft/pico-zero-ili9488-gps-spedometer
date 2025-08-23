@@ -1,12 +1,13 @@
 #include "ScreenManager.h"
 
+#include "ScreenMain.h"
 #include "ScreenTest.h"
 
 /**
  * @brief Képernyőkezelő osztály konstruktor
  */
 void ScreenManager::registerDefaultScreenFactories() {
-    // registerScreenFactory(SCREEN_NAME_FM, []() { return std::make_shared<ScreenFM>(); });
+    registerScreenFactory(SCREEN_NAME_MAIN, []() { return std::make_shared<ScreenMain>(); });
     // registerScreenFactory(SCREEN_NAME_AM, []() { return std::make_shared<ScreenAM>(); });
     // registerScreenFactory(SCREEN_NAME_SCREENSAVER, []() { return std::make_shared<ScreenScreenSaver>(); });
     // registerScreenFactory(SCREEN_NAME_MEMORY, []() { return std::make_shared<ScreenMemory>(); });

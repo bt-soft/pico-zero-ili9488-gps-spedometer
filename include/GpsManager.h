@@ -38,10 +38,6 @@ class GpsManager {
     HardwareSerial *gpsSerial;
     TinyGPSPlus gps;
 
-    // Műholdak tárolása
-    static constexpr uint8_t MAX_SATELLITES = 50;
-    Satellites_type satellites[MAX_SATELLITES];
-
     uint8_t currentSatelliteCount = 0;  // Number of satellites currently being tracked
     TinyGPSCustom gsv_msg_num;          // gsv_msg_num
     TinyGPSCustom gsv_total_msgs;       // gsv_total_msgs
@@ -58,9 +54,8 @@ class GpsManager {
     unsigned long startTime;
     unsigned long gpsBootTime;
 
-    void readGSVMessages();
+    void processGSVMessages();
     void readGPS();
-    void updateSatelliteInfo();
 };
 
 #endif // __GPS_MANAGER_H

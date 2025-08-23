@@ -1,4 +1,5 @@
 #include "GpsManager.h"
+#include "Utils.h"
 #include "defines.h"
 
 // Belső LED;  PICO: LED_BUILTIN (sima LED), Zero: GP16 (WS2812 RGB LED)
@@ -17,7 +18,7 @@ constexpr uint8_t MAX_SATELLITES = 50;
 /**
  * Konstruktor
  */
-GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugSerialOnInternalFastLed(false) {
+GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugSerialOnInternalFastLed(true) {
 
     // Initialize TinyGPSCustom objects for GSV parsing - main GSV fields
     gsv_msg_num.begin(gps, "GPGSV", 1);          // Message number
@@ -38,15 +39,6 @@ GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugSerialO
         gsv_snr[i].begin(gps, "GPGSV", 7 + 4 * i);       // offsets 7, 11, 15, 19
     }
 
-    // Initialize satellites array
-    for (int i = 0; i < MAX_SATELLITES; i++) {
-        satellites[i].prn = 0;
-        satellites[i].elevation = 0;
-        satellites[i].azimuth = 0;
-        satellites[i].snr = 0;
-        satellites[i].updated = false;
-    }
-
     // Ekkon indultunk
     startTime = millis();
     gpsBootTime = 0;
@@ -55,7 +47,7 @@ GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugSerialO
 /**
  * Read GSV messages from the GPS module
  */
-void GpsManager::readGSVMessages() {
+void GpsManager::processGSVMessages() {
 
     // Check if all GSV messages have been received
     if (!gsv_total_msgs.isValid()) {
@@ -72,14 +64,6 @@ void GpsManager::readGSVMessages() {
     uint8_t total_msgs = atoi(gsv_total_msgs.value());
     uint8_t num_sats_in_view = atoi(gsv_num_sats_in_view.value());
 
-    // If this is the first message in a new GSV block, reset satellite updated flags
-    if (msg_num == 1) {
-        for (uint8_t i = 0; i < currentSatelliteCount; ++i) {
-            satellites[i].updated = false;
-        }
-        currentSatelliteCount = 0; // Reset count for new block
-    }
-
     // Process up to 4 satellites per GSV message
     for (byte i = 0; i < 4; ++i) {
         if (gsv_prn[i].isUpdated() && gsv_prn[i].isValid()) {
@@ -94,30 +78,7 @@ void GpsManager::readGSVMessages() {
             int _azimuth = atoi(gsv_azimuth[i].value());
             int _snr = atoi(gsv_snr[i].value());
 
-            satelliteDb.insertSatellite(_prn, _elevation, _azimuth, _snr);
-
-            // Find if this satellite is already in our list
-            bool found = false;
-            for (uint8_t j = 0; j < currentSatelliteCount; ++j) {
-                if (satellites[j].prn == _prn) {
-                    satellites[j].elevation = _elevation;
-                    satellites[j].azimuth = _azimuth;
-                    satellites[j].snr = _snr;
-                    satellites[j].updated = true;
-                    found = true;
-                    break;
-                }
-            }
-
-            // If not found, add it to the list
-            if (!found && currentSatelliteCount < MAX_SATELLITES) {
-                satellites[currentSatelliteCount].prn = _prn;
-                satellites[currentSatelliteCount].elevation = _elevation;
-                satellites[currentSatelliteCount].azimuth = _azimuth;
-                satellites[currentSatelliteCount].snr = _snr;
-                satellites[currentSatelliteCount].updated = true;
-                currentSatelliteCount++;
-            }
+            // satelliteDb.insertSatellite(_prn, _elevation, _azimuth, _snr);
         }
     }
 
@@ -127,20 +88,9 @@ void GpsManager::readGSVMessages() {
         return;
     }
 
-    // If this is the last message in the GSV block, print/display results
-    DEBUG("\n--- Visible Satellites ---\n");
-    DEBUG("Total in view (from GSV): %d\n", num_sats_in_view);
-    DEBUG("PRN | Elev | Azim | SNR\n");
-    DEBUG("----|------|------|-----\n");
-
-    for (uint8_t i = 0; i < currentSatelliteCount; ++i) {
-        // Only display satellites that were updated in the current block
-        // This handles cases where a satellite might drop out of view
-        if (satellites[i].updated) {
-            DEBUG("%2d  | %2d   | %3d  | %2d\n", satellites[i].prn, satellites[i].elevation, satellites[i].azimuth, satellites[i].snr);
-        }
-    }
-    DEBUG("--------------------------\n");
+#ifdef __DEBUG
+    satelliteDb.debugSatDb(num_sats_in_view);
+#endif
 }
 
 /**
@@ -182,9 +132,12 @@ void GpsManager::loop() {
     // Van GPS adat?
     if (Serial1.available()) {
         readGPS();
-        readGSVMessages();
+        processGSVMessages();
     }
 
-    // Update satellite information
-    satelliteDb.deleteUntrackedSatellites();
+    // // Update satellite information
+    // static long lastWiseSatellitesData = millis();
+    // if (Utils::timeHasPassed(lastWiseSatellitesData, 1000)) {
+    //     satelliteDb.deleteUntrackedSatellites();
+    // }
 }

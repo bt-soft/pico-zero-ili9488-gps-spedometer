@@ -8,7 +8,7 @@ namespace Utils {
  * @param value A lebegőpontos szám értéke
  * @param decimalPlaces A tizedesjegyek száma (alapértelmezett: 2)
  */
-String floatToString(float value, int decimalPlaces) {
+String floatToString(float value, int decimalPlaces = 2) {
     String result = String(value, decimalPlaces);
     return result;
 }

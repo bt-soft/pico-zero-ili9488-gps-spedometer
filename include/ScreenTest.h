@@ -1,5 +1,5 @@
-#ifndef __TEST_SCREEN_H
-#define __TEST_SCREEN_H
+#ifndef __SCREEN_TEST_H
+#define __SCREEN_TEST_H
 
 #include "ButtonsGroupManager.h"
 #include "MessageDialog.h"
@@ -26,7 +26,7 @@ class ScreenTest : public UIScreen, public ButtonsGroupManager<ScreenTest> {
     }
     virtual ~ScreenTest() = default;
 
-        /**
+    /**
      * @brief Loop hívás felülírása
      * animációs vagy egyéb saját logika végrehajtására
      * @note Ez a metódus nem hívja meg a gyerek komponensek loop-ját, csak saját logikát tartalmaz.
@@ -249,4 +249,4 @@ class ScreenTest : public UIScreen, public ButtonsGroupManager<ScreenTest> {
     }
 };
 
-#endif // __TEST_SCREEN_H
+#endif // __SCREEN_TEST_H
