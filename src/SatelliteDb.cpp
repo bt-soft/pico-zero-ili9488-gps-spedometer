@@ -96,16 +96,24 @@ void SatelliteDb::clear() { satellites.clear(); }
  * @param num_sats_in_view A GSV üzenetből érkező műholdak száma
  */
 void SatelliteDb::debugSatDb(uint8_t num_sats_in_view) {
+    unsigned long currentTime = millis();
 
-    DEBUG("--------------------------\n");
+    DEBUG("--------------------------------\n");
     DEBUG("\n--- Visible Satellites ---\n");
     DEBUG("Total in view (from GSV): %d\n", num_sats_in_view);
     DEBUG("Total in DB: %d\n", countSats());
-    DEBUG("PRN | Elev | Azim | SNR\n");
-    DEBUG("----|------|------|-----\n");
+    DEBUG("PRN | Elev | Azim | SNR | TTL(s)\n");
+    DEBUG("----|------|------|-----|-------\n");
 
     for (const auto &sat : satellites) {
-        DEBUG("%2d  | %2d   | %3d  | %2d\n", sat.prn, sat.elevation, sat.azimuth, sat.snr);
+        long age = currentTime - sat.timeStamp;
+        long timeToLive = (SAT_MAX_AGE_MSEC - age) / 1000; // másodpercben
+
+        // Ha negatív, akkor már lejárt (de még nem lett törölve)
+        if (timeToLive < 0)
+            timeToLive = 0;
+
+        DEBUG("%2d  | %2d   | %3d  | %2d  | %2ld\n", sat.prn, sat.elevation, sat.azimuth, sat.snr, timeToLive);
     }
-    DEBUG("--------------------------\n");
+    DEBUG("--------------------------------\n");
 }
