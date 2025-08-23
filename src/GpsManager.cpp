@@ -20,6 +20,12 @@ constexpr uint8_t MAX_SATELLITES = 50;
  */
 GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugSerialOnInternalFastLed(true) {
 
+    // Initialize FastLED for Pico Zero WS2812 RGB LED
+    FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
+    FastLED.setBrightness(50); // Set brightness to 50%
+    FastLED.clear();
+    FastLED.show();
+
     // Initialize TinyGPSCustom objects for GSV parsing - main GSV fields
     gsv_msg_num.begin(gps, "GPGSV", 1);          // Message number
     gsv_total_msgs.begin(gps, "GPGSV", 2);       // Total messages
@@ -105,7 +111,7 @@ void GpsManager::readGPS() {
 
         if (gps.encode(c)) {
 
-            // LED villogtatása, ha van érvéynes bejövő GPS mondat
+            // LED villogtatása, ha van érvényes bejövő GPS mondat
             if (debugSerialOnInternalFastLed) {
                 leds[0] = INTERNAL_LED_COLOR;
                 FastLED.show();
