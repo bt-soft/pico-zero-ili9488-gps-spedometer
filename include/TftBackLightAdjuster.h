@@ -75,7 +75,7 @@ class TftBackLightAdjuster {
     /**
      * Állítgatja a háttérvilágítást a környezeti fényviszonyoknak megfelelően.
      */
-    void adjust(void);
+    void loop(void);
 };
 
 #endif // __TFT_BACKLIGHT_ADJUSTER_H

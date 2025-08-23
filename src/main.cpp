@@ -26,6 +26,10 @@ TrafipaxManager trafipaxManager; // Automatikusan betölti a CSV-t
 ScreenManager *screenManager = nullptr;
 IScreenManager **iScreenManager = (IScreenManager **)&screenManager; // A UIComponent használja
 
+//-------------------- GPS
+#include "GpsManager.h"
+GpsManager *gpsManager = nullptr;
+
 // ------------------------------------------------------------------------------------------------------------------------------
 // Core0
 // ------------------------------------------------------------------------------------------------------------------------------
@@ -159,7 +163,7 @@ void setup() {
     if (screenManager == nullptr) {
         screenManager = new ScreenManager();
     }
-    screenManager->switchToScreen(SCREEN_NAME_TEST); // A kezdő képernyő
+    screenManager->switchToScreen(SCREEN_NAME_MAIN); // A kezdő képernyőre kapcsolás
 
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
@@ -169,9 +173,6 @@ void setup() {
  *
  */
 void loop() {
-
-    // ----  Szenzor frissítése
-    sensorUtils.loop();
 
     //------------------- Touch esemény kezelése
     uint16_t touchX, touchY;
@@ -218,5 +219,29 @@ void loop() {
 // Core1
 // ------------------------------------------------------------------------------------------------------------------------------
 
-void setup1() {}
-void loop1() {}
+/**
+ * Core1 setup
+ */
+void setup1() {
+    // GPS Serial
+    Serial1.setRX(PIN_SERIAL1_RX_NEW);
+    Serial1.setTX(PIN_SERIAL1_TX_NEW);
+    Serial1.begin(9600);
+
+    gpsManager = new GpsManager(&Serial1);
+}
+
+/**
+ * Core1 loop
+ */
+void loop1() {
+
+    // GPS olvasás
+    gpsManager->loop();
+
+    // Szenzorok karbantartása
+    sensorUtils.loop();
+
+    // Háttérvilágitás bazseválása
+    tftBackLightAdjuster.loop();
+}

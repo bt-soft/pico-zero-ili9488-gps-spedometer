@@ -72,6 +72,11 @@ template <typename T, size_t N> bool isZeroArray(T (&arr)[N]) {
     return true; // Ha minden elem nulla, akkor true-t adunk vissza
 }
 
+/**
+ * Eltelt már annyi idő?
+ */
+inline bool timeHasPassed(long fromWhen, int howLong) { return millis() - fromWhen >= howLong; }
+
 }; // namespace Utils
 
 #endif // __UTILS_H__

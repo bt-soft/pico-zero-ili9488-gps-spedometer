@@ -3,7 +3,7 @@
 /**
  * LED háttérvilágítás PWM állítgatás
  */
-void TftBackLightAdjuster::adjust(void) {
+void TftBackLightAdjuster::loop(void) {
 
     // 200msec-enként frissítjük a célértéket
     if (millis() - lastSensorCheckMsec > SENSOR_CHECK_MSEC) {
