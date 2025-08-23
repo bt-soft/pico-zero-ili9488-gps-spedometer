@@ -17,10 +17,6 @@
 #define VBUS_DIVIDER_R2 4.7f
 #define EXTERNAL_VBUSDIVIDER_RATIO ((VBUS_DIVIDER_R1 + VBUS_DIVIDER_R2) / VBUS_DIVIDER_R2) // Feszültségosztó aránya
 
-// Statikus változók definíciói
-float SensorUtils::externalTemperatureValue = 0.0f;
-NonBlockingDallas *SensorUtils::nonBlockingDallasTemperatureSensor = nullptr;
-
 /**
  * Konstruktor
  */
@@ -29,35 +25,17 @@ SensorUtils::SensorUtils() : vBusExtValue(0.0f), vBusExtLastRead(0), vBusExtVali
     analogReadResolution(AD_RESOLUTION);
 }
 
+/**
+ * Inicializálja az osztályt
+ */
 void SensorUtils::init() {
-    // --------------------------------------------------------------------------------------------------------
-    // Figyelem!!!
-    // NEM LEHET a loop() és a Non-blocking Dallas között hosszú idő, mert a lib leáll az idő méréssel.
-    //  Szerintem hibás a matek a NonBlockingDallas::waitNextReading() metódusban
-    // --------------------------------------------------------------------------------------------------------
 
-    nonBlockingDallasTemperatureSensor = new NonBlockingDallas(new DallasTemperature(new OneWire(PIN_DS18B20_TEMP_SENSOR)));
+    oneWire = new OneWire(PIN_DS18B20_TEMP_SENSOR);
+    dallasTemperatureSensor = new DallasTemperature(oneWire);
 
     //  Hőmérséklet szenzor inicializálása
-    //  Non-blocking Dallas temperature sensor - 1500ms ajánlott 12 bites felbontáshoz
-    nonBlockingDallasTemperatureSensor->begin(NonBlockingDallas::resolution_12, 1500);
-
-    // Non-blocking Dallas temperature sensor callback-ek
-    nonBlockingDallasTemperatureSensor->onTemperatureChange(handleTemperatureChange);
-
-    // Azonnal le is kérjük a hőmérsékletet
-    nonBlockingDallasTemperatureSensor->requestTemperature();
-}
-
-/**
- * @brief callback function a hőmérséklet változás kezelésére
- * CSAK akkor hívódik meg, ha a hőmérséklet két ÉRVÉNYES szenzorleolvasás között megváltozik.
- * @param deviceIndex A szenzor eszköz indexe
- * @param temperatureRAW A nyers hőmérséklet érték
- */
-void SensorUtils::handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
-    externalTemperatureValue = nonBlockingDallasTemperatureSensor->rawToCelsius(temperatureRAW);
-    DEBUG("handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(externalTemperatureValue, 2).c_str());
+    dallasTemperatureSensor->begin();
+    dallasTemperatureSensor->setResolution(DS18B20_TEMP_SENSOR_NDX, 12); // 12 bites felbontás
 }
 
 /**
@@ -117,6 +95,9 @@ float SensorUtils::readExternalTemperature() {
  */
 void SensorUtils::loop() {
 
-    // Update temperature
-    nonBlockingDallasTemperatureSensor->update();
+    DEBUG("Requesting temperatures...\n");
+    dallasTemperatureSensor->requestTemperatures(); // Küld egy kérést a hőmérsékletre
+    DEBUG("Requesting done\n");
+    externalTemperatureValue = dallasTemperatureSensor->getTempCByIndex(DS18B20_TEMP_SENSOR_NDX);
+    DEBUG("externalTemperatureValue: %s °C\n", Utils::floatToString(externalTemperatureValue, 2).c_str());
 }

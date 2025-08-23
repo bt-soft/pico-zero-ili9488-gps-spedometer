@@ -22,9 +22,9 @@ class SensorUtils {
     bool coreTemperatureValid;             // Hőmérséklet cache érvényessége
 
     // DS18B20
-    static float externalTemperatureValue; // Külső hőmérséklet utolsó mért értéke (Celsius)
-    static NonBlockingDallas *nonBlockingDallasTemperatureSensor;
-    static void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW);
+    float externalTemperatureValue; // Külső hőmérséklet utolsó mért értéke (Celsius)
+    OneWire *oneWire;
+    DallasTemperature *dallasTemperatureSensor;
 
   public:
     SensorUtils();
