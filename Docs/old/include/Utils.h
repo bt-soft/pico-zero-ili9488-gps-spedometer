@@ -11,7 +11,7 @@ namespace Utils {
  * @param value A lebegőpontos szám értéke
  * @param decimalPlaces A tizedesjegyek száma (alapértelmezett: 2)
  */
-String floatToString(float value, int decimalPlaces = 2);
+String floatToString(float value, int decimalPlaces);
 
 /**
  * Várakozás a soros port megnyitására DEBUG esetén

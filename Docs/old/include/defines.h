@@ -1,15 +1,7 @@
 #ifndef __DEFINES_H
 #define __DEFINES_H
 
-//---- Program Information ------------------------------------------
-
-#define PROGRAM_NAME "GPS SpeedoMeter"
-#define PROGRAM_VERSION "V0.0.3"
-#define PROGRAM_AUTHOR "BT-Soft"
-
-//--- ScreenNames ----
-#define SCREEN_NAME_TEST "Test"
-#define SCREEN_NAME_EMPTY "Empty"
+#define APP_VERSION "0.0.1"
 
 #define __DEBUG
 // #define DEBUG_WAIT_FOR_SERIAL
@@ -67,12 +59,6 @@
 
 // TFT
 #define TFT_BACKGROUND_LED_MAX_BRIGHTNESS 255
-
-//--- C String compare -----
-#define STREQ(a, b) (strcmp((a), (b)) == 0)
-
-//--- Array Utils ---
-#define ARRAY_ITEM_COUNT(array) (sizeof(array) / sizeof(array[0]))
 
 //--- Debug ---
 #ifdef __DEBUG
