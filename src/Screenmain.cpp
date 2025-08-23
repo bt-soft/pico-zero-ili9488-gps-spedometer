@@ -374,7 +374,9 @@ void ScreenMain::handleOwnLoop() {
     }
 
     // GPS HDOP érték ellenőrzése
-    static double lastHdop = -1.0; // Kényszerített első frissítés
+    static double lastHdop = -1.0;     // Kényszerített első frissítés
+    static double maxSpeed = 0.0;      // Maximum sebesség tárolása
+    static double lastMaxSpeed = -1.0; // Kényszerített első frissítés
     double currentHdop = 0.0;
     bool hdopValid = gpsManager->getHdop().isValid() && gpsManager->getHdop().age() < GPS_DATA_MAX_AGE;
 #ifdef DEMO_MODE
@@ -397,7 +399,7 @@ void ScreenMain::handleOwnLoop() {
         // Padding a HDOP számára
         tft.setTextPadding(tft.textWidth("8.8") + 10);
 
-        // HDOP pozíciója az ikon mellett (55 pixel-re az ikon után)
+        // HDOP pozíciója az ikon mellett
         dtostrf(currentHdop, 0, 1, buf); // 1 tizedesjegy
         tft.drawString(hdopValid ? String(buf) : "--", 39, 60, 2);
         lastHdop = hdopValid ? currentHdop : -1.0;
@@ -425,6 +427,37 @@ void ScreenMain::handleOwnLoop() {
         currentSpeed = gpsManager->getSpeed().kmph();
     }
 #endif
+
+    // Maximum sebesség frissítése
+    if (speedValid && currentSpeed > maxSpeed) {
+        maxSpeed = currentSpeed;
+    }
+
+#ifdef DEMO_MODE
+    // Demo módban időnként növeljük a max sebességet
+    static unsigned long lastMaxSpeedChange = 0;
+    if (millis() - lastMaxSpeedChange > 10000) { // 10 másodpercenként
+        maxSpeed = max(maxSpeed, (double)random(100, 180));
+        lastMaxSpeedChange = millis();
+    }
+#endif
+
+    // Maximum sebesség kiírása
+    if (abs(maxSpeed - lastMaxSpeed) > 0.5) {
+        // Max sebesség a speedometer ikon mellé (jobbra)
+        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+        tft.setTextColor(TFT_WHITE, TFT_BLACK);
+        tft.setFreeFont();
+        tft.setTextSize(2); // Normál font méret
+
+        // Padding a max sebesség számára
+        tft.setTextPadding(tft.textWidth("888") + 10);
+
+        // Max sebesség pozíciója az ikon mellett
+        tft.drawString(String((int)maxSpeed), 400, 60, 2);
+        lastMaxSpeed = maxSpeed;
+        tft.setFreeFont(); // Alapértelmezett font
+    }
 
     if (abs(currentSpeed - lastSpeed) > 0.1 || (gpsManager->getSpeed().isValid() != (lastSpeed >= 0))) {
         // Sebesség középen Large_Font-al - csak ha változott
