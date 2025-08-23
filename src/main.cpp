@@ -155,9 +155,6 @@ void setup() {
     // Beállítjuk a touch scren-t
     tft.setTouch(config.data.tftCalibrateData);
 
-    // Szenzor inicializálása
-    sensorUtils.init();
-
     // Még egy picit mutatjuk a splash screent
     delay(3000);
 
@@ -167,6 +164,9 @@ void setup() {
     }
     screenManager->switchToScreen(SCREEN_NAME_MAIN); // A kezdő képernyőre kapcsolás
 
+    // Szenzor inicializálása
+    sensorUtils.init();
+
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
 }
@@ -175,6 +175,9 @@ void setup() {
  *
  */
 void loop() {
+
+    // Szenzorok karbantartása
+    sensorUtils.loop();
 
     //------------------- Touch esemény kezelése
     uint16_t touchX, touchY;
@@ -244,9 +247,6 @@ void loop1() {
 
     // GPS olvasás
     gpsManager->loop();
-
-    // Szenzorok karbantartása
-    sensorUtils.loop();
 
     // Háttérvilágitás bazseválása
     tftBackLightAdjuster.loop();
