@@ -176,8 +176,8 @@ void setup() {
  */
 void loop() {
 
-    // Szenzorok karbantartása - DALLAS SZENZOR KIKAPCSOLVA a megfagyás megelőzése érdekében
-    // sensorUtils.loop();
+    // Szenzorok karbantartása - DALLAS SZENZOR MOST ÚJRA BEKAPCSOLVA statikus objektumokkal
+    sensorUtils.loop();
 
     //------------------- Touch esemény kezelése
     uint16_t touchX, touchY;

@@ -2,7 +2,9 @@
 #define __SENSOR_UTILS_H
 
 #include <Arduino.h>
+#include <DallasTemperature.h>
 #include <NonBlockingDallas.h>
+#include <OneWire.h>
 
 #include "defines.h"
 #include "pins.h"
@@ -22,13 +24,12 @@ class SensorUtils {
     bool coreTemperatureValid;             // Hőmérséklet cache érvényessége
 
     // DS18B20
-    static float externalTemperatureValue; // Külső hőmérséklet utolsó mért értéke (Celsius)
-    static NonBlockingDallas *nonBlockingDallas;
+    static volatile float externalTemperatureValue;               // Külső hőmérséklet utolsó mért értéke (Celsius)
+    static NonBlockingDallas *nonBlockingDallasTemperatureSensor; // Pointer a NonBlockingDallas objektumra
+    static void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW);
 
   public:
     SensorUtils();
-
-    static void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW);
 
     /**
      * Inicializálja az osztályt

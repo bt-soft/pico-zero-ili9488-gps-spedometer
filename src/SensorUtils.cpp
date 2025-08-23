@@ -17,8 +17,14 @@
 #define VBUS_DIVIDER_R2 4.7f
 #define EXTERNAL_VBUSDIVIDER_RATIO ((VBUS_DIVIDER_R1 + VBUS_DIVIDER_R2) / VBUS_DIVIDER_R2) // Feszültségosztó aránya
 
-float SensorUtils::externalTemperatureValue = 0.0f; // Külső hőmérséklet utolsó mért értéke (Celsius)
-NonBlockingDallas *SensorUtils::nonBlockingDallas = nullptr;
+// Dallas hőmérséklet szenzor - STATIKUS OBJEKTUMOK (memóriafragmentáció elkerülése)
+static OneWire oneWire(PIN_DS18B20_TEMP_SENSOR);
+static DallasTemperature dallasTemp(&oneWire);
+static NonBlockingDallas nonBlockingDallasTemp(&dallasTemp);
+
+// Statikus változók definíciói
+volatile float SensorUtils::externalTemperatureValue = 0.0f;
+NonBlockingDallas *SensorUtils::nonBlockingDallasTemperatureSensor = nullptr;
 
 /**
  * Konstruktor
@@ -32,23 +38,27 @@ SensorUtils::SensorUtils() : vBusExtValue(0.0f), vBusExtLastRead(0), vBusExtVali
  * Inicializálja az osztályt
  */
 void SensorUtils::init() {
+    DEBUG("SensorUtils::init() - Statikus objektumok használata...\n");
 
-    nonBlockingDallas = new NonBlockingDallas(new DallasTemperature(new OneWire(PIN_DS18B20_TEMP_SENSOR)));
+    // Statikus objektumok használata (nincs dinamikus allokáció)
+    nonBlockingDallasTemperatureSensor = &nonBlockingDallasTemp;
 
     // --------------------------------------------------------------------------------------------------------
     // Figyelem!!!
     // NEM LEHET a loop() és a Non-blocking Dallas között hosszú idő, mert a lib leáll az idő méréssel.
     //  Szerintem hibás a matek a NonBlockingDallas::waitNextReading() metódusban
     // --------------------------------------------------------------------------------------------------------
-    //  Hőmérséklet szenzor inicializálása
-    //  Non-blocking Dallas temperature sensor - 1500ms ajánlott 12 bites felbontáshoz
-    nonBlockingDallas->begin(NonBlockingDallas::resolution_12, 1500);
 
-    // Non-blocking Dallas temperature sensor callback-ek
-    nonBlockingDallas->onTemperatureChange(handleTemperatureChange);
+    // Hőmérséklet szenzor inicializálása - 12 bites felbontás, 1500ms olvasási ciklus
+    nonBlockingDallasTemperatureSensor->begin(NonBlockingDallas::resolution_12, 1500);
+
+    // Callback beállítása
+    nonBlockingDallasTemperatureSensor->onTemperatureChange(handleTemperatureChange);
 
     // Azonnal le is kérjük a hőmérsékletet
-    nonBlockingDallas->requestTemperature();
+    nonBlockingDallasTemperatureSensor->requestTemperature();
+
+    DEBUG("SensorUtils::init() - Dallas szenzor inicializálva!\n");
 }
 
 /**
@@ -58,7 +68,7 @@ void SensorUtils::init() {
  * @param temperatureRAW A nyers hőmérséklet érték
  */
 void SensorUtils::handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
-    externalTemperatureValue = nonBlockingDallas->rawToCelsius(temperatureRAW);
+    externalTemperatureValue = nonBlockingDallasTemp.rawToCelsius(temperatureRAW);
     DEBUG("SensorUtils::handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(externalTemperatureValue, 2).c_str());
 }
 
@@ -115,6 +125,14 @@ float SensorUtils::readExternalTemperature() {
 }
 
 /**
- * Loop
+ * Loop - TIMEOUT VÉDELEMMEL
  */
-void SensorUtils::loop() { nonBlockingDallas->update(); }
+void SensorUtils::loop() {
+    static uint32_t lastUpdate = 0;
+
+    // Max 10Hz frissítés (100ms minimális idő)
+    if (millis() - lastUpdate >= 100) {
+        lastUpdate = millis();
+        nonBlockingDallasTemperatureSensor->update();
+    }
+}
