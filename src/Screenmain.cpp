@@ -13,7 +13,7 @@ void ScreenMain::layoutComponents() {
  */
 void ScreenMain::drawContent() {
     // Műhold ikon bal oldalon
-    drawSatelliteIcon(10, 0);
+    drawSatelliteIcon(0, 0);
 
     // Naptár ikon fent középen
     drawCalendarIcon(::SCREEN_W / 2 - 60, 0);
@@ -26,15 +26,16 @@ void ScreenMain::drawContent() {
     tft.setTextSize(1);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
-    // GPS pontosság ikon rajzolása a "Hdop" helyett
-    drawGpsAccuracyIcon(25, 75);
+    // GPS pontosság (hdop) ikon rajzolása
+    drawGpsAccuracyIcon(0, 50);
 
-    // Speedometer ikon a "Max Speed" helyett
-    drawSpeedometerIcon(420, 75);
+    // Speedometer ikon (max speed)
+    drawSpeedometerIcon(::SCREEN_W - 120, 50);
 
+    // Sebesség mértékegység felirat
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("km/h", tft.width() / 2, 105, 2);
+    tft.drawString("km/h", tft.width() / 2 - 20, 105, 2);
 }
 
 /**
