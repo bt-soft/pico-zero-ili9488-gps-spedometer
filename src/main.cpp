@@ -720,6 +720,12 @@ void readGSVMessages() {
     for (byte i = 0; i < 4; ++i) {
         if (gsv_prn[i].isUpdated() && gsv_prn[i].isValid()) {
             int _prn = atoi(gsv_prn[i].value());
+
+            // ez valami szemét adat?
+            if (_prn == 0) {
+                continue;
+            }
+
             int _elevation = atoi(gsv_elevation[i].value());
             int _azimuth = atoi(gsv_azimuth[i].value());
             int _snr = atoi(gsv_snr[i].value());
@@ -798,7 +804,7 @@ void readGPS() {
             FastLED.show();
         }
 
-        // Serial.print(c); // Debug: kiírjuk a bejövő karaktereket
+        Serial.print(c); // Debug: kiírjuk a bejövő karaktereket
     }
 }
 
