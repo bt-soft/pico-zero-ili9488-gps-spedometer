@@ -7,11 +7,6 @@
 #define REQUIRESALARMS true // nem kell a DallasTemperature ALARM supportja
 #include <DallasTemperature.h>
 
-// Hőmérés
-OneWire oneWire(PIN_DS18B20_TEMP_SENSOR);
-DallasTemperature dallasTemp(&oneWire);
-NonBlockingDallas nonBlockingDallasTemperatureSensor(&dallasTemp); // Create a new instance of the NonBlockingDallas class
-
 // --- Konstansok ---
 #define AD_RESOLUTION 12 // 12 bites az ADC
 #define V_REFERENCE 3.3f
@@ -27,11 +22,10 @@ float SensorUtils::externalTemperatureValue = 0.0f;
 NonBlockingDallas *SensorUtils::nonBlockingDallasTemperatureSensor = nullptr;
 
 /**
- *
+ * Konstruktor
  */
 SensorUtils::SensorUtils() : vBusExtValue(0.0f), vBusExtLastRead(0), vBusExtValid(false), coreTemperatureValue(0.0f), coreTemperatureLastRead(0), coreTemperatureValid(false) {
-
-    // Belső AD felbontás beállítása
+    // Belső AD felbontás beállítása a feszültségméréshez
     analogReadResolution(AD_RESOLUTION);
 }
 

@@ -164,9 +164,6 @@ void setup() {
     }
     screenManager->switchToScreen(SCREEN_NAME_MAIN); // A kezdő képernyőre kapcsolás
 
-    // Szenzor inicializálása
-    sensorUtils.init();
-
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
 }
@@ -175,9 +172,6 @@ void setup() {
  *
  */
 void loop() {
-
-    // Szenzorok karbantartása
-    sensorUtils.loop();
 
     //------------------- Touch esemény kezelése
     uint16_t touchX, touchY;
@@ -238,12 +232,18 @@ void setup1() {
     gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
     gpsManager->setSerialDebug(config.data.debugGpsSerialData);
     gpsManager->setDebugGpsSatellitesDatabase(config.data.debugGpsSatellitesDatabase);
+
+    // Szenzor inicializálása
+    sensorUtils.init();
 }
 
 /**
  * Core1 loop
  */
 void loop1() {
+
+    // Szenzorok karbantartása
+    sensorUtils.loop();
 
     // GPS olvasás
     gpsManager->loop();
