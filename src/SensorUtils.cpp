@@ -110,7 +110,13 @@ float SensorUtils::readCoreTemperature() {
 /**
  * @brief visszaadja a külső hőmérsékletet
  */
-float SensorUtils::readExternalTemperature() { return externalTemperatureValue; }
+float SensorUtils::readExternalTemperature() {
+    // // Ha a külső szenzor nem ad érvényes adatot (0.0f), használjuk a core temperature-t
+    // if (externalTemperatureValue == 0.0f) {
+    //     return readCoreTemperature();
+    // }
+    return externalTemperatureValue;
+}
 
 /**
  * Loop
