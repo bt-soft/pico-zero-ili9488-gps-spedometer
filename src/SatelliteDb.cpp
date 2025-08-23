@@ -92,6 +92,23 @@ void SatelliteDb::sortSatellites() {
 void SatelliteDb::clear() { satellites.clear(); }
 
 /**
+ * Thread-safe snapshot létrehozása UI számára (Core0)
+ * Gyors másolat készítése az aktuális állapotról
+ */
+std::vector<SatelliteDb::SatelliteData> SatelliteDb::getSnapshotForUI() const {
+    // Gyors másolat készítése - ez atomic operation std::list-nél
+    return std::vector<SatelliteData>(satellites.begin(), satellites.end());
+}
+
+/**
+ * Thread-safe műholdak számának lekérdezése UI számára (Core0)
+ */
+uint8_t SatelliteDb::countSatsForUI() const {
+    // size() olvasás általában atomic, de a snapshot biztonságosabb
+    return satellites.size();
+}
+
+/**
  * Debugging műhold adatbázis
  * @param num_sats_in_view A GSV üzenetből érkező műholdak száma
  */

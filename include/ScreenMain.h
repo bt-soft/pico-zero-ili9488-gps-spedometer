@@ -2,9 +2,14 @@
 #define __SCREEN_MAIN_H
 
 #include "ButtonsGroupManager.h"
+#include "GpsManager.h"
+#include "Large_Font.h"
 #include "MessageDialog.h"
 #include "UIScreen.h"
 #include "ValueChangeDialog.h"
+
+// Globális GPS manager
+extern GpsManager *gpsManager;
 
 /**
  * @file ScreenMain.h
@@ -30,31 +35,33 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * animációs vagy egyéb saját logika végrehajtására
      * @note Ez a metódus nem hívja meg a gyerek komponensek loop-ját, csak saját logikát tartalmaz.
      */
-    virtual void handleOwnLoop() override {}
+    virtual void handleOwnLoop() override;
 
     /**
      * @brief Kirajzolja a képernyő saját tartalmát
      */
-    virtual void drawContent() override {
-        // Szöveg középre igazítása
-        tft.setTextDatum(MC_DATUM);
-        tft.setTextColor(TFT_WHITE, TFT_COLOR_BACKGROUND);
-        tft.setFreeFont(); // Alapértelmezett (kisebb) font
-        tft.setTextSize(3);
-
-        // Képernyő cím kirajzolása
-        tft.drawString(SCREEN_NAME_MAIN, ::SCREEN_W / 2, ::SCREEN_H / 2 - 20);
-
-        // Információs szöveg
-        tft.setTextSize(1);
-        tft.drawString("ScreenMain for debugging", ::SCREEN_W / 2, ::SCREEN_H / 2 + 20);
-    }
+    virtual void drawContent() override;
 
   private:
     /**
      * @brief UI komponensek létrehozása és elhelyezése
      */
-    void layoutComponents() {}
+    void layoutComponents();
+
+    /**
+     * @brief Műhold ikon rajzolása
+     */
+    void drawSatelliteIcon(int16_t x, int16_t y);
+
+    /**
+     * @brief Magasság ikon rajzolása
+     */
+    void drawAltitudeIcon(int16_t x, int16_t y);
+
+    /**
+     * @brief Naptár ikon rajzolása
+     */
+    void drawCalendarIcon(int16_t x, int16_t y);
 };
 
 #endif // __SCREEN_MAIN_H

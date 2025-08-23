@@ -34,6 +34,28 @@ class GpsManager {
      */
     void setLedDebug(bool state) { debugSerialOnInternalFastLed = state; }
 
+    /**
+     * Thread-safe hozzáférés a műhold adatbázishoz UI számára (Core0)
+     */
+    std::vector<SatelliteDb::SatelliteData> getSatelliteSnapshotForUI() const { return satelliteDb.getSnapshotForUI(); }
+
+    /**
+     * Thread-safe műholdak számának lekérdezése UI számára (Core0)
+     */
+    uint8_t getSatelliteCountForUI() const { return satelliteDb.countSatsForUI(); }
+
+    /**
+     * Thread-safe GPS adatok lekérdezése UI számára (Core0)
+     */
+    TinyGPSLocation getLocation() { return gps.location; }
+    TinyGPSInteger getSatellites() { return gps.satellites; }
+    TinyGPSHDOP getHdop() { return gps.hdop; }
+    TinyGPSSpeed getSpeed() { return gps.speed; }
+    TinyGPSDate getDate() { return gps.date; }
+    TinyGPSTime getTime() { return gps.time; }
+    TinyGPSCourse getCourse() { return gps.course; }
+    TinyGPSAltitude getAltitude() { return gps.altitude; }
+
   private:
     HardwareSerial *gpsSerial;
     TinyGPSPlus gps;

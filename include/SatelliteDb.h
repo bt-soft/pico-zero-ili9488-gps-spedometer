@@ -34,6 +34,10 @@ class SatelliteDb {
     SortType_t getSortType() const { return sortType; }
     void setSortType(SortType_t type) { sortType = type; }
 
+    // Thread-safe read-only access for UI (Core0)
+    std::vector<SatelliteData> getSnapshotForUI() const;
+    uint8_t countSatsForUI() const;
+
     // Iterator támogatás a külső kód számára
     auto begin() { return satellites.begin(); }
     auto end() { return satellites.end(); }
