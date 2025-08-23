@@ -346,41 +346,6 @@ class UIButton : public UIComponent {
         }
     }
 
-    // /**
-    //  * @brief Gomb állapotának szöveges megjelenítése
-    //  * @param state Az állapot, amelyet szövegesen szeretnénk megjeleníteni
-    //  */
-    // static const char *eventButtonStateToString(EventButtonState state) {
-    //     switch (state) {
-    //     case EventButtonState::Off:
-    //         return "Off";
-    //     case EventButtonState::On:
-    //         return "On";
-    //     case EventButtonState::Disabled:
-    //         return "Disabled";
-    //     case EventButtonState::CurrentActive:
-    //         return "CurrentActive";
-    //     case EventButtonState::Clicked:
-    //         return "Clicked";
-    //     case EventButtonState::LongPressed:
-    //         return "LongPressed";
-    //     default:
-    //         return "Unknown";
-    //     }
-    // }
-
-    // // Segédfüggvény a ButtonType szöveges megjelenítéséhez (ha később kellene)
-    // static const char *buttonTypeToString(ButtonType type) {
-    //     switch (type) {
-    //     case ButtonType::Pushable:
-    //         return "Pushable";
-    //     case ButtonType::Toggleable:
-    //         return "Toggleable";
-    //     default:
-    //         return "Unknown";
-    //     }
-    // }
-
     // ================================
     // Getters/Setters
     // ================================

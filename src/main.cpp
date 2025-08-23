@@ -103,6 +103,10 @@ void setup() {
     Utils::debugWaitForSerial(tft);
 #endif
 
+    drawSplashScreen();
+    // Még egy picit mutatjuk a splash screent
+    delay(1000);
+
     // Config
     StoreEepromBase<Config_t>::init(); // Meghívjuk a statikus init metódust
 
@@ -151,13 +155,11 @@ void setup() {
     // Beállítjuk a touch scren-t
     tft.setTouch(config.data.tftCalibrateData);
 
-    drawSplashScreen();
+    // Szenzor inicializálása
+    sensorUtils.init();
 
     // Még egy picit mutatjuk a splash screent
     delay(3000);
-
-    // Szenzor inicializálása
-    sensorUtils.init();
 
     // ScreenManager inicializálása itt, amikor minden más már kész
     if (screenManager == nullptr) {

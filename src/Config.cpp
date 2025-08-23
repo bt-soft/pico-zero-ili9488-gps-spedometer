@@ -17,6 +17,10 @@ const Config_t DEFAULT_CONFIG = {
     .gpsTrafiAlarmDistance = 800, // GPS traffipax riasztási távolság méterben
     .gpsTrafiAlarmEnabled = true, // GPS traffipax riasztás engedélyezése
 
+    // GPS
+    .debugGpsSerialOnInternalFastLed = true,
+    .debugGpsSerialData = false,
+
 };
 
 // Globális konfiguráció példány

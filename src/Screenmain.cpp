@@ -13,13 +13,13 @@ void ScreenMain::layoutComponents() {
  */
 void ScreenMain::drawContent() {
     // Műhold ikon bal oldalon
-    drawSatelliteIcon(10, 10);
+    drawSatelliteIcon(10, 0);
 
     // Naptár ikon fent középen
-    drawCalendarIcon(::SCREEN_W / 2 - 15, 10);
+    drawCalendarIcon(::SCREEN_W / 2 - 60, 0);
 
     // Magasság ikon jobb oldalon
-    drawAltitudeIcon(::SCREEN_W - 120, 10);
+    drawAltitudeIcon(::SCREEN_W - 120, 0);
 
     tft.setTextDatum(MC_DATUM);
     tft.setFreeFont(); // Alapértelmezett font
@@ -153,25 +153,29 @@ void ScreenMain::handleOwnLoop() {
         // Műholdak száma az ikon mellé (jobbra)
         tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.setFreeFont();  // Alapértelmezett font
-        tft.setTextSize(2); // Normál font méret
+        tft.setFreeFont(&FreeSansBold18pt7b);
+        tft.setTextSize(1); // Normál font méret
 
         // Padding a szám számára
-        int paddingWidth = tft.textWidth("88", 2) + 10;
-        tft.setTextPadding(paddingWidth);
+        tft.setTextPadding(tft.textWidth("88") + 10);
 
-        // Szám pozíciója az ikon mellett (x=10+24+5=39, y=10+12=22 az ikon közepe)
-        tft.drawString(String(currentSatCount), 39, 22, 2); // Font méret 2, ikon mellett
+        // Szám pozíciója az ikon mellett
+        tft.drawString(String(currentSatCount), 39, 12);
         lastSatCount = currentSatCount;
+        tft.setFreeFont(); // Alapértelmezett font
     }
 
     // GPS dátum és idő ellenőrzése (helyi időzóna szerint korrigálva)
+    char dateStr[11], timeStr[9];
     String currentDate = "";
     String currentTime = "";
     GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
     bool dateTimeValid = localDateTime.valid;
 
 #ifdef DEMO_MODE
+    // Demó dátum
+    currentDate = "2025-08-23";
+
     // Demo módban az idő folyamatosan növekszik
     static unsigned long demoStartTime = millis();
     unsigned long elapsed = (millis() - demoStartTime) / 1000; // másodpercek
@@ -184,14 +188,11 @@ void ScreenMain::handleOwnLoop() {
     int minute = (totalSeconds % 3600) / 60;
     int second = totalSeconds % 60;
 
-    currentDate = "2025-08-23";
-    char timeBuffer[10];
-    sprintf(timeBuffer, "%02d:%02d:%02d", hour, minute, second);
-    currentTime = String(timeBuffer);
+    sprintf(timeStr, "%02d:%02d:%02d", hour, minute, second);
+    currentTime = String(timeStr);
     dateTimeValid = true;
 #else
     if (dateTimeValid) {
-        char dateStr[11], timeStr[9];
         sprintf(dateStr, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
         sprintf(timeStr, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
         currentDate = String(dateStr);
@@ -201,36 +202,23 @@ void ScreenMain::handleOwnLoop() {
 
     String currentDateTime = currentDate + currentTime; // Összefűzés a változás ellenőrzéséhez
     if (currentDateTime != lastDateTime) {
-        // GPS dátum az ikon mellett (jobbra), idő alatta
+
+        tft.setTextSize(1);
+        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.setFreeFont(); // Alapértelmezett font
 
-        // Dátum kiírása az ikon jobb oldalán (font 2)
-        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
-        tft.setTextSize(1);
-        int datePaddingWidth = tft.textWidth("8888-88-88", 2) + 10;
-        tft.setTextPadding(datePaddingWidth);
+        // GPS dátum az ikon mellett (jobbra), idő alatta
+        tft.setFreeFont(&FreeSansBold9pt7b);
+        tft.setTextPadding(tft.textWidth("8888888888") + 10);
+        tft.drawString(dateTimeValid ? currentDate : "----/--/--", ::SCREEN_W / 2 - 25, 10);
 
-        if (dateTimeValid) {
-            // Dátum a naptár ikon jobb oldalán (x=240+15+5=260, y=16)
-            tft.drawString(currentDate, ::SCREEN_W / 2 + 20, 16, 2); // Font méret 2
-        } else {
-            tft.drawString("----/--/--", ::SCREEN_W / 2 + 20, 16, 2); // Font méret 2
-        }
+        // Idő kiírása
+        tft.setFreeFont(&FreeSansBold18pt7b);
+        tft.setTextPadding(tft.textWidth("88:88:88") + 10);
+        tft.drawString(dateTimeValid ? currentTime : "--:--:--", ::SCREEN_W / 2 - 60, 40);
 
-        // Idő kiírása a dátum alatt (font 2)
-        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
-        tft.setTextSize(1);
-        int timePaddingWidth = tft.textWidth("88:88:88", 2) + 10;
-        tft.setTextPadding(timePaddingWidth);
-
-        if (dateTimeValid) {
-            // Idő a dátum alatt (x=260, y=30)
-            tft.drawString(currentTime, ::SCREEN_W / 2 + 20, 30, 2); // Font méret 2
-        } else {
-            tft.drawString("--:--:--", ::SCREEN_W / 2 + 20, 30, 2); // Font méret 2
-        }
         lastDateTime = currentDateTime;
+        tft.setFreeFont(); // Alapértelmezett font
     }
 
     // Magasság ellenőrzése
@@ -261,16 +249,12 @@ void ScreenMain::handleOwnLoop() {
         tft.setTextSize(2); // Normál font méret
 
         // Padding a magasság számára
-        int paddingWidth = tft.textWidth("9999m", 2) + 10;
+        int paddingWidth = tft.textWidth("8888m", 2) + 10;
         tft.setTextPadding(paddingWidth);
 
-        // Szám pozíciója a képernyő jobb szélén (x=SCREEN_W-5, y=22 az ikon közepe)
-        if (altitudeValid) {
-            String altText = String((int)currentAltitude) + "m";
-            tft.drawString(altText, ::SCREEN_W - 5, 22, 2); // Font méret 2, jobb szélre igazítva
-        } else {
-            tft.drawString("--m", ::SCREEN_W - 5, 22, 2); // Font méret 2
-        }
+        // Szám pozíciója a képernyő jobb szélén (x=SCREEN_W-5, y=10 az ikon közepe)
+        String altText = (altitudeValid ? String((int)currentAltitude) : "-- ") + "m";
+        tft.drawString(altText, ::SCREEN_W - 5, 10, 2); // Font méret 2, jobb szélre igazítva
         lastAltitude = altitudeValid ? currentAltitude : -9999.0;
     }
 
