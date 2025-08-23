@@ -17,6 +17,10 @@ void DebugDataInspector::printConfigData(const Config_t &configData) {
     DEBUG("  beeperEnabled: %s\n", configData.beeperEnabled ? "true" : "false");
     DEBUG("  gpsTrafiAlarmEnabled: %s\n", configData.gpsTrafiAlarmEnabled ? "true" : "false");
     DEBUG("  gpsTrafiAlarmDistance: %u\n", configData.gpsTrafiAlarmDistance);
+    DEBUG("  debugGpsSerialOnInternalFastLed: %s\n", configData.debugGpsSerialOnInternalFastLed ? "true" : "false");
+    DEBUG("  debugGpsSerialData: %s\n", configData.debugGpsSerialData ? "true" : "false");
+    DEBUG("  debugGpsSatellitesDatabase: %s\n", configData.debugGpsSatellitesDatabase ? "true" : "false");
+
     DEBUG("====================\n");
 #endif
 }
