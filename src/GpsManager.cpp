@@ -11,7 +11,7 @@
 #define FASTLED_FORCE_SOFTWARE_PINS
 #define NUM_LEDS 1
 CRGB leds[NUM_LEDS];
-#define INTERNAL_LED_COLOR CRGB::Green // Zölden villogjon, ha GPS adat érkezik
+#define INTERNAL_LED_COLOR CRGB::Red // Pirosan villogjon, ha GPS adat érkezik
 
 constexpr uint8_t MAX_SATELLITES = 50;
 
@@ -78,7 +78,7 @@ void GpsManager::processGSVMessages() {
             int _azimuth = atoi(gsv_azimuth[i].value());
             int _snr = atoi(gsv_snr[i].value());
 
-            // satelliteDb.insertSatellite(_prn, _elevation, _azimuth, _snr);
+            satelliteDb.insertSatellite(_prn, _elevation, _azimuth, _snr);
         }
     }
 
@@ -103,9 +103,9 @@ void GpsManager::readGPS() {
 
         char c = gpsSerial->read();
 
-        // LED villogtatása, ha van érvéynes bejövő GPS mondat
         if (gps.encode(c)) {
 
+            // LED villogtatása, ha van érvéynes bejövő GPS mondat
             if (debugSerialOnInternalFastLed) {
                 leds[0] = INTERNAL_LED_COLOR;
                 FastLED.show();
@@ -135,9 +135,9 @@ void GpsManager::loop() {
         processGSVMessages();
     }
 
-    // // Update satellite information
-    // static long lastWiseSatellitesData = millis();
-    // if (Utils::timeHasPassed(lastWiseSatellitesData, 1000)) {
-    //     satelliteDb.deleteUntrackedSatellites();
-    // }
+    // Update satellite information
+    static long lastWiseSatellitesData = millis();
+    if (Utils::timeHasPassed(lastWiseSatellitesData, 1000)) {
+        satelliteDb.deleteUntrackedSatellites();
+    }
 }
