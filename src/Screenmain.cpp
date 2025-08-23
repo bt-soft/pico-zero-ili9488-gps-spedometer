@@ -1,5 +1,13 @@
 #include "ScreenMain.h"
+#include "LinearMeter.h"
 #include "Utils.h"
+
+constexpr int SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
+constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
+
+// Sprite a vertikális bar-oknak
+TFT_eSprite spriteVerticalLinearMeter(&tft);
+TFT_eSprite spriteAlertBar(&tft);
 
 /**
  * UI komponensek elhelyezése
@@ -476,4 +484,40 @@ void ScreenMain::handleOwnLoop() {
         tft.unloadFont(); // Visszaállítjuk az alapértelmezett fontot
         lastSpeed = speedValid ? currentSpeed : -1.0;
     }
+
+    // -- Vertikális bar komponensek
+    // Sprite legyártása, ha még nem létezik
+    if (!spriteVerticalLinearMeter.created()) {
+        spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
+    }
+
+#define VERTICAL_BARS_Y 290
+    // Vertical Line bar - Batterry (sprite-os)
+    verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
+                        "Batt [V]",           // category
+                        5.1,          // val
+                        BATT_BARMETER_MIN,    // minVal
+                        BATT_BARMETER_MAX,    // maxVal
+                        0,                    // x
+                        VERTICAL_BARS_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                   // bar-w
+                        10,                   // bar-h
+                        2,                    // gap
+                        10,                   // n
+                        BLUE2RED);            // color
+
+    // Vertical Line bar - temperature (sprite-os)
+    verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
+                        "Temp [C]",                                       // category
+                        25.46,                                    // val
+                        TEMP_BARMETER_MIN,                                // minVal
+                        TEMP_BARMETER_MAX,                                // maxVal
+                        tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH, // x: sprite szélesség beszámítva
+                        VERTICAL_BARS_Y + 10,                             // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                                               // bar-w
+                        10,                                               // bar-h
+                        2,                                                // gap
+                        10,                                               // n
+                        BLUE2RED,                                         // color
+                        true);                                            // bal oldalt legyenek az értékek
 }
