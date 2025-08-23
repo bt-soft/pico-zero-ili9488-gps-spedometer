@@ -5,6 +5,7 @@
 #include "GpsManager.h"
 #include "Large_Font.h"
 #include "MessageDialog.h"
+#include "SensorUtils.h"
 #include "UIScreen.h"
 #include "ValueChangeDialog.h"
 

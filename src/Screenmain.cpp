@@ -493,9 +493,10 @@ void ScreenMain::handleOwnLoop() {
 
 #define VERTICAL_BARS_Y 290
     // Vertical Line bar - Batterry (sprite-os)
+    float batteryVoltage = sensorUtils.readVBusExternal();
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
                         "Batt [V]",           // category
-                        5.1,          // val
+                        batteryVoltage,       // val
                         BATT_BARMETER_MIN,    // minVal
                         BATT_BARMETER_MAX,    // maxVal
                         0,                    // x
@@ -507,9 +508,10 @@ void ScreenMain::handleOwnLoop() {
                         BLUE2RED);            // color
 
     // Vertical Line bar - temperature (sprite-os)
+    float externalTemp = sensorUtils.readExternalTemperature();
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
                         "Temp [C]",                                       // category
-                        25.46,                                    // val
+                        externalTemp,                                     // val
                         TEMP_BARMETER_MIN,                                // minVal
                         TEMP_BARMETER_MAX,                                // maxVal
                         tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH, // x: sprite szélesség beszámítva
