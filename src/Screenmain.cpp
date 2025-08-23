@@ -185,34 +185,42 @@ void ScreenMain::handleOwnLoop() {
         lastAltitude = altitudeValid ? currentAltitude : -9999.0;
     }
 
-    // GPS dátum és idő ellenőrzése
-    String currentDateTime = "";
-    bool dateTimeValid = gpsManager->getDate().isValid() && gpsManager->getTime().isValid() && gpsManager->getDate().age() < GPS_DATA_MAX_AGE && gpsManager->getTime().age() < GPS_DATA_MAX_AGE;
+    // GPS dátum és idő ellenőrzése (helyi időzóna szerint korrigálva)
+    String currentDate = "";
+    String currentTime = "";
+    GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
+    bool dateTimeValid = localDateTime.valid;
+
 #ifdef DEMO_MODE
-    currentDateTime = "2025-08-23\n15:42:30";
+    currentDate = "2025-08-23";
+    currentTime = "17:42:30"; // Helyi idő (CEST)
     dateTimeValid = true;
 #endif
 
     if (dateTimeValid) {
         char dateStr[11], timeStr[9];
-        sprintf(dateStr, "%04d-%02d-%02d", gpsManager->getDate().year(), gpsManager->getDate().month(), gpsManager->getDate().day());
-        sprintf(timeStr, "%02d:%02d:%02d", gpsManager->getTime().hour(), gpsManager->getTime().minute(), gpsManager->getTime().second());
-        currentDateTime = String(dateStr) + "\n" + String(timeStr);
+        sprintf(dateStr, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
+        sprintf(timeStr, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
+        currentDate = String(dateStr);
+        currentTime = String(timeStr);
     }
 
+    String currentDateTime = currentDate + currentTime; // Összefűzés a változás ellenőrzéséhez
     if (currentDateTime != lastDateTime) {
         // GPS dátum és idő a naptár ikon alatt - csak ha változott
         tft.setTextDatum(TC_DATUM); // Top Center
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setFreeFont(); // Alapértelmezett font
         tft.setTextSize(1);
-        tft.setTextPadding(tft.textWidth("2025-08-23\n15:42:30")); // Padding a villogás ellen
+        tft.setTextPadding(tft.textWidth("8888-88-88")); // Padding a villogás ellen
 
-        // Pozíció a naptár ikon alatt (középen)
+        // Pozíció a naptár ikon alatt (középen) - első sor: dátum
         if (dateTimeValid) {
-            tft.drawString(currentDateTime, ::SCREEN_W / 2, 40, 1);
+            tft.drawString(currentDate, ::SCREEN_W / 2, 40, 1);
+            tft.drawString(currentTime, ::SCREEN_W / 2, 52, 1); // Második sor: idő (12 pixel lejjebb)
         } else {
-            tft.drawString("--:--:--\n----/--/--", ::SCREEN_W / 2, 40, 1);
+            tft.drawString("----/--/--", ::SCREEN_W / 2, 40, 1);
+            tft.drawString("--:--:--", ::SCREEN_W / 2, 52, 1);
         }
         lastDateTime = currentDateTime;
     }

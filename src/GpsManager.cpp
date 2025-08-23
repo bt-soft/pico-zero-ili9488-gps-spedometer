@@ -147,3 +147,30 @@ void GpsManager::loop() {
         satelliteDb.deleteUntrackedSatellites();
     }
 }
+
+/**
+ * Helyi időzóna szerint korrigált dátum és idő lekérdezése (CET/CEST)
+ */
+GpsManager::LocalDateTime GpsManager::getLocalDateTime() {
+    LocalDateTime result = {0, 0, 0, 0, 0, 0, false};
+
+    // Ellenőrizzük, hogy érvényesek-e a GPS adatok
+    if (!gps.date.isValid() || !gps.time.isValid()) {
+        return result; // valid = false
+    }
+
+    // GPS adatok másolása
+    result.hour = gps.time.hour();
+    result.minute = gps.time.minute();
+    result.second = gps.time.second();
+    result.day = gps.date.day();
+    result.month = gps.date.month();
+    result.year = gps.date.year();
+
+    // Nyári/téli időszámítás korrekció
+    uint8_t mins = result.minute; // A DaylightSaving::correctTime várja a referenciát
+    DaylightSaving::correctTime(mins, result.hour, result.day, result.month, result.year);
+
+    result.valid = true;
+    return result;
+}

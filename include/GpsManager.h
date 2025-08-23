@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <TinyGPS++.h>
 
+#include "DayLightSaving.h"
 #include "SatelliteDb.h"
 
 class GpsManager {
@@ -55,6 +56,22 @@ class GpsManager {
     TinyGPSTime getTime() { return gps.time; }
     TinyGPSCourse getCourse() { return gps.course; }
     TinyGPSAltitude getAltitude() { return gps.altitude; }
+
+    /**
+     * Helyi időzóna szerint korrigált dátum és idő lekérdezése (CET/CEST)
+     */
+    struct LocalDateTime {
+        uint8_t hour;
+        uint8_t minute;
+        uint8_t second;
+        uint8_t day;
+        uint8_t month;
+        uint16_t year;
+        bool valid;
+    };
+
+    LocalDateTime getLocalDateTime();
+    LocalDateTime getLocalTime() { return getLocalDateTime(); } // Alias
 
   private:
     HardwareSerial *gpsSerial;
