@@ -40,6 +40,11 @@ class GpsManager {
     void setSerialDebug(bool state) { debugGpsSerialData = state; }
 
     /**
+     * Debug GPS műhold adatbázis logolása
+     */
+    void setDebugGpsSatellitesDatabase(bool state) { debugGpsSatellitesDatabase = state; }
+
+    /**
      * Thread-safe hozzáférés a műhold adatbázishoz UI számára (Core0)
      */
     std::vector<SatelliteDb::SatelliteData> getSatelliteSnapshotForUI() const { return satelliteDb.getSnapshotForUI(); }
@@ -96,6 +101,8 @@ class GpsManager {
 
     // Debugging a beépített RGB LED-el
     bool debugGpsSerialOnInternalFastLed;
+
+    bool debugGpsSatellitesDatabase;
 
     unsigned long startTime;
     unsigned long gpsBootTime;

@@ -20,6 +20,7 @@ const Config_t DEFAULT_CONFIG = {
     // GPS
     .debugGpsSerialOnInternalFastLed = true,
     .debugGpsSerialData = false,
+    .debugGpsSatellitesDatabase = false,
 
 };
 

@@ -20,6 +20,7 @@ struct Config_t {
     //--- Debug
     bool debugGpsSerialOnInternalFastLed; //  Az RGB LED villogtatása, ha van GPS soros adat
     bool debugGpsSerialData;              //  GPS adatok kiírása a Soros portra
+    bool debugGpsSatellitesDatabase;      //  GPS műhold adatbázis debug logolása
 };
 
 #endif // CONFIG_DATA_H

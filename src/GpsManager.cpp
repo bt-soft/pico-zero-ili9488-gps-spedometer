@@ -18,7 +18,7 @@ constexpr uint8_t MAX_SATELLITES = 50;
 /**
  * Konstruktor
  */
-GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugGpsSerialOnInternalFastLed(false), debugGpsSerialData(false) {
+GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugGpsSerialOnInternalFastLed(false), debugGpsSerialData(false), debugGpsSatellitesDatabase(false) {
 
     // Initialize FastLED for Pico Zero WS2812 RGB LED
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
@@ -94,9 +94,9 @@ void GpsManager::processGSVMessages() {
         return;
     }
 
-#ifdef __DEBUG
-    satelliteDb.debugSatDb(num_sats_in_view);
-#endif
+    if (debugGpsSatellitesDatabase) {
+        satelliteDb.debugSatDb(num_sats_in_view);
+    }
 }
 
 /**

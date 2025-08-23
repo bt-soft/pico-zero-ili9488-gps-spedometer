@@ -234,6 +234,7 @@ void setup1() {
     gpsManager = new GpsManager(&Serial1);
     gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
     gpsManager->setSerialDebug(config.data.debugGpsSerialData);
+    gpsManager->setDebugGpsSatellitesDatabase(config.data.debugGpsSatellitesDatabase);
 }
 
 /**
