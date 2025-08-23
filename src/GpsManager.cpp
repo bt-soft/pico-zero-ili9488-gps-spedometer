@@ -18,7 +18,7 @@ constexpr uint8_t MAX_SATELLITES = 50;
 /**
  * Konstruktor
  */
-GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugSerialOnInternalFastLed(true) {
+GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugGpsSerialOnInternalFastLed(false), debugGpsSerialData(false) {
 
     // Initialize FastLED for Pico Zero WS2812 RGB LED
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
@@ -111,8 +111,8 @@ void GpsManager::readGPS() {
 
         if (gps.encode(c)) {
 
-            // LED villogtatása, ha van érvényes bejövő GPS mondat
-            if (debugSerialOnInternalFastLed) {
+            // beépített RGB LED villogtatása, ha van érvényes bejövő GPS mondat
+            if (debugGpsSerialOnInternalFastLed) {
                 leds[0] = INTERNAL_LED_COLOR;
                 FastLED.show();
 
@@ -121,7 +121,10 @@ void GpsManager::readGPS() {
             }
         }
 
-        Serial.print(c); // Debug: kiírjuk a bejövő karaktereket
+        // Debug: kiírjuk a bejövő karaktereket
+        if (debugGpsSerialData) {
+            DEBUG("%c", c);
+        }
     }
 
     // Mikor bootolt be a GPS?

@@ -1,0 +1,8 @@
+A font méretek a TFT_eSPI könyvtárban:
+
+Font 1: 8x8 pixel (kicsi)
+Font 2: 16x16 pixel (közepes)
+Font 4: 26x26 pixel (nagy)
+Font 6: 48x48 pixel (nagyon nagy)
+Font 8: 75x75 pixel (extra nagy)
+

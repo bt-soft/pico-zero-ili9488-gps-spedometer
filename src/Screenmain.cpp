@@ -12,20 +12,18 @@ void ScreenMain::layoutComponents() {
  * Kirajzolja a képernyő saját tartalmát (statikus elemek)
  */
 void ScreenMain::drawContent() {
-    // Műhold ikon bal felső sarokban (statikus)
+    // Műhold ikon bal oldalon
     drawSatelliteIcon(10, 10);
 
-    // Magasság ikon jobb felső sarokban (statikus)
-    drawAltitudeIcon(::SCREEN_W - 40, 10);
-
-    // Naptár ikon fent középen (statikus)
+    // Naptár ikon fent középen
     drawCalendarIcon(::SCREEN_W / 2 - 15, 10);
 
-    // Információs szöveg alul (statikus)
+    // Magasság ikon jobb oldalon
+    drawAltitudeIcon(::SCREEN_W - 120, 10);
+
     tft.setTextDatum(MC_DATUM);
     tft.setFreeFont(); // Alapértelmezett font
     tft.setTextSize(1);
-
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
     tft.drawString("Hdop", 40, 90, 2);
@@ -71,25 +69,6 @@ void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
 }
 
 /**
- * Magasság ikon rajzolása (hegy + magassági vonalak)
- */
-void ScreenMain::drawAltitudeIcon(int16_t x, int16_t y) {
-    // Hegy/domb alakzat
-    tft.fillTriangle(x + 5, y + 12, x + 15, y + 4, x + 25, y + 12, TFT_GREEN);
-    tft.drawTriangle(x + 5, y + 12, x + 15, y + 4, x + 25, y + 12, TFT_DARKGREEN);
-
-    // Magassági vonalak (szintvonalak)
-    tft.drawFastHLine(x + 8, y + 10, 14, TFT_WHITE);
-    tft.drawFastHLine(x + 10, y + 8, 10, TFT_WHITE);
-    tft.drawFastHLine(x + 12, y + 6, 6, TFT_WHITE);
-
-    // Magasság jelölő nyíl
-    tft.drawFastVLine(x + 2, y + 2, 10, TFT_WHITE);
-    tft.drawLine(x + 2, y + 2, x + 4, y + 4, TFT_WHITE);
-    tft.drawLine(x + 2, y + 2, x, y + 4, TFT_WHITE);
-}
-
-/**
  * Naptár ikon rajzolása (flaticon stílusban)
  */
 void ScreenMain::drawCalendarIcon(int16_t x, int16_t y) {
@@ -118,17 +97,37 @@ void ScreenMain::drawCalendarIcon(int16_t x, int16_t y) {
 }
 
 /**
+ * Magasság ikon rajzolása (hegy + magassági vonalak) - nagyobb méret
+ */
+void ScreenMain::drawAltitudeIcon(int16_t x, int16_t y) {
+    // Hegy/domb alakzat - nagyobb méret
+    tft.fillTriangle(x + 5, y + 18, x + 20, y + 4, x + 35, y + 18, TFT_GREEN);
+    tft.drawTriangle(x + 5, y + 18, x + 20, y + 4, x + 35, y + 18, TFT_DARKGREEN);
+
+    // Magassági vonalak (szintvonalak) - nagyobb és több vonal
+    tft.drawFastHLine(x + 8, y + 15, 24, TFT_WHITE);
+    tft.drawFastHLine(x + 10, y + 12, 20, TFT_WHITE);
+    tft.drawFastHLine(x + 13, y + 9, 14, TFT_WHITE);
+    tft.drawFastHLine(x + 16, y + 7, 8, TFT_WHITE);
+
+    // Magasság jelölő nyíl - nagyobb
+    tft.drawFastVLine(x + 2, y + 2, 14, TFT_WHITE);
+    tft.drawLine(x + 2, y + 2, x + 5, y + 5, TFT_WHITE);
+    tft.drawLine(x + 2, y + 2, x - 1, y + 5, TFT_WHITE);
+}
+
+/**
  * Kezeli a képernyő saját ciklusát (dinamikus frissítés)
  */
 void ScreenMain::handleOwnLoop() {
 
     // Update satellite information
-    static long lastUpdate = millis();
+    static long lastUpdate = millis() - 1000;
     if (!Utils::timeHasPassed(lastUpdate, 1000)) {
         return;
     }
-
     lastUpdate = millis();
+
     static uint8_t lastSatCount = 255;    // Kényszerített első frissítés
     static double lastSpeed = -1.0;       // Kényszerített első frissítés
     static double lastAltitude = -9999.0; // Kényszerített első frissítés
@@ -139,50 +138,31 @@ void ScreenMain::handleOwnLoop() {
     // Műholdak száma
     uint8_t currentSatCount = gpsManager->getSatellites().isValid() && gpsManager->getSatellites().age() < GPS_DATA_MAX_AGE ? gpsManager->getSatellites().value() : 0;
 #ifdef DEMO_MODE
-    currentSatCount = random(0, 16); // Demo mód
+    // Demo módban időnként változtatjuk a műholdak számát
+    static unsigned long lastSatChange = 0;
+    static uint8_t demoSatCount = 8; // Kezdő demo műholdszám
+
+    if (millis() - lastSatChange > 2000) { // 2 másodpercenként változik
+        demoSatCount = random(0, 16);      // Demo mód: 0-15 műhold
+        lastSatChange = millis();
+    }
+    currentSatCount = demoSatCount;
 #endif
 
     if (currentSatCount != lastSatCount) {
-        // Műholdak száma az ikon alatt - csak a számot frissítjük
-        tft.setTextDatum(TC_DATUM); // Top Center
+        // Műholdak száma az ikon mellé (jobbra)
+        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.setFreeFont(); // Alapértelmezett font
-        tft.setTextSize(1);
-        tft.setTextPadding(tft.textWidth("99")); // Padding a villogás ellen
+        tft.setFreeFont();  // Alapértelmezett font
+        tft.setTextSize(2); // Normál font méret
 
-        // Szám pozíciója az ikon alatt (x=10+12=22 az ikon közepe, y=10+24 az ikon alatt)
-        tft.drawString(String(currentSatCount), 22, 34, 2);
+        // Padding a szám számára
+        int paddingWidth = tft.textWidth("88", 2) + 10;
+        tft.setTextPadding(paddingWidth);
+
+        // Szám pozíciója az ikon mellett (x=10+24+5=39, y=10+12=22 az ikon közepe)
+        tft.drawString(String(currentSatCount), 39, 22, 2); // Font méret 2, ikon mellett
         lastSatCount = currentSatCount;
-    }
-
-    // Magasság ellenőrzése
-    double currentAltitude = 0.0;
-    bool altitudeValid = gpsManager->getAltitude().isValid() && gpsManager->getAltitude().age() < GPS_DATA_MAX_AGE;
-#ifdef DEMO_MODE
-    currentAltitude = random(50, 2000); // Demo mód: 50-2000m
-    altitudeValid = true;
-#endif
-
-    if (altitudeValid) {
-        currentAltitude = gpsManager->getAltitude().meters();
-    }
-
-    if (abs(currentAltitude - lastAltitude) > 1.0 || (altitudeValid != (lastAltitude != -9999.0))) {
-        // Magasság jobb felső sarokban - csak ha változott
-        tft.setTextDatum(TC_DATUM); // Top Center
-        tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.setFreeFont(); // Alapértelmezett font
-        tft.setTextSize(1);
-        tft.setTextPadding(tft.textWidth("9999m")); // Padding a villogás ellen
-
-        // Szám pozíciója az ikon alatt (jobb felső sarok)
-        if (altitudeValid) {
-            String altText = String((int)currentAltitude) + "m";
-            tft.drawString(altText, ::SCREEN_W - 15, 26, 1);
-        } else {
-            tft.drawString("--m", ::SCREEN_W - 15, 26, 1);
-        }
-        lastAltitude = altitudeValid ? currentAltitude : -9999.0;
     }
 
     // GPS dátum és idő ellenőrzése (helyi időzóna szerint korrigálva)
@@ -192,11 +172,24 @@ void ScreenMain::handleOwnLoop() {
     bool dateTimeValid = localDateTime.valid;
 
 #ifdef DEMO_MODE
-    currentDate = "2025-08-23";
-    currentTime = "17:42:30"; // Helyi idő (CEST)
-    dateTimeValid = true;
-#endif
+    // Demo módban az idő folyamatosan növekszik
+    static unsigned long demoStartTime = millis();
+    unsigned long elapsed = (millis() - demoStartTime) / 1000; // másodpercek
 
+    // Kezdő idő: 17:42:30
+    int startHour = 17, startMin = 42, startSec = 30;
+    int totalSeconds = startHour * 3600 + startMin * 60 + startSec + elapsed;
+
+    int hour = (totalSeconds / 3600) % 24;
+    int minute = (totalSeconds % 3600) / 60;
+    int second = totalSeconds % 60;
+
+    currentDate = "2025-08-23";
+    char timeBuffer[10];
+    sprintf(timeBuffer, "%02d:%02d:%02d", hour, minute, second);
+    currentTime = String(timeBuffer);
+    dateTimeValid = true;
+#else
     if (dateTimeValid) {
         char dateStr[11], timeStr[9];
         sprintf(dateStr, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
@@ -204,44 +197,110 @@ void ScreenMain::handleOwnLoop() {
         currentDate = String(dateStr);
         currentTime = String(timeStr);
     }
+#endif
 
     String currentDateTime = currentDate + currentTime; // Összefűzés a változás ellenőrzéséhez
     if (currentDateTime != lastDateTime) {
-        // GPS dátum és idő a naptár ikon alatt - csak ha változott
-        tft.setTextDatum(TC_DATUM); // Top Center
+        // GPS dátum az ikon mellett (jobbra), idő alatta
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setFreeFont(); // Alapértelmezett font
-        tft.setTextSize(1);
-        tft.setTextPadding(tft.textWidth("8888-88-88")); // Padding a villogás ellen
 
-        // Pozíció a naptár ikon alatt (középen) - első sor: dátum
+        // Dátum kiírása az ikon jobb oldalán (font 2)
+        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+        tft.setTextSize(1);
+        int datePaddingWidth = tft.textWidth("8888-88-88", 2) + 10;
+        tft.setTextPadding(datePaddingWidth);
+
         if (dateTimeValid) {
-            tft.drawString(currentDate, ::SCREEN_W / 2, 40, 1);
-            tft.drawString(currentTime, ::SCREEN_W / 2, 52, 1); // Második sor: idő (12 pixel lejjebb)
+            // Dátum a naptár ikon jobb oldalán (x=240+15+5=260, y=16)
+            tft.drawString(currentDate, ::SCREEN_W / 2 + 20, 16, 2); // Font méret 2
         } else {
-            tft.drawString("----/--/--", ::SCREEN_W / 2, 40, 1);
-            tft.drawString("--:--:--", ::SCREEN_W / 2, 52, 1);
+            tft.drawString("----/--/--", ::SCREEN_W / 2 + 20, 16, 2); // Font méret 2
+        }
+
+        // Idő kiírása a dátum alatt (font 2)
+        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+        tft.setTextSize(1);
+        int timePaddingWidth = tft.textWidth("88:88:88", 2) + 10;
+        tft.setTextPadding(timePaddingWidth);
+
+        if (dateTimeValid) {
+            // Idő a dátum alatt (x=260, y=30)
+            tft.drawString(currentTime, ::SCREEN_W / 2 + 20, 30, 2); // Font méret 2
+        } else {
+            tft.drawString("--:--:--", ::SCREEN_W / 2 + 20, 30, 2); // Font méret 2
         }
         lastDateTime = currentDateTime;
     }
 
-    // Sebesség ellenőrzése
-    // Aktuális sebesség
-    int16_t currentSpeed = 0; //(int16_t)(gpsManager->getSpeed().isValid() && gpsManager->getSpeed().age() < GPS_DATA_MAX_AGE && >= 4 ? gpsManager->getSpeed().kmph() : 0);
+    // Magasság ellenőrzése
+    double currentAltitude = 0.0;
+    bool altitudeValid = gpsManager->getAltitude().isValid() && gpsManager->getAltitude().age() < GPS_DATA_MAX_AGE;
 #ifdef DEMO_MODE
-    currentSpeed = random(0, 288); // demo mód
+    // Demo módban időnként változtatjuk a magasságot
+    static unsigned long lastAltChange = 0;
+    static double demoAltitude = 150.0; // Kezdő demo magasság
+
+    if (millis() - lastAltChange > 3000) { // 3 másodpercenként változik
+        demoAltitude = random(50, 2000);   // Demo mód: 50-2000m
+        lastAltChange = millis();
+    }
+    currentAltitude = demoAltitude;
+    altitudeValid = true;
+#else
+    if (altitudeValid) {
+        currentAltitude = gpsManager->getAltitude().meters();
+    }
 #endif
 
+    if (abs(currentAltitude - lastAltitude) > 1.0 || (altitudeValid != (lastAltitude != -9999.0))) {
+        // Magasság jobb oldalra igazítva az ikon után
+        tft.setTextDatum(MR_DATUM); // Middle Right - jobb oldal, középre igazítva
+        tft.setTextColor(TFT_WHITE, TFT_BLACK);
+        tft.setFreeFont();  // Alapértelmezett font
+        tft.setTextSize(2); // Normál font méret
+
+        // Padding a magasság számára
+        int paddingWidth = tft.textWidth("9999m", 2) + 10;
+        tft.setTextPadding(paddingWidth);
+
+        // Szám pozíciója a képernyő jobb szélén (x=SCREEN_W-5, y=22 az ikon közepe)
+        if (altitudeValid) {
+            String altText = String((int)currentAltitude) + "m";
+            tft.drawString(altText, ::SCREEN_W - 5, 22, 2); // Font méret 2, jobb szélre igazítva
+        } else {
+            tft.drawString("--m", ::SCREEN_W - 5, 22, 2); // Font méret 2
+        }
+        lastAltitude = altitudeValid ? currentAltitude : -9999.0;
+    }
+
+    // Sebesség ellenőrzése
+    // Aktuális sebesség
+    int16_t currentSpeed = 0;
     bool speedValid = gpsManager->getSpeed().isValid();
+
+#ifdef DEMO_MODE
+    // Demo módban időnként változtatjuk a sebességet
+    static unsigned long lastSpeedChange = 0;
+    static int16_t demoSpeed = 80; // Kezdő demo sebesség
+
+    if (millis() - lastSpeedChange > 1500) { // 1.5 másodpercenként változik
+        demoSpeed = random(0, 150);          // Demo mód: 0-150 km/h
+        lastSpeedChange = millis();
+    }
+    currentSpeed = demoSpeed;
+    speedValid = true;
+#else
     if (speedValid) {
         currentSpeed = gpsManager->getSpeed().kmph();
     }
+#endif
 
     if (abs(currentSpeed - lastSpeed) > 0.1 || (gpsManager->getSpeed().isValid() != (lastSpeed >= 0))) {
         // Sebesség középen Large_Font-al - csak ha változott
         tft.loadFont(Arial_Narrow_Bold120);
-        tft.setTextDatum(MC_DATUM);               // vízszintes közép
-        tft.setTextPadding(tft.textWidth("888")); // Padding a villogás ellen
+        tft.setTextDatum(MC_DATUM);                    // vízszintes közép
+        tft.setTextPadding(tft.textWidth("888") + 10); // Padding a villogás ellen
 
         if (speedValid) {
             dtostrf(currentSpeed, 0, 0, buf);

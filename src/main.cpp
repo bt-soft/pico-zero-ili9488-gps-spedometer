@@ -228,7 +228,10 @@ void setup1() {
     Serial1.setTX(PIN_SERIAL1_TX_NEW);
     Serial1.begin(9600);
 
+    // Init + konfiguráció
     gpsManager = new GpsManager(&Serial1);
+    gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
+    gpsManager->setSerialDebug(config.data.debugGpsSerialData);
 }
 
 /**

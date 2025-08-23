@@ -16,6 +16,10 @@ struct Config_t {
 
     uint16_t gpsTrafiAlarmDistance; // GPS traffipax riasztási távolság méterben
     bool gpsTrafiAlarmEnabled;      // GPS traffipax riasztás engedélyezése
+
+    //--- Debug
+    bool debugGpsSerialOnInternalFastLed; //  Az RGB LED villogtatása, ha van GPS soros adat
+    bool debugGpsSerialData;              //  GPS adatok kiírása a Soros portra
 };
 
 #endif // CONFIG_DATA_H

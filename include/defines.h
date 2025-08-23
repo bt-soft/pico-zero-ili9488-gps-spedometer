@@ -16,7 +16,7 @@
 
 #define __DEBUG
 // #define DEBUG_WAIT_FOR_SERIAL
-//  #define DEMO_MODE
+  #define DEMO_MODE
 
 // Színsémák
 #define RED2RED 0

@@ -33,7 +33,11 @@ class GpsManager {
     /**
      * LED debug mode beállítása
      */
-    void setLedDebug(bool state) { debugSerialOnInternalFastLed = state; }
+    void setLedDebug(bool state) { debugGpsSerialOnInternalFastLed = state; }
+    /**
+     * Soros debug mód beállítása
+     */
+    void setSerialDebug(bool state) { debugGpsSerialData = state; }
 
     /**
      * Thread-safe hozzáférés a műhold adatbázishoz UI számára (Core0)
@@ -87,8 +91,11 @@ class GpsManager {
     TinyGPSCustom gsv_azimuth[4];   // gsv_azimuth
     TinyGPSCustom gsv_snr[4];       // gsv_snr
 
+    // Debugging GPS adatok kiírása
+    bool debugGpsSerialData;
+
     // Debugging a beépített RGB LED-el
-    bool debugSerialOnInternalFastLed;
+    bool debugGpsSerialOnInternalFastLed;
 
     unsigned long startTime;
     unsigned long gpsBootTime;
