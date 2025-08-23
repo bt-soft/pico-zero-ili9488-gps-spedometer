@@ -62,6 +62,16 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @brief Naptár ikon rajzolása
      */
     void drawCalendarIcon(int16_t x, int16_t y);
+
+    /**
+     * @brief GPS pontosság ikon rajzolása
+     */
+    void drawGpsAccuracyIcon(int16_t x, int16_t y);
+
+    /**
+     * @brief Speedometer ikon rajzolása
+     */
+    void drawSpeedometerIcon(int16_t x, int16_t y);
 };
 
 #endif // __SCREEN_MAIN_H

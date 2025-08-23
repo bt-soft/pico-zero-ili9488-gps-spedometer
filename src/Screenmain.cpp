@@ -26,8 +26,11 @@ void ScreenMain::drawContent() {
     tft.setTextSize(1);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
-    tft.drawString("Hdop", 40, 90, 2);
-    tft.drawString("Max Speed", 440, 90, 2);
+    // GPS pontosság ikon rajzolása a "Hdop" helyett
+    drawGpsAccuracyIcon(25, 75);
+
+    // Speedometer ikon a "Max Speed" helyett
+    drawSpeedometerIcon(420, 75);
 
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -66,6 +69,13 @@ void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
 
     // Központi jelzőfény (kicsi)
     tft.fillCircle(x + 12, y + 12, 2, TFT_RED);
+
+    // Felirat
+    tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.setFreeFont();
+    tft.setTextSize(1);
+    tft.drawString("sats", x, y + 27);
 }
 
 /**
@@ -114,6 +124,112 @@ void ScreenMain::drawAltitudeIcon(int16_t x, int16_t y) {
     tft.drawFastVLine(x + 2, y + 2, 14, TFT_WHITE);
     tft.drawLine(x + 2, y + 2, x + 5, y + 5, TFT_WHITE);
     tft.drawLine(x + 2, y + 2, x - 1, y + 5, TFT_WHITE);
+
+    // Felirat
+    tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.setFreeFont();
+    tft.setTextSize(1);
+    tft.drawString("alti", x + 5, y + 27);
+}
+
+/**
+ * GPS pontosság ikon rajzolása (célkereszt/target stílusban)
+ */
+void ScreenMain::drawGpsAccuracyIcon(int16_t x, int16_t y) {
+    // Külső kör (cél kerete)
+    tft.drawCircle(x + 15, y + 12, 12, TFT_WHITE);
+    tft.drawCircle(x + 15, y + 12, 11, TFT_WHITE);
+
+    // Egyetlen belső kör (célpont)
+    tft.fillCircle(x + 15, y + 12, 3, TFT_RED);
+    tft.drawCircle(x + 15, y + 12, 3, TFT_WHITE);
+
+    // Kereszt vonalak (célkereszt)
+    // Vízszintes vonal
+    tft.drawFastHLine(x + 3, y + 12, 24, TFT_WHITE);
+    // Függőleges vonal
+    tft.drawFastVLine(x + 15, y, 24, TFT_WHITE);
+
+    // Kis szaggatás a kereszten (autentikus célkereszt look)
+    tft.drawFastHLine(x + 13, y + 12, 4, TFT_BLACK); // kis rés középen vízszintesen
+    tft.drawFastVLine(x + 15, y + 10, 4, TFT_BLACK); // kis rés középen függőlegesen
+
+    // Felirat
+    tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.setFreeFont();
+    tft.setTextSize(1);
+    tft.drawString("hdop", x + 5, y + 27);
+}
+
+/**
+ * Speedometer ikon rajzolása (sebességmérő - félkör)
+ */
+void ScreenMain::drawSpeedometerIcon(int16_t x, int16_t y) {
+    // Félkör alap (felső félkör speedometer)
+    // Külső félkör (felső 180°)
+    for (int i = 180; i <= 360; i++) {
+        float rad = (i * PI) / 180.0;
+        int x1 = x + 15 + 15 * cos(rad);
+        int y1 = y + 15 + 15 * sin(rad);
+        tft.drawPixel(x1, y1, TFT_WHITE);
+
+        int x2 = x + 15 + 14 * cos(rad);
+        int y2 = y + 15 + 14 * sin(rad);
+        tft.drawPixel(x2, y2, TFT_LIGHTGREY);
+    }
+
+    // Belső félkör (műszer lap - felső rész)
+    for (int i = 180; i <= 360; i++) {
+        float rad = (i * PI) / 180.0;
+        for (int r = 0; r < 12; r++) {
+            int x1 = x + 15 + r * cos(rad);
+            int y1 = y + 15 + r * sin(rad);
+            tft.drawPixel(x1, y1, TFT_BLACK);
+        }
+    }
+
+    // Felső egyenes vonal (speedometer alapja)
+    tft.drawFastHLine(x + 3, y + 15, 24, TFT_WHITE);
+
+    // Skála vonalak (csak felső félkörben)
+    // 180° (bal szél) - 0 km/h
+    tft.drawLine(x + 3, y + 15, x + 6, y + 15, TFT_WHITE);
+    // 225° (bal-felső) - 50 km/h
+    tft.drawLine(x + 4, y + 5, x + 7, y + 8, TFT_WHITE);
+    // 270° (felső közép) - 100 km/h
+    tft.drawLine(x + 15, y + 3, x + 15, y + 6, TFT_WHITE);
+    // 315° (jobb-felső) - 150 km/h
+    tft.drawLine(x + 26, y + 5, x + 23, y + 8, TFT_WHITE);
+    // 360° / 0° (jobb szél) - 200 km/h
+    tft.drawLine(x + 27, y + 15, x + 24, y + 15, TFT_WHITE);
+
+    // Speedometer mutató 240 fokra (120° a felső félkörben)
+    float angle = 240 * PI / 180.0; // 240 fok radiánban (felső félkör 60°-nál)
+    int endX = x + 15 + 10 * cos(angle);
+    int endY = y + 15 + 10 * sin(angle);
+
+    // Piros mutató (vastagabb)
+    tft.drawLine(x + 15, y + 15, endX, endY, TFT_RED);
+    tft.drawLine(x + 15, y + 15, endX - 1, endY, TFT_RED);
+    tft.drawLine(x + 15, y + 15, endX, endY - 1, TFT_RED);
+
+    // Központi csavar/tengely
+    tft.fillCircle(x + 15, y + 15, 2, TFT_YELLOW);
+    tft.drawCircle(x + 15, y + 15, 2, TFT_WHITE);
+
+    // Speed zónák jelzése (színes pontok a skálán)
+    tft.drawPixel(x + 6, y + 12, TFT_GREEN);  // alacsony sebesség
+    tft.drawPixel(x + 12, y + 7, TFT_YELLOW); // közepes sebesség
+    tft.drawPixel(x + 21, y + 12, TFT_RED);   // nagy sebesség
+
+    // Felirat
+    tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.setFreeFont();
+    tft.setTextSize(1);
+    tft.drawString("max", x + 8, y + 20);
 }
 
 /**
