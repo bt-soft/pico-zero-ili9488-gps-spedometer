@@ -143,7 +143,7 @@ void setup() {
     if (trafipaxManager.checkFile(TrafipaxManager::CSV_FILE_NAME)) {
         trafipaxManager.loadFromCSV(TrafipaxManager::CSV_FILE_NAME);
     }
-    DEBUG("trafipaxManagerok száma: %d\n", trafipaxManager.count());
+    DEBUG("trafipaxok száma: %d\n", trafipaxManager.count());
 
     // TFT érintőképernyő kalibrálása
     // Kell kalibrálni a TFT Touch-t?
