@@ -70,6 +70,7 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "*.impl": "cpp",
-        "*.cpp_a": "cpp"
+        "*.cpp_a": "cpp",
+        "*.cpp_dallas": "cpp"
     }
 }
