@@ -245,14 +245,10 @@ void ScreenMain::handleOwnLoop() {
     }
     lastUpdate = millis();
 
-    static uint8_t lastSatCount = 255;    // Kényszerített első frissítés
-    static double lastSpeed = -1.0;       // Kényszerített első frissítés
-    static double lastAltitude = -9999.0; // Kényszerített első frissítés
-    static String lastDateTime = "";      // Kényszerített első frissítés
-
     char buf[11];
 
     // Műholdak száma
+    static uint8_t lastSatCount = 255; // Kényszerített első frissítés
     uint8_t currentSatCount = gpsManager->getSatellites().isValid() && gpsManager->getSatellites().age() < GPS_DATA_MAX_AGE ? gpsManager->getSatellites().value() : 0;
 #ifdef DEMO_MODE
     // Demo módban időnként változtatjuk a műholdak számát
@@ -283,11 +279,12 @@ void ScreenMain::handleOwnLoop() {
     }
 
     // GPS dátum és idő ellenőrzése (helyi időzóna szerint korrigálva)
-    char dateStr[11], timeStr[9];
+    static String lastDateTime = ""; // Kényszerített első frissítés
     String currentDate = "";
     String currentTime = "";
     GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
     bool dateTimeValid = localDateTime.valid;
+    char dateStr[11], timeStr[9];
 
 #ifdef DEMO_MODE
     // Demó dátum
@@ -339,6 +336,7 @@ void ScreenMain::handleOwnLoop() {
     }
 
     // Magasság ellenőrzése
+    static double lastAltitude = -9999.0; // Kényszerített első frissítés
     double currentAltitude = 0.0;
     bool altitudeValid = gpsManager->getAltitude().isValid() && gpsManager->getAltitude().age() < GPS_DATA_MAX_AGE;
 #ifdef DEMO_MODE
@@ -375,8 +373,39 @@ void ScreenMain::handleOwnLoop() {
         lastAltitude = altitudeValid ? currentAltitude : -9999.0;
     }
 
+    // GPS HDOP érték ellenőrzése
+    static double lastHdop = -1.0; // Kényszerített első frissítés
+    double currentHdop = 0.0;
+    bool hdopValid = gpsManager->getHdop().isValid() && gpsManager->getHdop().age() < GPS_DATA_MAX_AGE;
+#ifdef DEMO_MODE
+    // Demo módban fix HDOP érték
+    currentHdop = 1.2;
+    hdopValid = true;
+#else
+    if (hdopValid) {
+        currentHdop = gpsManager->getHdop().hdop();
+    }
+#endif
+
+    if (abs(currentHdop - lastHdop) > 0.1 || (hdopValid != (lastHdop >= 0))) {
+        // HDOP érték a pontosság ikon mellé (jobbra)
+        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+        tft.setTextColor(TFT_WHITE, TFT_BLACK);
+        tft.setFreeFont();
+        tft.setTextSize(2); // Normál font méret
+
+        // Padding a HDOP számára
+        tft.setTextPadding(tft.textWidth("8.8") + 10);
+
+        // HDOP pozíciója az ikon mellett (55 pixel-re az ikon után)
+        dtostrf(currentHdop, 0, 1, buf); // 1 tizedesjegy
+        tft.drawString(hdopValid ? String(buf) : "--", 39, 60, 2);
+        lastHdop = hdopValid ? currentHdop : -1.0;
+        tft.setFreeFont(); // Alapértelmezett font
+    }
+
     // Sebesség ellenőrzése
-    // Aktuális sebesség
+    static double lastSpeed = -1.0; // Kényszerített első frissítés
     int16_t currentSpeed = 0;
     bool speedValid = gpsManager->getSpeed().isValid();
 
