@@ -5,4 +5,7 @@ class ScreenTFTSetup : public UIScreen {
     ScreenTFTSetup() : UIScreen(SCREEN_NAME_TFT_SETUP) { layoutComponents(); }
     void layoutComponents() override;
     void drawContent() override;
+
+  private:
+    std::shared_ptr<UIButton> manualBrightnessBtn;
 };
