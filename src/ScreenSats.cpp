@@ -189,13 +189,15 @@ void ScreenSats::drawSatelliteTable() {
     tableSprite->drawString("In DB: " + String(satellites.size()), tableX, tableY + 8);
 
     // Táblázat fejléc
+    int16_t currentY = tableY + 25;
     tableSprite->setTextColor(TFT_YELLOW, TFT_BLACK);
-    tableSprite->drawString("PRN     Elv    Azm   SNR", tableX, tableY + 18);
+    tableSprite->drawString("PRN     Elv    Azm   SNR", tableX, currentY);
     // Vonal a fejléc alatt
-    tableSprite->drawFastHLine(tableX, tableY + 25, TABLE_WIDTH, TFT_DARKGREY);
+    currentY += 7;
+    tableSprite->drawFastHLine(tableX, currentY, TABLE_WIDTH, TFT_DARKGREY);
 
     // Műholdak listázása
-    int16_t currentY = tableY + 30;
+    currentY +=  10;
     uint8_t itemCount = 0;
     constexpr uint8_t maxItems = 12; // Maximum megjelenítendő elemek száma
 
@@ -212,9 +214,9 @@ void ScreenSats::drawSatelliteTable() {
         else if (sat.snr > 20)
             color = TFT_YELLOW;
         else if (sat.snr > 10)
-            color = TFT_ORANGE;
+            color = TFT_GOLD;
         else
-            color = TFT_RED;
+            color = TFT_ORANGE;
 
         tableSprite->setTextColor(color, TFT_BLACK);
 

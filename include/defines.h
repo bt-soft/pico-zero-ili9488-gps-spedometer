@@ -18,8 +18,8 @@
 #define SCREEN_NAME_TEST "Test"
 
 #define __DEBUG
-#define DEBUG_WAIT_FOR_SERIAL
-// #define DEMO_MODE // Véletlenszerű adatok a main képernyőn
+// #define DEBUG_WAIT_FOR_SERIAL
+//  #define DEMO_MODE // Véletlenszerű adatok a main képernyőn
 
 // Színsémák
 #define RED2RED 0
