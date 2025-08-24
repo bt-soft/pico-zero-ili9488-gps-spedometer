@@ -17,36 +17,6 @@ void ScreenMain::layoutComponents() {
 }
 
 /**
- * Kirajzolja a képernyő saját tartalmát (statikus elemek)
- */
-void ScreenMain::drawContent() {
-    // Műhold ikon bal oldalon
-    drawSatelliteIcon(0, 0);
-
-    // Naptár ikon fent középen
-    drawCalendarIcon(::SCREEN_W / 2 - 60, 0);
-
-    // Magasság ikon jobb oldalon
-    drawAltitudeIcon(::SCREEN_W - 120, 0);
-
-    tft.setTextDatum(MC_DATUM);
-    tft.setFreeFont(); // Alapértelmezett font
-    tft.setTextSize(1);
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-
-    // GPS pontosság (hdop) ikon rajzolása
-    drawGpsAccuracyIcon(0, 50);
-
-    // Speedometer ikon (max speed)
-    drawSpeedometerIcon(::SCREEN_W - 120, 50);
-
-    // Sebesség mértékegység felirat
-    tft.setTextSize(2);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("km/h", tft.width() / 2 - 20, 105, 2);
-}
-
-/**
  * Műhold ikon rajzolása (flaticon 2863489 stílusban - minimális)
  */
 void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
@@ -139,7 +109,7 @@ void ScreenMain::drawAltitudeIcon(int16_t x, int16_t y) {
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.setFreeFont();
     tft.setTextSize(1);
-    tft.drawString("alti", x + 5, y + 27);
+    tft.drawString("altit", x + 5, y + 27);
 }
 
 /**
@@ -238,7 +208,44 @@ void ScreenMain::drawSpeedometerIcon(int16_t x, int16_t y) {
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.setFreeFont();
     tft.setTextSize(1);
-    tft.drawString("max", x + 8, y + 20);
+    tft.drawString("max sp", x - 2, y + 20);
+}
+
+/**
+ * Kirajzolja a képernyő saját tartalmát (statikus elemek)
+ */
+void ScreenMain::drawContent() {
+    // Műhold ikon bal oldalon
+    drawSatelliteIcon(0, 0);
+
+    // Naptár ikon fent középen
+    drawCalendarIcon(::SCREEN_W / 2 - 100, 0);
+
+    // Magasság ikon jobb oldalon
+    drawAltitudeIcon(::SCREEN_W - 135, 0);
+
+    // GPS pontosság (hdop) ikon rajzolása
+    drawGpsAccuracyIcon(0, 50);
+
+    // Speedometer ikon (max speed)
+    drawSpeedometerIcon(::SCREEN_W - 130, 50);
+
+    // Szöveges feliratok
+    tft.setTextDatum(MC_DATUM);
+    tft.setFreeFont(); // Alapértelmezett font
+    tft.setTextSize(1);
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+
+    // Magasság mértékegység felirat
+    tft.drawString("m", ::SCREEN_W - 8, 10, 1);
+
+    // Maxspeed km/h felirat
+    tft.drawString("km/h", ::SCREEN_W - 14, 60, 1);
+
+    // Sebesség mértékegység felirat
+    tft.setTextSize(2);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("km/h", ::SCREEN_W / 2 - 20, 105, 2);
 }
 
 /**
@@ -274,14 +281,14 @@ void ScreenMain::handleOwnLoop() {
         // Műholdak száma az ikon mellé (jobbra)
         tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.setFreeFont(&FreeSansBold18pt7b);
-        tft.setTextSize(1); // Normál font méret
+        tft.setFreeFont();
+        tft.setTextSize(2);
 
         // Padding a szám számára
         tft.setTextPadding(tft.textWidth("88") + 10);
 
         // Szám pozíciója az ikon mellett
-        tft.drawString(String(currentSatCount), 39, 12);
+        tft.drawString(String(currentSatCount), 39, 12, 2);
         lastSatCount = currentSatCount;
         tft.setFreeFont(); // Alapértelmezett font
     }
@@ -325,19 +332,20 @@ void ScreenMain::handleOwnLoop() {
     String currentDateTime = currentDate + currentTime; // Összefűzés a változás ellenőrzéséhez
     if (currentDateTime != lastDateTime) {
 
-        tft.setTextSize(1);
+        tft.setTextSize(2);
+        tft.setFreeFont();
         tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
         // GPS dátum az ikon mellett (jobbra), idő alatta
-        tft.setFreeFont(&FreeSansBold9pt7b);
         tft.setTextPadding(tft.textWidth("8888888888") + 10);
-        tft.drawString(dateTimeValid ? currentDate : "----/--/--", ::SCREEN_W / 2 - 25, 10);
+        tft.drawString(dateTimeValid ? currentDate : "----/--/--", ::SCREEN_W / 2 - 60, 10, 1);
 
         // Idő kiírása
+        tft.setTextSize(1);
         tft.setFreeFont(&FreeSansBold18pt7b);
         tft.setTextPadding(tft.textWidth("88:88:88") + 10);
-        tft.drawString(dateTimeValid ? currentTime : "--:--:--", ::SCREEN_W / 2 - 60, 40);
+        tft.drawString(dateTimeValid ? currentTime : "--:--:--", ::SCREEN_W / 2 - 80, 40);
 
         lastDateTime = currentDateTime;
         tft.setFreeFont(); // Alapértelmezett font
@@ -365,19 +373,19 @@ void ScreenMain::handleOwnLoop() {
 #endif
 
     if (abs(currentAltitude - lastAltitude) > 1.0 || (altitudeValid != (lastAltitude != -9999.0))) {
-        // Magasság jobb oldalra igazítva az ikon után
-        tft.setTextDatum(MR_DATUM); // Middle Right - jobb oldal, középre igazítva
+        // Magasság bal oldalra igazítva az ikon után
+        tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setFreeFont();  // Alapértelmezett font
         tft.setTextSize(2); // Normál font méret
 
         // Padding a magasság számára
-        int paddingWidth = tft.textWidth("8888m", 2) + 10;
+        int paddingWidth = tft.textWidth("8888", 2) + 10;
         tft.setTextPadding(paddingWidth);
 
         // Szám pozíciója a képernyő jobb szélén (x=SCREEN_W-5, y=10 az ikon közepe)
-        String altText = (altitudeValid ? String((int)currentAltitude) : "-- ") + "m";
-        tft.drawString(altText, ::SCREEN_W - 5, 10, 2); // Font méret 2, jobb szélre igazítva
+        String altText = (altitudeValid ? String((int)currentAltitude) : "-- ");
+        tft.drawString(altText, ::SCREEN_W - 90, 10, 2); // Font méret 2, ikon jobb szélre igazítva
         lastAltitude = altitudeValid ? currentAltitude : -9999.0;
     }
 
@@ -405,7 +413,7 @@ void ScreenMain::handleOwnLoop() {
         tft.setTextSize(2); // Normál font méret
 
         // Padding a HDOP számára
-        tft.setTextPadding(tft.textWidth("8.8") + 10);
+        tft.setTextPadding(tft.textWidth("888.8") + 10);
 
         // HDOP pozíciója az ikon mellett
         dtostrf(currentHdop, 0, 1, buf); // 1 tizedesjegy
@@ -462,7 +470,7 @@ void ScreenMain::handleOwnLoop() {
         tft.setTextPadding(tft.textWidth("888") + 10);
 
         // Max sebesség pozíciója az ikon mellett
-        tft.drawString(String((int)maxSpeed), 400, 60, 2);
+        tft.drawString(String((int)maxSpeed), ::SCREEN_W - 90, 60, 2);
         lastMaxSpeed = maxSpeed;
         tft.setFreeFont(); // Alapértelmezett font
     }
