@@ -127,6 +127,7 @@ void ScreenTFTSetup::drawContent() {
     tft.fillScreen(TFT_BLACK);
     tft.setTextDatum(MC_DATUM);
     tft.setFreeFont(&FreeSansBold18pt7b);
+    tft.setTextSize(1);
     tft.setTextColor(TFT_CYAN, TFT_BLACK);
     tft.drawString("TFT Settings", ::SCREEN_W / 2, 20);
     tft.setFreeFont();

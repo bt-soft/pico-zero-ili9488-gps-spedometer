@@ -228,9 +228,11 @@ void ValueChangeDialog::createDialogContent() {
     // Gombállapotok beállítása közvetlenül a létrehozás után
     if (_decreaseButton) {
         _decreaseButton->setEnabled(canDecrement());
+        _decreaseButton->markForRedraw();
     }
     if (_increaseButton) {
         _increaseButton->setEnabled(canIncrement());
+        _increaseButton->markForRedraw();
     }
 }
 
@@ -375,9 +377,13 @@ void ValueChangeDialog::incrementValue() {
             }
             break;
         case ValueType::UInt8:
-            if (_uint8Ptr && *_uint8Ptr < _maxUint8) {
-                *_uint8Ptr += _stepUint8;
-                valueChanged = true;
+            if (_uint8Ptr) {
+                // Biztonságos aritmetika overflow ellenőrzéssel
+                int tempValue = (int)*_uint8Ptr + (int)_stepUint8;
+                if (tempValue <= (int)_maxUint8) {
+                    *_uint8Ptr = (uint8_t)tempValue;
+                    valueChanged = true;
+                }
             }
             break;
     }
@@ -414,9 +420,13 @@ void ValueChangeDialog::decrementValue() {
             }
             break;
         case ValueType::UInt8:
-            if (_uint8Ptr && *_uint8Ptr > _minUint8) {
-                *_uint8Ptr -= _stepUint8;
-                valueChanged = true;
+            if (_uint8Ptr) {
+                // Biztonságos aritmetika underflow ellenőrzéssel
+                int tempValue = (int)*_uint8Ptr - (int)_stepUint8;
+                if (tempValue >= (int)_minUint8) {
+                    *_uint8Ptr = (uint8_t)tempValue;
+                    valueChanged = true;
+                }
             }
             break;
     }
@@ -560,14 +570,17 @@ void ValueChangeDialog::redrawValueArea() {
     tft.setTextDatum(MC_DATUM);
     tft.setTextColor(textColor, colors.background);
     tft.setTextSize(VALUE_TEXT_FONT_SIZE);
-    tft.drawString(valueStr, centerX, valueY); // Gombok állapotának frissítése típus alapján
-                                               // Egységesített gomb állapot frissítés minden típusra    if (_decreaseButton) {
-    _decreaseButton->setEnabled(canDecrement());
-    // Az automatikus frissítés fog működni
+    tft.drawString(valueStr, centerX, valueY);
+
+    // Gombok állapotának frissítése típus alapján
+    if (_decreaseButton) {
+        _decreaseButton->setEnabled(canDecrement());
+        _decreaseButton->markForRedraw(); // Újrarajzolás kényszerítése
+    }
 
     if (_increaseButton) {
         _increaseButton->setEnabled(canIncrement());
-        // Az automatikus frissítés fog működni
+        _increaseButton->markForRedraw(); // Újrarajzolás kényszerítése
     }
 }
 
@@ -615,7 +628,9 @@ bool ValueChangeDialog::canIncrement() const {
             return false;
         case ValueType::UInt8:
             if (_uint8Ptr) {
-                return (*_uint8Ptr + _stepUint8) <= _maxUint8;
+                // Ellenőrizzük az overflow-t és underflow-t
+                int tempValue = (int)*_uint8Ptr + (int)_stepUint8;
+                return tempValue <= (int)_maxUint8;
             }
             return false;
         default:
@@ -648,7 +663,9 @@ bool ValueChangeDialog::canDecrement() const {
             return false;
         case ValueType::UInt8:
             if (_uint8Ptr) {
-                return (*_uint8Ptr - _stepUint8) >= _minUint8;
+                // Ellenőrizzük az underflow-t
+                int tempValue = (int)*_uint8Ptr - (int)_stepUint8;
+                return tempValue >= (int)_minUint8;
             }
             return false;
         default:
@@ -679,12 +696,16 @@ void ValueChangeDialog::redrawValueTextOnly() {
     tft.setTextDatum(MC_DATUM);
     tft.setTextColor(textColor, colors.background);
     tft.setTextSize(VALUE_TEXT_FONT_SIZE);
-    tft.drawString(valueStr, centerX, valueY); // Gombok állapotának frissítése (egységesítve)    if (_decreaseButton) {
-    _decreaseButton->setEnabled(canDecrement());
-    // Az automatikus frissítés fog működni
+    tft.drawString(valueStr, centerX, valueY);
+
+    // Gombok állapotának frissítése
+    if (_decreaseButton) {
+        _decreaseButton->setEnabled(canDecrement());
+        _decreaseButton->markForRedraw(); // Újrarajzolás kényszerítése
+    }
 
     if (_increaseButton) {
         _increaseButton->setEnabled(canIncrement());
-        // Az automatikus frissítés fog működni
+        _increaseButton->markForRedraw(); // Újrarajzolás kényszerítése
     }
 }
