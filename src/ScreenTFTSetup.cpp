@@ -1,13 +1,16 @@
 #include "ScreenTFTSetup.h"
+#include "Config.h"
 #include "Utils.h"
 #include "defines.h"
 
 void ScreenTFTSetup::layoutComponents() {
+    // Vissza gomb
     auto backButton = std::make_shared<UIButton>( //
         1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                getScreenManager()->switchToScreen(SCREEN_NAME_SETUP);
+                config.checkSave();
+                getScreenManager()->goBack();
             }
         });
     addChild(backButton);

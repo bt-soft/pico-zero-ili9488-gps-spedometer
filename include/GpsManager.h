@@ -1,5 +1,4 @@
-#ifndef __GPS_MANAGER_H
-#define __GPS_MANAGER_H
+#pragma once
 
 #include <Arduino.h>
 #include <TinyGPS++.h>
@@ -110,5 +109,3 @@ class GpsManager {
     void processGSVMessages();
     void readGPS();
 };
-
-#endif // __GPS_MANAGER_H

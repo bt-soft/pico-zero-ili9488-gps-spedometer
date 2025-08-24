@@ -1,4 +1,5 @@
 #include "ScreenInfo.h"
+#include "Config.h"
 #include "Utils.h"
 #include "defines.h"
 
@@ -6,14 +7,16 @@
  * UI komponensek elhelyezése
  */
 void ScreenInfo::layoutComponents() {
-    // Back gomb jobb alsó sarokban
-    auto backButton = std::make_shared<UIButton>(
-        1,                                                                                                                                                                // id
-        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (jobb alsó sarok)
-        "Back",                                                                                                                                                           // label
-        UIButton::ButtonType::Pushable,                                                                                                                                   // type
-        [this](const UIButton::ButtonEvent &event) { this->onBackButtonClicked(event); });
 
+    // Vissza gomb
+    auto backButton = std::make_shared<UIButton>( //
+        1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
+        [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                config.checkSave();
+                getScreenManager()->goBack();
+            }
+        });
     addChild(backButton);
 }
 
@@ -42,14 +45,4 @@ void ScreenInfo::drawContent() {
     tft.drawString("TFT ILI9488 Display", ::SCREEN_W / 2, 180);
     tft.drawString("DS18B20 Temperature Sensor", ::SCREEN_W / 2, 200);
     tft.drawString("GPS Module", ::SCREEN_W / 2, 220);
-}
-
-/**
- * Back gomb callback
- */
-void ScreenInfo::onBackButtonClicked(const UIButton::ButtonEvent &event) {
-    if (event.state == UIButton::EventButtonState::Clicked) {
-        DEBUG("ScreenInfo: Back button clicked, returning to main screen\n");
-        getScreenManager()->switchToScreen(SCREEN_NAME_MAIN);
-    }
 }

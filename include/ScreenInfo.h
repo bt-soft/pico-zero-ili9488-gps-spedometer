@@ -1,6 +1,4 @@
-#ifndef __SCREEN_INFO_H
-#define __SCREEN_INFO_H
-
+#pragma once
 #include "UIButton.h"
 #include "UIScreen.h"
 
@@ -29,11 +27,4 @@ class ScreenInfo : public UIScreen {
      * @brief UI komponensek létrehozása és elhelyezése
      */
     void layoutComponents();
-
-    /**
-     * @brief Back gomb callback
-     */
-    void onBackButtonClicked(const UIButton::ButtonEvent &event);
 };
-
-#endif // __SCREEN_INFO_H
