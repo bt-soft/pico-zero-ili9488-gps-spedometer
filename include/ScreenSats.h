@@ -61,19 +61,9 @@ class ScreenSats : public UIScreen {
     void drawSatelliteTable();
 
     /**
-     * @brief Műholdak táblázatának rajzolása közvetlenül (fallback)
-     */
-    // void drawSatelliteTableDirect();
-
-    /**
      * @brief Műholdak vizuális megjelenítése koncentrikus körben
      */
     void drawSatelliteCircle();
-
-    /**
-     * @brief Műholdak vizuális megjelenítése közvetlenül (fallback)
-     */
-    // void drawSatelliteCircleDirect();
 
     /**
      * @brief Egy műhold rajzolása a körön
@@ -94,4 +84,9 @@ class ScreenSats : public UIScreen {
      * @brief Sprite-ok felszabadítása
      */
     void freeSprites();
+
+    /**
+     * @brief Visszaadja a SNR értékhez tartozó színt
+     */
+    uint32_t getColorBySnr(uint8_t snr);
 };

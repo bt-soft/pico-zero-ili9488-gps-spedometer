@@ -1,7 +1,8 @@
-#include "ScreenSats.h"
-#include "GpsManager.h"
-#include "Utils.h"
 #include <algorithm>
+
+#include "GpsManager.h"
+#include "ScreenSats.h"
+#include "Utils.h"
 
 extern GpsManager *gpsManager;
 
@@ -28,13 +29,11 @@ ScreenSats::~ScreenSats() { freeSprites(); }
  * @brief Sprite-ok inicializálása
  */
 void ScreenSats::initSprites() {
-    DEBUG("ScreenSats: Initializing sprites...\n");
 
     // Táblázat sprite inicializálása
     tableSprite = new TFT_eSprite(&tft);
     if (tableSprite->createSprite(TABLE_WIDTH, TABLE_HEIGHT)) {
         tableSprite->fillSprite(TFT_BLACK);
-        DEBUG("ScreenSats: Table sprite created successfully (%dx%d)\n", TABLE_WIDTH, TABLE_HEIGHT);
     } else {
         delete tableSprite;
         tableSprite = nullptr;
@@ -45,7 +44,6 @@ void ScreenSats::initSprites() {
     circleSprite = new TFT_eSprite(&tft);
     if (circleSprite->createSprite(CIRCLE_WIDTH, CIRCLE_HEIGHT)) {
         circleSprite->fillSprite(TFT_BLACK);
-        DEBUG("ScreenSats: Circle sprite created successfully (%dx%d)\n", CIRCLE_WIDTH, CIRCLE_HEIGHT);
     } else {
         delete circleSprite;
         circleSprite = nullptr;
@@ -99,7 +97,6 @@ void ScreenSats::drawContent() {
 
     // Csak akkor frissítünk, ha változtak az adatok
     if (satelliteDataChanged(satellites, satCount)) {
-        DEBUG("ScreenSats: Data changed - updating display\n");
         drawSatelliteTable();
         drawSatelliteCircle();
 
@@ -197,7 +194,7 @@ void ScreenSats::drawSatelliteTable() {
     tableSprite->drawFastHLine(tableX, currentY, TABLE_WIDTH, TFT_DARKGREY);
 
     // Műholdak listázása
-    currentY +=  10;
+    currentY += 10;
     uint8_t itemCount = 0;
     constexpr uint8_t maxItems = 12; // Maximum megjelenítendő elemek száma
 
@@ -208,16 +205,7 @@ void ScreenSats::drawSatelliteTable() {
             break;
 
         // SNR alapján színkódolás
-        uint16_t color = TFT_WHITE;
-        if (sat.snr > 30)
-            color = TFT_GREEN;
-        else if (sat.snr > 20)
-            color = TFT_YELLOW;
-        else if (sat.snr > 10)
-            color = TFT_GOLD;
-        else
-            color = TFT_ORANGE;
-
+        uint16_t color = getColorBySnr(sat.snr);
         tableSprite->setTextColor(color, TFT_BLACK);
 
         // Adatok formázása
@@ -243,85 +231,9 @@ void ScreenSats::drawSatelliteTable() {
 }
 
 /**
- * @brief Műhold táblázat közvetlen rajzolása
- */
-/*
-void ScreenSats::drawSatelliteTableDirect() {
-    DEBUG("ScreenSats: Using direct table drawing (fallback)\n");
-
-    // Közvetlen rajzolás, ha nincs sprite (fallback)
-    const int16_t tableX = 5;
-    const int16_t tableY = 55;
-    const int16_t lineHeight = 14; // Kicsit nagyobb sormagasság
-
-    // Terület törlése
-    tft.fillRect(tableX, tableY, TABLE_WIDTH, TABLE_HEIGHT, TFT_BLACK);
-
-    // Fejléc
-    tft.setTextDatum(TL_DATUM);
-    tft.setTextSize(1); // Nagyobb font
-    tableSprite->setFreeFont(&FreeMono9pt7b);
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    tft.drawString("PRN Elv Azm SNR", tableX, tableY);
-
-    // Vonal a fejléc alatt
-    tft.drawFastHLine(tableX, tableY + 10, 110, TFT_DARKGREY);
-
-    // Műholdak adatainak lekérése
-    auto satellites = gpsManager->getSatelliteSnapshotForUI();
-
-    // Műholdak száma
-    uint8_t satCount = gpsManager->getSatellites().isValid() ? gpsManager->getSatellites().value() : 0;
-
-    // Státusz információk
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("In view: " + String(satCount), tableX, tableY + 15);
-    tft.drawString("In DB: " + String(satellites.size()), tableX, tableY + 27);
-
-    // Műholdak listázása
-    int16_t currentY = tableY + 45;
-    int itemCount = 0;
-    const int maxItems = 12;
-
-    for (const auto &sat : satellites) {
-        if (itemCount >= maxItems)
-            break;
-
-        // SNR alapján színkódolás
-        uint16_t color = TFT_WHITE;
-        if (sat.snr > 30)
-            color = TFT_GREEN;
-        else if (sat.snr > 20)
-            color = TFT_YELLOW;
-        else if (sat.snr > 10)
-            color = TFT_ORANGE;
-        else
-            color = TFT_RED;
-
-        tft.setTextColor(color, TFT_BLACK);
-
-        // Adatok formázása
-        char line[20];
-        sprintf(line, "%2d %3d %3d %2d", sat.prn, sat.elevation, sat.azimuth, sat.snr);
-        tft.drawString(line, tableX, currentY);
-
-        currentY += lineHeight;
-        itemCount++;
-    }
-
-    // Ha több műhold van, mint amit meg tudunk jeleníteni
-    if (satellites.size() > maxItems) {
-        tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
-        tft.drawString("+" + String(satellites.size() - maxItems) + " more...", tableX, currentY);
-    }
-}
-*/
-
-/**
  * @brief Műhold kör rajzolása
  */
 void ScreenSats::drawSatelliteCircle() {
-    DEBUG("ScreenSats: Drawing satellite circle (sprite: %s)\n", circleSprite ? "available" : "NULL");
 
     if (!circleSprite) {
         // Fallback közvetlen rajzolásra, ha nincs sprite
@@ -355,7 +267,6 @@ void ScreenSats::drawSatelliteCircle() {
     circleSprite->setTextSize(1);
     circleSprite->setFreeFont();
     circleSprite->setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-    DEBUG("ScreenSats: Drawing direction labels at centerX=%d, centerY=%d, maxRadius=%d\n", centerX, centerY, maxRadius);
     circleSprite->drawString("N", centerX, centerY - maxRadius - 12);
     circleSprite->drawString("S", centerX, centerY + maxRadius + 8);
     circleSprite->drawString("E", centerX + maxRadius + 8, centerY);
@@ -380,57 +291,6 @@ void ScreenSats::drawSatelliteCircle() {
 }
 
 /**
- * @brief Műhold kör rajzolása
- */
-/*
-void ScreenSats::drawSatelliteCircleDirect() {
-    DEBUG("ScreenSats: Using direct circle drawing (fallback)\n");
-
-    // Közvetlen rajzolás, ha nincs sprite (fallback)
-    const int16_t centerX = ::SCREEN_W - 120;
-    const int16_t centerY = 120 + 20; // 20 pixellel lejjebb
-    const int16_t maxRadius = 80;
-
-    // Terület törlése
-    tft.fillRect(::SCREEN_W - CIRCLE_WIDTH, 55, CIRCLE_WIDTH, CIRCLE_HEIGHT, TFT_BLACK);
-
-    // Koncentrikus körök rajzolása (elevation alapján)
-    tft.drawCircle(centerX, centerY, maxRadius, TFT_DARKGREY);         // 0° elevation
-    tft.drawCircle(centerX, centerY, maxRadius * 2 / 3, TFT_DARKGREY); // 30° elevation
-    tft.drawCircle(centerX, centerY, maxRadius * 1 / 3, TFT_DARKGREY); // 60° elevation
-    tft.drawCircle(centerX, centerY, 5, TFT_DARKGREY);                 // 90° elevation (zenit)
-
-    // Azimuth vonalak (fő irányok)
-    tft.drawLine(centerX, centerY - maxRadius, centerX, centerY + maxRadius, TFT_DARKGREY);
-    tft.drawLine(centerX - maxRadius, centerY, centerX + maxRadius, centerY, TFT_DARKGREY);
-
-    // Irány feliratok
-    tft.setTextDatum(MC_DATUM);
-    tft.setTextSize(1);
-    tft.setFreeFont();
-    tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-    tft.drawString("N", centerX, centerY - maxRadius - 12);
-    tft.drawString("S", centerX, centerY + maxRadius + 8);
-    tft.drawString("E", centerX + maxRadius + 8, centerY);
-    tft.drawString("W", centerX - maxRadius - 8, centerY);
-
-    // Elevation címkék
-    tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
-    tft.drawString("90°", centerX + 8, centerY - 5);
-    tft.drawString("60°", centerX + maxRadius * 1 / 3 + 8, centerY - 5);
-    tft.drawString("30°", centerX + maxRadius * 2 / 3 + 8, centerY - 5);
-    tft.drawString("0°", centerX + maxRadius + 8, centerY - 5);
-
-    // Műholdak rajzolása
-    auto satellites = gpsManager->getSatelliteSnapshotForUI();
-
-    for (const auto &sat : satellites) {
-        drawSatelliteOnCircle(nullptr, centerX, centerY, maxRadius, sat);
-    }
-}
-*/
-
-/**
  * @brief Műhold rajzolása körön
  */
 void ScreenSats::drawSatelliteOnCircle(TFT_eSprite *sprite, int16_t centerX, int16_t centerY, int16_t maxRadius, const SatelliteDb::SatelliteData &sat) {
@@ -445,20 +305,16 @@ void ScreenSats::drawSatelliteOnCircle(TFT_eSprite *sprite, int16_t centerX, int
     int16_t satY = centerY + distance * sin(azimuthRad);
 
     // SNR alapján színkódolás és méret
-    uint16_t color = TFT_WHITE;
+    uint16_t color = getColorBySnr(sat.snr);
     int radius = 2;
 
     if (sat.snr > 30) {
-        color = TFT_GREEN;
         radius = 4;
     } else if (sat.snr > 20) {
-        color = TFT_YELLOW;
         radius = 3;
     } else if (sat.snr > 10) {
-        color = TFT_ORANGE;
         radius = 3;
     } else {
-        color = TFT_RED;
         radius = 2;
     }
 
@@ -508,4 +364,19 @@ bool ScreenSats::satelliteDataChanged(const std::vector<SatelliteDb::SatelliteDa
     }
 
     return false;
+}
+
+/**
+ * @brief Visszaadja a SNR értékhez tartozó színt
+ */
+uint32_t ScreenSats::getColorBySnr(uint8_t snr) {
+    if (snr > 30) {
+        return TFT_GREEN;
+    } else if (snr > 20) {
+        return TFT_YELLOW;
+    } else if (snr > 10) {
+        return TFT_GOLD;
+    } else {
+        return TFT_ORANGE;
+    }
 }
