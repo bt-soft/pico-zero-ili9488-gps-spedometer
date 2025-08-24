@@ -38,7 +38,6 @@ SensorUtils::SensorUtils() : vBusExtValue(0.0f), vBusExtLastRead(0), vBusExtVali
  * Inicializálja az osztályt
  */
 void SensorUtils::init() {
-    DEBUG("SensorUtils::init() - Statikus objektumok használata...\n");
 
     // Statikus objektumok használata (nincs dinamikus allokáció)
     nonBlockingDallasTemperatureSensor = &nonBlockingDallasTemp;
@@ -57,8 +56,6 @@ void SensorUtils::init() {
 
     // Azonnal le is kérjük a hőmérsékletet
     nonBlockingDallasTemperatureSensor->requestTemperature();
-
-    DEBUG("SensorUtils::init() - Dallas szenzor inicializálva!\n");
 }
 
 /**
@@ -106,24 +103,19 @@ float SensorUtils::readCoreTemperature() {
     if (coreTemperatureValid && (currentTime - coreTemperatureLastRead < SENSORS_CACHE_TIMEOUT_MS)) {
         return coreTemperatureValue;
     }
-    float temperature = analogReadTemp(); // A4
+
+    float temperature = analogReadTemp();
     coreTemperatureValue = temperature;
     coreTemperatureLastRead = currentTime;
     coreTemperatureValid = true;
+
     return temperature;
 }
 
 /**
  * @brief visszaadja a külső hőmérsékletet
  */
-float SensorUtils::readExternalTemperature() {
-    // // Ha a külső szenzor nem ad érvényes adatot (0.0f), használjuk a core temperature-t
-    // if (externalTemperatureValue == 0.0f) {
-    //     return readCoreTemperature();
-    // }
-    DEBUG("SensorUtils::readExternalTemperature() -> value: %s °C\n", Utils::floatToString(externalTemperatureValue, 2).c_str());
-    return externalTemperatureValue;
-}
+float SensorUtils::readExternalTemperature() { return externalTemperatureValue; }
 
 /**
  * Loop - TIMEOUT VÉDELEMMEL

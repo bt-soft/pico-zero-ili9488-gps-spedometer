@@ -84,6 +84,11 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @brief Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet
      */
     bool temperatureMode = true; // true = external, false = CPU
+
+    /**
+     * @brief Sprite frissítés időzítő
+     */
+    uint32_t lastSpriteUpdate = 0;
 };
 
 #endif // __SCREEN_MAIN_H

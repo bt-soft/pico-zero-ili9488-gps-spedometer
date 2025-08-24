@@ -496,7 +496,6 @@ void ScreenMain::handleOwnLoop() {
 
     // -- Vertikális bar komponensek - 5 másodperces frissítés ------------------------------------
 
-    static uint32_t lastSpriteUpdate = 0;
     if (!Utils::timeHasPassed(lastSpriteUpdate, 5000)) {
         return;
     }
@@ -572,6 +571,9 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
 
         // Váltás a hőmérsékleti módok között
         temperatureMode = !temperatureMode;
+
+        // Sprite azonnal frissüljön a következő draw()-nál
+        lastSpriteUpdate = 0;
 
         DEBUG("ScreenMain::handleTouch() - Temperature mode switched to: %s\n", temperatureMode ? "External" : "CPU");
 
