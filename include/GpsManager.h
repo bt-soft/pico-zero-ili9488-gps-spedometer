@@ -47,7 +47,7 @@ class GpsManager {
     /**
      * Thread-safe hozzáférés a műhold adatbázishoz UI számára (Core0)
      */
-    std::vector<SatelliteDb::SatelliteData> getSatelliteSnapshotForUI() const { return satelliteDb.getSnapshotForUI(); }
+    std::vector<SatelliteDb::SatelliteData> getSatelliteSnapshotForUI(SatelliteDb::SortType_t sortType = SatelliteDb::NONE) const { return satelliteDb.getSnapshotForUI(sortType); }
 
     /**
      * Thread-safe műholdak számának lekérdezése UI számára (Core0)

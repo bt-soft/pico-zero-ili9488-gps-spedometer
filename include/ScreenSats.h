@@ -46,6 +46,10 @@ class ScreenSats : public UIScreen {
     uint8_t lastSatCount;
     bool firstDraw;
 
+    // Rendezési beállítások
+    SatelliteDb::SortType_t currentSortType;
+    bool sortOrderChanged;
+
     /**
      * @brief UI komponensek elhelyezése
      */
@@ -90,4 +94,19 @@ class ScreenSats : public UIScreen {
      * @brief Visszaadja a SNR értékhez tartozó színt
      */
     uint32_t getColorBySnr(uint8_t snr);
+
+    /**
+     * @brief Érintés kezelése
+     */
+    bool handleTouch(const TouchEvent &event) override;
+
+    /**
+     * @brief PRN oszlop fejléc kattintásának kezelése
+     */
+    void handlePrnHeaderClick();
+
+    /**
+     * @brief SNR oszlop fejléc kattintásának kezelése
+     */
+    void handleSnrHeaderClick();
 };

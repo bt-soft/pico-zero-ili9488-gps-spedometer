@@ -9,7 +9,7 @@
 /**
  * Konstruktor
  */
-SatelliteDb::SatelliteDb() : sortType(BY_PRN) {
+SatelliteDb::SatelliteDb() {
     // std::list automatikusan inicializálódik üres állapotban
 }
 
@@ -74,19 +74,6 @@ void SatelliteDb::insertSatellite(uint8_t prn, int16_t elevation, int16_t azimut
 }
 
 /**
- * Műholdak sorbarendezése
- */
-void SatelliteDb::sortSatellites() {
-    if (sortType == BY_PRN) {
-        satellites.sort([](const SatelliteData &a, const SatelliteData &b) { return a.prn < b.prn; });
-    } else if (sortType == BY_SNR) {
-        satellites.sort([](const SatelliteData &a, const SatelliteData &b) {
-            return a.snr > b.snr; // SNR csökkenő sorrendben
-        });
-    }
-}
-
-/**
  * Összes műhold törlése
  */
 void SatelliteDb::clear() { satellites.clear(); }
@@ -94,10 +81,26 @@ void SatelliteDb::clear() { satellites.clear(); }
 /**
  * Thread-safe snapshot létrehozása UI számára (Core0)
  * Gyors másolat készítése az aktuális állapotról
+ * @param sortType Rendezési mód (alapértelmezett: NONE)
  */
-std::vector<SatelliteDb::SatelliteData> SatelliteDb::getSnapshotForUI() const {
+std::vector<SatelliteDb::SatelliteData> SatelliteDb::getSnapshotForUI(SortType_t sortType) const {
+
     // Gyors másolat készítése - ez atomic operation std::list-nél
-    return std::vector<SatelliteData>(satellites.begin(), satellites.end());
+    std::vector<SatelliteData> copiedSatellites(satellites.begin(), satellites.end());
+
+    // Le is rendezzük a másolatot a beállított mód szerint, ha kell
+    if (sortType == BY_PRN) {
+        std::sort(copiedSatellites.begin(), copiedSatellites.end(), [](const SatelliteData &a, const SatelliteData &b) {
+            return a.prn < b.prn; // PRN növekvő sorrendben
+        });
+
+    } else if (sortType == BY_SNR) {
+        std::sort(copiedSatellites.begin(), copiedSatellites.end(), [](const SatelliteData &a, const SatelliteData &b) {
+            return a.snr > b.snr; // SNR csökkenő sorrendben
+        });
+    }
+
+    return copiedSatellites;
 }
 
 /**

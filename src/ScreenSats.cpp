@@ -6,16 +6,19 @@
 
 extern GpsManager *gpsManager;
 
+// A táblázatban Maximum megjelenítendő elemek száma
+constexpr uint8_t MAX_SATS_TABLE_ITEMS = 9;
+
 // Területek méretei
-constexpr int16_t TABLE_WIDTH = 150; // +20 pixel szélesebb
-constexpr int16_t TABLE_HEIGHT = 200;
+constexpr int16_t TABLE_WIDTH = 160; // +20 pixel szélesebb
+constexpr int16_t TABLE_HEIGHT = 220;
 constexpr int16_t CIRCLE_WIDTH = 200;
 constexpr int16_t CIRCLE_HEIGHT = 200;
 
 /**
  * @brief Konstruktor
  */
-ScreenSats::ScreenSats() : UIScreen(SCREEN_NAME_SATS), tableSprite(nullptr), circleSprite(nullptr), lastSatCount(0), firstDraw(true) {
+ScreenSats::ScreenSats() : UIScreen(SCREEN_NAME_SATS), tableSprite(nullptr), circleSprite(nullptr), lastSatCount(0), firstDraw(true), currentSortType(SatelliteDb::BY_SNR), sortOrderChanged(false) {
     layoutComponents();
     initSprites();
 }
@@ -83,26 +86,28 @@ void ScreenSats::drawContent() {
         drawSatelliteCircle();
 
         // Adatok mentése
-        auto satellites = gpsManager->getSatelliteSnapshotForUI();
+        auto satellites = gpsManager->getSatelliteSnapshotForUI(currentSortType);
         uint8_t satCount = gpsManager->getSatellites().isValid() ? gpsManager->getSatellites().value() : 0;
         lastSatellites = satellites;
         lastSatCount = satCount;
+        sortOrderChanged = false;
 
         return;
     }
 
     // Műhold adatok lekérése
-    auto satellites = gpsManager->getSatelliteSnapshotForUI();
+    auto satellites = gpsManager->getSatelliteSnapshotForUI(currentSortType);
     uint8_t satCount = gpsManager->getSatellites().isValid() ? gpsManager->getSatellites().value() : 0;
 
-    // Csak akkor frissítünk, ha változtak az adatok
-    if (satelliteDataChanged(satellites, satCount)) {
+    // Csak akkor frissítünk, ha változtak az adatok vagy a rendezési mód
+    if (satelliteDataChanged(satellites, satCount) || sortOrderChanged) {
         drawSatelliteTable();
         drawSatelliteCircle();
 
         // Adatok mentése a következő összehasonlításhoz
         lastSatellites = satellites;
         lastSatCount = satCount;
+        sortOrderChanged = false;
     }
 }
 
@@ -170,8 +175,8 @@ void ScreenSats::drawSatelliteTable() {
     const int16_t tableY = 0;
     const int16_t lineHeight = 18; // Kicsit nagyobb sormagasság
 
-    // Műholdak adatainak lekérése
-    auto satellites = gpsManager->getSatelliteSnapshotForUI();
+    // Műholdak adatainak lekérése rendezéssel
+    auto satellites = gpsManager->getSatelliteSnapshotForUI(currentSortType);
 
     // Műholdak száma
     uint8_t satCount = gpsManager->getSatellites().isValid() ? gpsManager->getSatellites().value() : 0;
@@ -187,8 +192,20 @@ void ScreenSats::drawSatelliteTable() {
 
     // Táblázat fejléc
     int16_t currentY = tableY + 25;
+
+    // PRN oszlop szövege
+    uint16_t prnColor = (currentSortType == SatelliteDb::BY_PRN) ? TFT_CYAN : TFT_YELLOW;
+    tableSprite->setTextColor(prnColor, TFT_BLACK);
+    tableSprite->drawString("PRN", tableX, currentY);
+
+    // Középső oszlopok (mindig sárga)
     tableSprite->setTextColor(TFT_YELLOW, TFT_BLACK);
-    tableSprite->drawString("PRN     Elv    Azm   SNR", tableX, currentY);
+    tableSprite->drawString("     Elv    Azm   ", tableX + 18, currentY);
+
+    // SNR oszlop szövege
+    uint16_t snrColor = (currentSortType == SatelliteDb::BY_SNR) ? TFT_CYAN : TFT_YELLOW;
+    tableSprite->setTextColor(snrColor, TFT_BLACK);
+    tableSprite->drawString("SNR", tableX + 120, currentY);
     // Vonal a fejléc alatt
     currentY += 7;
     tableSprite->drawFastHLine(tableX, currentY, TABLE_WIDTH, TFT_DARKGREY);
@@ -196,12 +213,11 @@ void ScreenSats::drawSatelliteTable() {
     // Műholdak listázása
     currentY += 10;
     uint8_t itemCount = 0;
-    constexpr uint8_t maxItems = 12; // Maximum megjelenítendő elemek száma
 
     tableSprite->setFreeFont(&FreeMono9pt7b);
 
     for (const auto &sat : satellites) {
-        if (itemCount >= maxItems)
+        if (itemCount >= MAX_SATS_TABLE_ITEMS)
             break;
 
         // SNR alapján színkódolás
@@ -218,9 +234,9 @@ void ScreenSats::drawSatelliteTable() {
     }
 
     // Ha több műhold van, mint amit meg tudunk jeleníteni
-    if (satellites.size() > maxItems) {
+    if (satellites.size() > MAX_SATS_TABLE_ITEMS) {
         tableSprite->setTextColor(TFT_DARKGREY, TFT_BLACK);
-        tableSprite->drawString("+" + String(satellites.size() - maxItems) + " more...", tableX, currentY);
+        tableSprite->drawString("+" + String(satellites.size() - MAX_SATS_TABLE_ITEMS) + " more...", tableX, currentY);
     }
 
     // Sprite kirajzolása a képernyőre
@@ -269,8 +285,8 @@ void ScreenSats::drawSatelliteCircle() {
     circleSprite->setTextColor(TFT_LIGHTGREY, TFT_BLACK);
     circleSprite->drawString("N", centerX, centerY - maxRadius - 12);
     circleSprite->drawString("S", centerX, centerY + maxRadius + 8);
-    circleSprite->drawString("E", centerX + maxRadius + 8, centerY);
-    circleSprite->drawString("W", centerX - maxRadius - 8, centerY);
+    circleSprite->drawString("E", centerX + maxRadius + 8, centerY + 5);
+    circleSprite->drawString("W", centerX - maxRadius - 8, centerY + 5);
 
     // Elevation címkék
     circleSprite->setTextColor(TFT_DARKGREY, TFT_BLACK);
@@ -286,8 +302,8 @@ void ScreenSats::drawSatelliteCircle() {
         drawSatelliteOnCircle(circleSprite, centerX, centerY, maxRadius, sat);
     }
 
-    // Sprite kirajzolása a képernyőre
-    circleSprite->pushSprite(::SCREEN_W - CIRCLE_WIDTH, 55);
+    // Sprite kirajzolása a képernyőre (40px-el balrább)
+    circleSprite->pushSprite(::SCREEN_W - CIRCLE_WIDTH - 40, 55);
 }
 
 /**
@@ -379,4 +395,64 @@ uint32_t ScreenSats::getColorBySnr(uint8_t snr) {
     } else {
         return TFT_ORANGE;
     }
+}
+
+/**
+ * @brief Érintés kezelése
+ */
+bool ScreenSats::handleTouch(const TouchEvent &event) {
+    // Először a szülő osztály touch kezelését hívjuk meg
+    if (UIScreen::handleTouch(event)) {
+        return true;
+    }
+
+    // Debug információ
+    // DEBUG("ScreenSats touch: x=%d, y=%d, pressed=%d\n", event.x, event.y, event.pressed);
+
+    // Érintés felengedéskor reagálunk (pressed=0)
+    if (!event.pressed) {
+        int16_t x = event.x;
+        int16_t y = event.y;
+
+        // Fejléc területének koordinátái (sprite pozíció + relatív koordináták)
+        const int16_t tableX = 5;            // sprite X pozíciója
+        const int16_t tableY = 55;           // sprite Y pozíciója
+        const int16_t headerY = tableY + 25; // fejléc Y pozíciója
+
+        //  DEBUG("ScreenSats header area: tableX=%d, tableY=%d, headerY=%d\n", tableX, tableY, headerY);
+
+        // PRN oszlop fejléc területe (a logok alapján szélesebb és alacsonyabb)
+        if (x >= 5 && x <= 40 && y >= 70 && y <= 90) {
+            // DEBUG("ScreenSats: PRN header clicked\n");
+            handlePrnHeaderClick();
+            return true;
+        }
+
+        // SNR oszlop fejléc területe (a logok alapján szélesebb és alacsonyabb)
+        if (x >= 120 && x <= 160 && y >= 70 && y <= 90) {
+            // DEBUG("ScreenSats: SNR header clicked\n");
+            handleSnrHeaderClick();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * @brief PRN oszlop fejléc kattintásának kezelése
+ */
+void ScreenSats::handlePrnHeaderClick() {
+    currentSortType = SatelliteDb::BY_PRN;
+    sortOrderChanged = true;
+    // DEBUG("ScreenSats: Sorting by PRN\n");
+}
+
+/**
+ * @brief SNR oszlop fejléc kattintásának kezelése
+ */
+void ScreenSats::handleSnrHeaderClick() {
+    currentSortType = SatelliteDb::BY_SNR;
+    sortOrderChanged = true;
+    // DEBUG("ScreenSats: Sorting by SNR\n");
 }

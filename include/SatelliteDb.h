@@ -18,7 +18,7 @@ class SatelliteDb {
         SatelliteData(uint8_t p, int16_t e, int16_t a, int16_t s, unsigned long t = 0) : prn(p), elevation(e), azimuth(a), snr(s), timeStamp(t) {}
     };
 
-    typedef enum { BY_PRN, BY_SNR } SortType_t;
+    typedef enum { NONE, BY_PRN, BY_SNR } SortType_t;
 
     SatelliteDb();
     ~SatelliteDb() = default; // std::list automatikusan felszabadítja a memóriát
@@ -31,11 +31,8 @@ class SatelliteDb {
     void sortSatellites();
     void clear();
 
-    SortType_t getSortType() const { return sortType; }
-    void setSortType(SortType_t type) { sortType = type; }
-
     // Thread-safe read-only access for UI (Core0)
-    std::vector<SatelliteData> getSnapshotForUI() const;
+    std::vector<SatelliteData> getSnapshotForUI(SortType_t sortType = NONE) const;
     uint8_t countSatsForUI() const;
 
     // Iterator támogatás a külső kód számára
@@ -48,7 +45,6 @@ class SatelliteDb {
 
   private:
     std::list<SatelliteData> satellites;
-    SortType_t sortType = BY_PRN;
 
     // Segédfüggvény a kereséshez
     auto findSatellite(uint8_t prn) {
