@@ -26,19 +26,19 @@ void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
 
     // Felső napelem (egyszerű téglalap)
     tft.fillRect(x + 9, y + 2, 6, 3, TFT_BLUE);
-    tft.drawRect(x + 9, y + 2, 6, 3, TFT_WHITE);
+    tft.drawRect(x + 9, y + 2, 6, 3, TFT_MAGENTA);
 
     // Alsó napelem (egyszerű téglalap)
     tft.fillRect(x + 9, y + 19, 6, 3, TFT_BLUE);
-    tft.drawRect(x + 9, y + 19, 6, 3, TFT_WHITE);
+    tft.drawRect(x + 9, y + 19, 6, 3, TFT_MAGENTA);
 
     // Bal napelem (egyszerű téglalap)
     tft.fillRect(x + 2, y + 9, 3, 6, TFT_BLUE);
-    tft.drawRect(x + 2, y + 9, 3, 6, TFT_MAGENTA);
+    tft.drawRect(x + 2, y + 9, 3, 6, TFT_WHITE);
 
     // Jobb napelem (egyszerű téglalap)
     tft.fillRect(x + 19, y + 9, 3, 6, TFT_BLUE);
-    tft.drawRect(x + 19, y + 9, 3, 6, TFT_MAGENTA);
+    tft.drawRect(x + 19, y + 9, 3, 6, TFT_WHITE);
 
     // Összekötő vonalak (vékony vonalak a központból)
     tft.drawLine(x + 12, y + 7, x + 12, y + 5, TFT_WHITE);   // felfelé
