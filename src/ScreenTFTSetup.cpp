@@ -60,19 +60,26 @@ void ScreenTFTSetup::layoutComponents() {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 DEBUG("Manual Brightness button pressed - opening dialog\n");
 
+                // Lokális int változó a dialog számára
+                static int brightnessValue = static_cast<int>(config.data.tftManualBrightnessValue);
+                brightnessValue = static_cast<int>(config.data.tftManualBrightnessValue); // Frissítjük az aktuális értékkel
+
                 auto dialog = std::make_shared<ValueChangeDialog>(
-                    this,                                  // parent screen
-                    "Manual Brightness",                   // title
-                    "Set brightness level (5-255)",        // message
-                    &config.data.tftManualBrightnessValue, // value pointer
-                    (uint8_t)5,                            // min value (NIGHTLY_BRIGHTNESS)
-                    (uint8_t)255,                          // max value (TFT_BACKGROUND_LED_MAX_BRIGHTNESS)
-                    (uint8_t)5,                            // step value
+                    this,                           // parent screen
+                    "Manual Brightness",            // title
+                    "Set brightness level (5-255)", // message
+                    &brightnessValue,               // lokális int pointer
+                    5,                              // min value
+                    255,                            // max value
+                    5,                              // step value
                     [this](const std::variant<int, float, bool> &newValue) {
                         // Value change callback - frissítjük a fényerőt azonnal
                         if (std::holds_alternative<int>(newValue)) {
                             int brightness = std::get<int>(newValue);
                             DEBUG("Brightness changed to: %d\n", brightness);
+                            // Biztosítsuk, hogy a tartományban maradjon
+                            brightness = constrain(brightness, 5, 255);
+                            config.data.tftManualBrightnessValue = static_cast<uint8_t>(brightness);
                             tftBackLightAdjuster.setBacklightLevel(brightness);
                         }
                     },
@@ -84,6 +91,11 @@ void ScreenTFTSetup::layoutComponents() {
                             config.checkSave();
                         }
                         // Cancel esetén a ValueChangeDialog automatikusan visszaállítja az eredeti értéket
+                        // De nekünk is vissza kell állítani a config értéket
+                        else if (result == UIDialogBase::DialogResult::Rejected) {
+                            // Visszaállítjuk az eredeti értéket Cancel esetén
+                            brightnessValue = static_cast<int>(config.data.tftManualBrightnessValue);
+                        }
                     });
 
                 showDialog(dialog);
