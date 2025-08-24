@@ -2,6 +2,7 @@
 
 #include "ScreenInfo.h"
 #include "ScreenMain.h"
+#include "ScreenSat.h"
 #include "ScreenSetup.h"
 #include "ScreenTest.h"
 
@@ -18,6 +19,7 @@ void ScreenManager::registerDefaultScreenFactories() {
     // Info és Setup képernyők regisztrálása
     registerScreenFactory(SCREEN_NAME_INFO, []() { return std::make_shared<ScreenInfo>(); });
     registerScreenFactory(SCREEN_NAME_SETUP, []() { return std::make_shared<ScreenSetup>(); });
+    registerScreenFactory(SCREEN_NAME_SAT, []() { return std::make_shared<ScreenSat>(); });
 
     // További setup képernyők (kikommentezve)
     // registerScreenFactory(SCREEN_NAME_SETUP_SYSTEM, []() { return std::make_shared<ScreenSetupSystem>(); });

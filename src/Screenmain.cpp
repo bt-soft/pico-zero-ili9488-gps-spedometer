@@ -16,11 +16,11 @@ TFT_eSprite spriteAlertBar(&tft);
  */
 void ScreenMain::layoutComponents() {
     // Info gomb bal alsó sarokban
-    auto infoButton = std::make_shared<UIButton>(                                                                               //
-        1,                                                                                                                      // id
-        Rect(0, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH-8, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (bal alsó sarok)
-        "Info",                                                                                                                 // label
-        UIButton::ButtonType::Pushable,                                                                                         // type
+    auto infoButton = std::make_shared<UIButton>(                                                                                   //
+        1,                                                                                                                          // id
+        Rect(0, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH - 8, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (bal alsó sarok)
+        "Info",                                                                                                                     // label
+        UIButton::ButtonType::Pushable,                                                                                             // type
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 DEBUG("ScreenMain: Info button clicked\n");
@@ -244,20 +244,6 @@ void ScreenMain::drawSpeedometerIcon(int16_t x, int16_t y) {
  * Kirajzolja a képernyő saját tartalmát (statikus elemek)
  */
 void ScreenMain::drawContent() {
-    // Műhold ikon bal oldalon
-    drawSatelliteIcon(0, 0);
-
-    // Naptár ikon fent középen
-    drawCalendarIcon(::SCREEN_W / 2 - 100, 0);
-
-    // Magasság ikon jobb oldalon
-    drawAltitudeIcon(::SCREEN_W - 135, 0);
-
-    // GPS pontosság (hdop) ikon rajzolása
-    drawGpsAccuracyIcon(0, 50);
-
-    // Speedometer ikon (max speed)
-    drawSpeedometerIcon(::SCREEN_W - 130, 50);
 
     // Szöveges feliratok
     tft.setTextDatum(MC_DATUM);
@@ -275,6 +261,21 @@ void ScreenMain::drawContent() {
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString("km/h", ::SCREEN_W / 2 + 10, 105, 2);
+
+    // Műhold ikon bal oldalon
+    drawSatelliteIcon(0, 0);
+
+    // Naptár ikon fent középen
+    drawCalendarIcon(::SCREEN_W / 2 - 100, 0);
+
+    // Magasság ikon jobb oldalon
+    drawAltitudeIcon(::SCREEN_W - 135, 0);
+
+    // GPS pontosság (hdop) ikon rajzolása
+    drawGpsAccuracyIcon(0, 50);
+
+    // Speedometer ikon (max speed)
+    drawSpeedometerIcon(::SCREEN_W - 130, 50);
 }
 
 /**
@@ -294,6 +295,24 @@ void ScreenMain::handleOwnLoop() {
     // Műholdak száma
     static uint8_t lastSatCount = 255; // Kényszerített első frissítés
     uint8_t currentSatCount = gpsManager->getSatellites().isValid() && gpsManager->getSatellites().age() < GPS_DATA_MAX_AGE ? gpsManager->getSatellites().value() : 0;
+
+    // GPS HDOP és max speed statikus változók deklarálása
+    static double lastHdop = -1.0;        // Kényszerített első frissítés
+    static double maxSpeed = 0.0;         // Maximum sebesség tárolása
+    static double lastMaxSpeed = -1.0;    // Kényszerített első frissítés
+    static double lastAltitude = -9999.0; // Magasság változó (egységes -9999.0 érték)
+    static double lastSpeed = -1.0;       // Sebesség változó
+
+    // Kényszerített újrarajzolás esetén reseteljük a statikus változókat
+    if (forceRedraw) {
+        DEBUG("ScreenMain::handleOwnLoop() - Force redraw detected, resetting static variables\n");
+        lastSatCount = 255;     // Force satellite count redraw
+        lastHdop = -1.0;        // Force hdop redraw
+        lastMaxSpeed = -1.0;    // Force max speed redraw
+        lastAltitude = -9999.0; // Force altitude redraw (egységes érték)
+        lastSpeed = -1.0;       // Force speed redraw
+        forceRedraw = false;    // Reset flag
+    }
 #ifdef DEMO_MODE
     // Demo módban időnként változtatjuk a műholdak számát
     static unsigned long lastSatChange = 0;
@@ -381,8 +400,7 @@ void ScreenMain::handleOwnLoop() {
         tft.setFreeFont(); // Alapértelmezett font
     }
 
-    // Magasság ellenőrzése
-    static double lastAltitude = -9999.0; // Kényszerített első frissítés
+    // Magasság ellenőrzése - a lastAltitude statikus változó már deklarálva van fent
     double currentAltitude = 0.0;
     bool altitudeValid = gpsManager->getAltitude().isValid() && gpsManager->getAltitude().age() < GPS_DATA_MAX_AGE;
 #ifdef DEMO_MODE
@@ -419,10 +437,7 @@ void ScreenMain::handleOwnLoop() {
         lastAltitude = altitudeValid ? currentAltitude : -9999.0;
     }
 
-    // GPS HDOP érték ellenőrzése
-    static double lastHdop = -1.0;     // Kényszerített első frissítés
-    static double maxSpeed = 0.0;      // Maximum sebesség tárolása
-    static double lastMaxSpeed = -1.0; // Kényszerített első frissítés
+    // GPS HDOP érték ellenőrzése - a statikus változók már deklarálva vannak fent
     double currentHdop = 0.0;
     bool hdopValid = gpsManager->getHdop().isValid() && gpsManager->getHdop().age() < GPS_DATA_MAX_AGE;
 #ifdef DEMO_MODE
@@ -452,8 +467,7 @@ void ScreenMain::handleOwnLoop() {
         tft.setFreeFont(); // Alapértelmezett font
     }
 
-    // Sebesség ellenőrzése
-    static double lastSpeed = -1.0; // Kényszerített első frissítés
+    // Sebesség ellenőrzése - a lastSpeed statikus változó már deklarálva van fent
     int16_t currentSpeed = 0;
     bool speedValid = gpsManager->getSpeed().isValid();
 
@@ -584,6 +598,19 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
         return UIScreen::handleTouch(event); // Továbbítjuk az alaposztálynak
     }
 
+    // Műhold ikon és szám területének ellenőrzése (bal felső sarok)
+    int16_t satIconX = 0;
+    int16_t satIconY = 0;
+    int16_t satIconWidth = 60;  // Ikon + szám területe
+    int16_t satIconHeight = 35; // Ikon magassága + felirat
+
+    if (event.x >= satIconX && event.x < satIconX + satIconWidth && event.y >= satIconY && event.y < satIconY + satIconHeight) {
+
+        DEBUG("ScreenMain::handleTouch() - Satellite area clicked, switching to SAT screen\n");
+        getScreenManager()->switchToScreen(SCREEN_NAME_SAT);
+        return true; // Esemény kezelve
+    }
+
     // Jobb oldali hőmérsékleti bar területének ellenőrzése
     int16_t rightBarX = tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH;
     int16_t rightBarY = VERTICAL_BARS_Y + 10 - SPRITE_VERTICAL_LINEAR_METER_HEIGHT; // y koordináta teteje
@@ -606,4 +633,23 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
 
     // Ha nem volt találat, továbbítjuk az alaposztálynak
     return UIScreen::handleTouch(event);
+}
+
+/**
+ * @brief Képernyő aktiválása - Reset statikus változók
+ *
+ * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
+ * Reseteli a statikus változókat hogy kényszerítse az újrarajzolást
+ */
+void ScreenMain::activate() {
+    DEBUG("ScreenMain::activate() - Forcing redraw of all elements\n");
+
+    // Beállítjuk a kényszerített újrarajzolás flag-et
+    forceRedraw = true;
+
+    // Force immediate redraw on next loop
+    markForRedraw(true); // Jelöljük újrarajzolásra a képernyőt és gyerekeit
+
+    // Call parent activate
+    UIScreen::activate();
 }

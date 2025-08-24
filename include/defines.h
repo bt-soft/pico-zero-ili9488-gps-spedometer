@@ -12,13 +12,14 @@
 #define SCREEN_NAME_MAIN "Main"
 #define SCREEN_NAME_INFO "Info"
 #define SCREEN_NAME_SETUP "Setup"
+#define SCREEN_NAME_SAT "Satellites"
 //---
 #define SCREEN_NAME_EMPTY "Empty"
 #define SCREEN_NAME_TEST "Test"
 
 #define __DEBUG
 // #define DEBUG_WAIT_FOR_SERIAL
-#define DEMO_MODE // Véletlenszerű adatok a main képernyőn
+// #define DEMO_MODE // Véletlenszerű adatok a main képernyőn
 
 // Színsémák
 #define RED2RED 0

@@ -6,12 +6,13 @@
  * UI komponensek elhelyezése
  */
 void ScreenSetup::layoutComponents() {
-    // Back gomb bal alsó sarokban
-    auto backButton = std::make_shared<UIButton>(1,                                  // id
-                                                 Rect(10, ::SCREEN_H - 50, 100, 40), // bounds
-                                                 "Back",                             // label
-                                                 UIButton::ButtonType::Pushable,     // type
-                                                 [this](const UIButton::ButtonEvent &event) { this->onBackButtonClicked(event); });
+    // Back gomb jobb alsó sarokban
+    auto backButton = std::make_shared<UIButton>(
+        1,                                                                                                                                                                // id
+        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (jobb alsó sarok)
+        "Back",                                                                                                                                                           // label
+        UIButton::ButtonType::Pushable,                                                                                                                                   // type
+        [this](const UIButton::ButtonEvent &event) { this->onBackButtonClicked(event); });
 
     addChild(backButton);
 }

@@ -39,6 +39,14 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     virtual void handleOwnLoop() override;
 
     /**
+     * @brief Képernyő aktiválása - Reset statikus változók
+     *
+     * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
+     * Reseteli a statikus változókat hogy kényszerítse az újrarajzolást
+     */
+    virtual void activate() override;
+
+    /**
      * @brief Kirajzolja a képernyő saját tartalmát
      */
     virtual void drawContent() override;
@@ -84,6 +92,11 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @brief Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet
      */
     bool externalTemperatureMode = true; // true = external, false = CPU
+
+    /**
+     * @brief Kényszerített újrarajzolás flag - amikor visszatérünk más képernyőről
+     */
+    bool forceRedraw = false;
 
     /**
      * @brief Sprite frissítés időzítő
