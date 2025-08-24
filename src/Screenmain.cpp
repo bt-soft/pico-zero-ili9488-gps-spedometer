@@ -506,7 +506,7 @@ void ScreenMain::handleOwnLoop() {
         spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
     }
 
-#define VERTICAL_BARS_Y 290
+#define VERTICAL_BARS_Y 260
     // Vertical Line bar - Battery (sprite-os)
     float batteryVoltage = sensorUtils.readVBusExternal();
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
