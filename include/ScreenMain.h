@@ -43,6 +43,11 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      */
     virtual void drawContent() override;
 
+    /**
+     * @brief Touch esemény kezelése
+     */
+    virtual bool handleTouch(const TouchEvent &event) override;
+
   private:
     /**
      * @brief UI komponensek létrehozása és elhelyezése
@@ -73,6 +78,12 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @brief Speedometer ikon rajzolása
      */
     void drawSpeedometerIcon(int16_t x, int16_t y);
+
+  private:
+    /**
+     * @brief Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet
+     */
+    bool temperatureMode = true; // true = external, false = CPU
 };
 
 #endif // __SCREEN_MAIN_H

@@ -524,10 +524,22 @@ void ScreenMain::handleOwnLoop() {
                         BLUE2RED);            // color
 
     // Vertical Line bar - External Temperature (DS18B20) - DALLAS SZENZOR
-    float externalTemp = sensorUtils.readExternalTemperature();
+    float temperature;
+    const char *tempLabel;
+
+    if (temperatureMode) {
+        // Külső hőmérséklet (DS18B20)
+        temperature = sensorUtils.readExternalTemperature();
+        tempLabel = "Ext [C]";
+    } else {
+        // CPU hőmérséklet
+        temperature = sensorUtils.readCoreTemperature();
+        tempLabel = "CPU [C]";
+    }
+
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        "Ext [C]",                                        // category
-                        externalTemp,                                     // val
+                        tempLabel,                                        // category
+                        temperature,                                      // val
                         TEMP_BARMETER_MIN,                                // minVal
                         TEMP_BARMETER_MAX,                                // maxVal
                         tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH, // x: sprite szélesség beszámítva
@@ -538,4 +550,34 @@ void ScreenMain::handleOwnLoop() {
                         10,                                               // n
                         BLUE2RED,                                         // color
                         true);                                            // bal oldalt legyenek az értékek
+}
+
+/**
+ * @brief Touch esemény kezelése - hőmérsékleti mód váltás
+ */
+bool ScreenMain::handleTouch(const TouchEvent &event) {
+    // Csak lenyomás eseményre reagálunk
+    if (!event.pressed) {
+        return UIScreen::handleTouch(event); // Továbbítjuk az alaposztálynak
+    }
+
+    // Jobb oldali hőmérsékleti bar területének ellenőrzése
+    int16_t rightBarX = tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH;
+    int16_t rightBarY = VERTICAL_BARS_Y + 10 - SPRITE_VERTICAL_LINEAR_METER_HEIGHT; // y koordináta teteje
+    int16_t rightBarWidth = SPRITE_VERTICAL_LINEAR_METER_WIDTH;
+    int16_t rightBarHeight = SPRITE_VERTICAL_LINEAR_METER_HEIGHT;
+
+    // Ellenőrizzük, hogy a touch a jobb oldali bar területén belül van-e
+    if (event.x >= rightBarX && event.x < rightBarX + rightBarWidth && event.y >= rightBarY && event.y < rightBarY + rightBarHeight) {
+
+        // Váltás a hőmérsékleti módok között
+        temperatureMode = !temperatureMode;
+
+        DEBUG("ScreenMain::handleTouch() - Temperature mode switched to: %s\n", temperatureMode ? "External" : "CPU");
+
+        return true; // Esemény kezelve
+    }
+
+    // Ha nem volt találat, továbbítjuk az alaposztálynak
+    return UIScreen::handleTouch(event);
 }
