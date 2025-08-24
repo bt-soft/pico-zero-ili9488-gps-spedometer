@@ -24,8 +24,7 @@ class SensorUtils {
     bool coreTemperatureValid;             // Hőmérséklet cache érvényessége
 
     // DS18B20
-    static volatile float externalTemperatureValue;               // Külső hőmérséklet utolsó mért értéke (Celsius)
-    static NonBlockingDallas *nonBlockingDallasTemperatureSensor; // Pointer a NonBlockingDallas objektumra
+    static volatile float externalTemperatureValue; // Külső hőmérséklet utolsó mért értéke (Celsius)
     static void handleTemperatureChange(int deviceIndex, int32_t temperatureRAW);
 
   public:

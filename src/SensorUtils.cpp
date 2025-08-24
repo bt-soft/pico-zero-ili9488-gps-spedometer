@@ -1,7 +1,7 @@
 #include "SensorUtils.h"
 #include "Utils.h"
 
-#define DEBUG_DS18B20             // DB18B20 debug
+// #define DEBUG_DS18B20             // DB18B20 debug
 #define DS18B20_TEMP_SENSOR_NDX 0 // Dallas DS18B20 hõmérõ szenzor indexe
 #include <OneWire.h>
 #define REQUIRESALARMS true // nem kell a DallasTemperature ALARM supportja
@@ -17,14 +17,13 @@
 #define VBUS_DIVIDER_R2 4.7f
 #define EXTERNAL_VBUSDIVIDER_RATIO ((VBUS_DIVIDER_R1 + VBUS_DIVIDER_R2) / VBUS_DIVIDER_R2) // Feszültségosztó aránya
 
-// Dallas hőmérséklet szenzor - STATIKUS OBJEKTUMOK (memóriafragmentáció elkerülése)
+// Dallas DS18B20 hőmérséklet szenzor - STATIKUS OBJEKTUMOK (memóriafragmentáció elkerülése)
 static OneWire oneWire(PIN_DS18B20_TEMP_SENSOR);
 static DallasTemperature dallasTemp(&oneWire);
 static NonBlockingDallas nonBlockingDallasTemp(&dallasTemp);
 
 // Statikus változók definíciói
 volatile float SensorUtils::externalTemperatureValue = 0.0f;
-NonBlockingDallas *SensorUtils::nonBlockingDallasTemperatureSensor = nullptr;
 
 /**
  * Konstruktor
@@ -39,9 +38,6 @@ SensorUtils::SensorUtils() : vBusExtValue(0.0f), vBusExtLastRead(0), vBusExtVali
  */
 void SensorUtils::init() {
 
-    // Statikus objektumok használata (nincs dinamikus allokáció)
-    nonBlockingDallasTemperatureSensor = &nonBlockingDallasTemp;
-
     // --------------------------------------------------------------------------------------------------------
     // Figyelem!!!
     // NEM LEHET a loop() és a Non-blocking Dallas között hosszú idő, mert a lib leáll az idő méréssel.
@@ -49,13 +45,13 @@ void SensorUtils::init() {
     // --------------------------------------------------------------------------------------------------------
 
     // Hőmérséklet szenzor inicializálása - 12 bites felbontás, 1500ms olvasási ciklus
-    nonBlockingDallasTemperatureSensor->begin(NonBlockingDallas::resolution_12, 1500);
+    nonBlockingDallasTemp.begin(NonBlockingDallas::resolution_12, 1500);
 
     // Callback beállítása
-    nonBlockingDallasTemperatureSensor->onTemperatureChange(handleTemperatureChange);
+    nonBlockingDallasTemp.onTemperatureChange(handleTemperatureChange);
 
     // Azonnal le is kérjük a hőmérsékletet
-    nonBlockingDallasTemperatureSensor->requestTemperature();
+    nonBlockingDallasTemp.requestTemperature();
 }
 
 /**
@@ -126,6 +122,6 @@ void SensorUtils::loop() {
     // Max 10Hz frissítés (100ms minimális idő)
     if (millis() - lastUpdate >= 100) {
         lastUpdate = millis();
-        nonBlockingDallasTemperatureSensor->update();
+        nonBlockingDallasTemp.update();
     }
 }
