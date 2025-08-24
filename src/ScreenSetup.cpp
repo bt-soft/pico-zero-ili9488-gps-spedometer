@@ -42,17 +42,12 @@ void ScreenSetup::layoutComponents() {
         }));
 
     // Debug beállítások gomb
-    auto dbgButton = std::make_shared<UIButton>( //
+    addChild(std::make_shared<UIButton>( //
         13, Rect((::SCREEN_W - btnW) - buttonXGap, buttonY, btnW, btnH), "Debug Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_DEBUG_SETUP);
             }
-        });
-#ifndef __DEBUG
-    // Ha nincs debug mód, akkor a Debug gomb le van tiltva
-    dbgButton->setButtonState(UIButton::ButtonState::Disabled);
-#endif
-    addChild(dbgButton);
+        }));
 
     // Back gomb jobb alsó sarokban
     addChild(std::make_shared<UIButton>( //

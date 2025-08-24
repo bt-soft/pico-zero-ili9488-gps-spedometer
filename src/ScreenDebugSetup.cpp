@@ -23,12 +23,11 @@ void ScreenDebugSetup::layoutComponents() {
     addChild(std::make_shared<UIButton>(                                                                      //
         10,                                                                                                   // id
         Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH),                                                 // rect
-        "Zero Internal LED",                                                                                  // label
+        "Pico-Zero LED",                                                                                      // label
         UIButton::ButtonType::Toggleable,                                                                     // type
         config.data.debugGpsSerialOnInternalFastLed ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
-                // DEBUG("Button ID: %d, Label: %s, State: %s\n", event.id, event.label, event.state == UIButton::EventButtonState::On ? "ON" : "OFF");
                 config.data.debugGpsSerialOnInternalFastLed = event.state == UIButton::EventButtonState::On;
                 gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
             }
@@ -37,15 +36,18 @@ void ScreenDebugSetup::layoutComponents() {
 
     // GPS Data on Serial
     row++;
-    addChild(std::make_shared<UIButton>(                                                         //
-        11,                                                                                      // id
-        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH),                                    // rect
-        "GPS On Serial",                                                                         // label
-        UIButton::ButtonType::Toggleable,                                                        // type
+    addChild(std::make_shared<UIButton>(                      //
+        11,                                                   // id
+        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH), // rect
+        "GPS On Serial",                                      // label
+        UIButton::ButtonType::Toggleable,                     // type
+#ifdef __DEBUG
         config.data.debugGpsSerialData ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
+#else
+        UIButton::ButtonState::Disabled, // Ha nincs Serial, akkor nincs értelme
+#endif
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
-                // DEBUG("Button ID: %d, Label: %s, State: %s\n", event.id, event.label, event.state == UIButton::EventButtonState::On ? "ON" : "OFF");
                 config.data.debugGpsSerialData = event.state == UIButton::EventButtonState::On;
                 gpsManager->setSerialDebug(config.data.debugGpsSerialData);
             }
@@ -54,15 +56,18 @@ void ScreenDebugSetup::layoutComponents() {
 
     // SatDB on Serial
     row++;
-    addChild(std::make_shared<UIButton>(                                                                 //
-        12,                                                                                              // id
-        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH),                                            // rect
-        "SatDB On Serial",                                                                               // label
-        UIButton::ButtonType::Toggleable,                                                                // type
+    addChild(std::make_shared<UIButton>(                      //
+        12,                                                   // id
+        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH), // rect
+        "SatDB On Serial",                                    // label
+        UIButton::ButtonType::Toggleable,                     // type
+#ifdef __DEBUG
         config.data.debugGpsSatellitesDatabase ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
+#else
+        UIButton::ButtonState::Disabled, // Ha nincs Serial, akkor nincs értelme
+#endif
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
-                // DEBUG("Button ID: %d, Label: %s, State: %s\n", event.id, event.label, event.state == UIButton::EventButtonState::On ? "ON" : "OFF");
                 config.data.debugGpsSatellitesDatabase = event.state == UIButton::EventButtonState::On;
                 gpsManager->setDebugGpsSatellitesDatabase(config.data.debugGpsSatellitesDatabase);
             }
