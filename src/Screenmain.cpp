@@ -34,11 +34,11 @@ void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
 
     // Bal napelem (egyszerű téglalap)
     tft.fillRect(x + 2, y + 9, 3, 6, TFT_BLUE);
-    tft.drawRect(x + 2, y + 9, 3, 6, TFT_WHITE);
+    tft.drawRect(x + 2, y + 9, 3, 6, TFT_MAGENTA);
 
     // Jobb napelem (egyszerű téglalap)
     tft.fillRect(x + 19, y + 9, 3, 6, TFT_BLUE);
-    tft.drawRect(x + 19, y + 9, 3, 6, TFT_WHITE);
+    tft.drawRect(x + 19, y + 9, 3, 6, TFT_MAGENTA);
 
     // Összekötő vonalak (vékony vonalak a központból)
     tft.drawLine(x + 12, y + 7, x + 12, y + 5, TFT_WHITE);   // felfelé
@@ -237,7 +237,7 @@ void ScreenMain::drawContent() {
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
     // Magasság mértékegység felirat
-    tft.drawString("m", ::SCREEN_W - 8, 15, 1);
+    tft.drawString("m", ::SCREEN_W - 8, 18, 1);
 
     // Maxspeed km/h felirat
     tft.drawString("km/h", ::SCREEN_W - 14, 65, 1);
@@ -288,7 +288,7 @@ void ScreenMain::handleOwnLoop() {
         tft.setTextPadding(tft.textWidth("88") + 10);
 
         // Szám pozíciója az ikon mellett
-        tft.drawString(String(currentSatCount), 39, 12, 2);
+        tft.drawString(String(currentSatCount), 35, 15, 2);
         lastSatCount = currentSatCount;
         tft.setFreeFont(); // Alapértelmezett font
     }
@@ -386,7 +386,7 @@ void ScreenMain::handleOwnLoop() {
 
         // Szám pozíciója a képernyő jobb szélén (x=SCREEN_W-5, y=10 az ikon közepe)
         String altText = (altitudeValid ? String((int)currentAltitude) : "-- ");
-        tft.drawString(altText, ::SCREEN_W - 90, 10, 2); // Font méret 2, ikon jobb szélre igazítva
+        tft.drawString(altText, ::SCREEN_W - 90, 13, 2); // Font méret 2, ikon jobb szélre igazítva
         lastAltitude = altitudeValid ? currentAltitude : -9999.0;
     }
 
@@ -418,7 +418,7 @@ void ScreenMain::handleOwnLoop() {
 
         // HDOP pozíciója az ikon mellett
         dtostrf(currentHdop, 0, 1, buf); // 1 tizedesjegy
-        tft.drawString(hdopValid ? String(buf) : "--", 39, 60, 2);
+        tft.drawString(hdopValid ? String(buf) : "--", 35, 63, 2);
         lastHdop = hdopValid ? currentHdop : -1.0;
         tft.setFreeFont(); // Alapértelmezett font
     }
@@ -526,12 +526,12 @@ void ScreenMain::handleOwnLoop() {
     float temperature;
     const char *tempLabel;
 
-    if (temperatureMode) {
+    if (externalTemperatureMode) {
         // Külső hőmérséklet (DS18B20)
         temperature = sensorUtils.readExternalTemperature();
         tempLabel = "Ext [C]";
     } else {
-        // CPU hőmérséklet
+        // CPU Core hőmérséklet  (Pico belső AD4 olvasásával)
         temperature = sensorUtils.readCoreTemperature();
         tempLabel = "CPU [C]";
     }
@@ -570,12 +570,12 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
     if (event.x >= rightBarX && event.x < rightBarX + rightBarWidth && event.y >= rightBarY && event.y < rightBarY + rightBarHeight) {
 
         // Váltás a hőmérsékleti módok között
-        temperatureMode = !temperatureMode;
+        externalTemperatureMode = !externalTemperatureMode;
 
         // Sprite azonnal frissüljön a következő draw()-nál
         lastSpriteUpdate = 0;
 
-        DEBUG("ScreenMain::handleTouch() - Temperature mode switched to: %s\n", temperatureMode ? "External" : "CPU");
+        DEBUG("ScreenMain::handleTouch() - Temperature mode switched to: %s\n", externalTemperatureMode ? "External" : "CPU");
 
         return true; // Esemény kezelve
     }
