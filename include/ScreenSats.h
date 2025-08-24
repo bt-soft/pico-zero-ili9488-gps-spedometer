@@ -1,10 +1,11 @@
 #pragma once
 
+#include <TFT_eSPI.h>
+
 #include "SatelliteDb.h"
 #include "UIButton.h"
 #include "UIScreen.h"
 #include "defines.h"
-#include <TFT_eSPI.h>
 
 /**
  * @brief Műholdak képernyő
