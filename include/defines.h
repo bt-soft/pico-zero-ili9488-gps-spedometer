@@ -10,6 +10,8 @@
 
 //--- ScreenNames ----
 #define SCREEN_NAME_MAIN "Main"
+#define SCREEN_NAME_INFO "Info"
+#define SCREEN_NAME_SETUP "Setup"
 //---
 #define SCREEN_NAME_EMPTY "Empty"
 #define SCREEN_NAME_TEST "Test"

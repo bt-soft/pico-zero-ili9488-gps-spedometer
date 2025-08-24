@@ -1,6 +1,8 @@
 #include "ScreenManager.h"
 
+#include "ScreenInfo.h"
 #include "ScreenMain.h"
+#include "ScreenSetup.h"
 #include "ScreenTest.h"
 
 /**
@@ -13,8 +15,11 @@ void ScreenManager::registerDefaultScreenFactories() {
     // registerScreenFactory(SCREEN_NAME_MEMORY, []() { return std::make_shared<ScreenMemory>(); });
     // registerScreenFactory(SCREEN_NAME_SCAN, []() { return std::make_shared<ScanScreen>(); });
 
-    // Setup képernyők regisztrálása
-    // registerScreenFactory(SCREEN_NAME_SETUP, []() { return std::make_shared<ScreenSetup>(); });
+    // Info és Setup képernyők regisztrálása
+    registerScreenFactory(SCREEN_NAME_INFO, []() { return std::make_shared<ScreenInfo>(); });
+    registerScreenFactory(SCREEN_NAME_SETUP, []() { return std::make_shared<ScreenSetup>(); });
+
+    // További setup képernyők (kikommentezve)
     // registerScreenFactory(SCREEN_NAME_SETUP_SYSTEM, []() { return std::make_shared<ScreenSetupSystem>(); });
     // registerScreenFactory(SCREEN_NAME_SETUP_SI4735, []() { return std::make_shared<ScreenSetupSi4735>(); });
     // registerScreenFactory(SCREEN_NAME_SETUP_AUDIO_PROC, []() { return std::make_shared<ScreenSetupAudioProc>(); });

@@ -1,6 +1,8 @@
 #include "ScreenMain.h"
 #include "LinearMeter.h"
+#include "UIButton.h"
 #include "Utils.h"
+#include "defines.h"
 
 constexpr int SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
 constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
@@ -13,7 +15,34 @@ TFT_eSprite spriteAlertBar(&tft);
  * UI komponensek elhelyezése
  */
 void ScreenMain::layoutComponents() {
-    // Komponensek elhelyezése
+    // Info gomb bal alsó sarokban
+    auto infoButton = std::make_shared<UIButton>(                                                                               //
+        1,                                                                                                                      // id
+        Rect(0, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH-8, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (bal alsó sarok)
+        "Info",                                                                                                                 // label
+        UIButton::ButtonType::Pushable,                                                                                         // type
+        [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                DEBUG("ScreenMain: Info button clicked\n");
+                getScreenManager()->switchToScreen(SCREEN_NAME_INFO);
+            }
+        });
+
+    // Setup gomb jobb alsó sarokban
+    auto setupButton = std::make_shared<UIButton>(                                                                                                                        //
+        2,                                                                                                                                                                // id
+        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (jobb alsó sarok)
+        "Setup",                                                                                                                                                          // label
+        UIButton::ButtonType::Pushable,                                                                                                                                   // type
+        [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                DEBUG("ScreenMain: Setup button clicked\n");
+                getScreenManager()->switchToScreen(SCREEN_NAME_SETUP);
+            }
+        });
+
+    addChild(infoButton);
+    addChild(setupButton);
 }
 
 /**
@@ -482,14 +511,9 @@ void ScreenMain::handleOwnLoop() {
         tft.setTextDatum(MC_DATUM);                    // vízszintes közép
         tft.setTextPadding(tft.textWidth("888") + 10); // Padding a villogás ellen
 
-        if (speedValid) {
-            dtostrf(currentSpeed, 0, 0, buf);
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
-            tft.drawString(buf, ::SCREEN_W / 2, 240);
-        } else {
-            tft.setTextColor(TFT_RED, TFT_BLACK);
-            tft.drawString("0", ::SCREEN_W / 2, 240);
-        }
+        dtostrf(speedValid ? currentSpeed : 0, 0, 0, buf);
+        tft.setTextColor(speedValid ? TFT_WHITE : TFT_RED, TFT_BLACK);
+        tft.drawString(buf, ::SCREEN_W / 2 - 11, 240);
         tft.unloadFont(); // Visszaállítjuk az alapértelmezett fontot
         lastSpeed = speedValid ? currentSpeed : -1.0;
     }
@@ -506,7 +530,7 @@ void ScreenMain::handleOwnLoop() {
         spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
     }
 
-#define VERTICAL_BARS_Y 260
+#define VERTICAL_BARS_Y 250
     // Vertical Line bar - Battery (sprite-os)
     float batteryVoltage = sensorUtils.readVBusExternal();
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
