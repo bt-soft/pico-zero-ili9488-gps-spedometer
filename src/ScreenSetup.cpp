@@ -7,16 +7,16 @@
  */
 void ScreenSetup::layoutComponents() {
 
-    // Függőlegesen egymás alá
     int btnW = 180;
-    int btnH = 40;
-    int btnX = (::SCREEN_W - btnW) / 2;
-    int btnY = 80;
-    int btnGap = 10;
+    int btnH = 60;
+    int buttonXGap = 30;
+
+    // 1. sor
+    int buttonY = 80;
 
     // TFT beállítások gomb
     addChild(std::make_shared<UIButton>( //
-        10, Rect(btnX, btnY, btnW, btnH), "TFT Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+        10, Rect(buttonXGap, buttonY, btnW, btnH), "TFT Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_TFT_SETUP);
             }
@@ -24,15 +24,18 @@ void ScreenSetup::layoutComponents() {
 
     // System beállítások button
     addChild(std::make_shared<UIButton>( //
-        11, Rect(btnX, btnY + (btnH + btnGap), btnW, btnH), "System Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+        11, Rect((::SCREEN_W - btnW) - buttonXGap, buttonY, btnW, btnH), "System Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_SYSTEM_SETUP);
             }
         }));
 
+    // 2. sor
+    buttonY = 170;
+
     // GPS beállítások gomb
     addChild(std::make_shared<UIButton>( //
-        12, Rect(btnX, btnY + 2 * (btnH + btnGap), btnW, btnH), "GPS Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+        12, Rect(buttonXGap, buttonY, btnW, btnH), "GPS Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_GPS_SETUP);
             }
@@ -40,7 +43,7 @@ void ScreenSetup::layoutComponents() {
 
     // Debug beállítások gomb
     auto dbgButton = std::make_shared<UIButton>( //
-        13, Rect(btnX, btnY + 3 * (btnH + btnGap), btnW, btnH), "Debug Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+        13, Rect((::SCREEN_W - btnW) - buttonXGap, buttonY, btnW, btnH), "Debug Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_DEBUG_SETUP);
             }
@@ -56,7 +59,7 @@ void ScreenSetup::layoutComponents() {
         1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                getScreenManager()->switchToScreen(SCREEN_NAME_MAIN);
+                getScreenManager()->goBack();
             }
         }));
 }
