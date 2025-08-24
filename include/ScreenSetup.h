@@ -13,10 +13,7 @@ class ScreenSetup : public UIScreen {
     /**
      * @brief ScreenSetup konstruktor
      */
-    ScreenSetup() : UIScreen(SCREEN_NAME_SETUP) {
-        DEBUG("ScreenSetup: Constructor called\n");
-        layoutComponents();
-    }
+    ScreenSetup() : UIScreen(SCREEN_NAME_SETUP) { layoutComponents(); }
     virtual ~ScreenSetup() = default;
 
     /**
@@ -29,11 +26,6 @@ class ScreenSetup : public UIScreen {
      * @brief UI komponensek létrehozása és elhelyezése
      */
     void layoutComponents();
-
-    /**
-     * @brief Back gomb callback
-     */
-    void onBackButtonClicked(const UIButton::ButtonEvent &event);
 };
 
 #endif // __SCREEN_SETUP_H

@@ -1,9 +1,13 @@
 #include "ScreenManager.h"
 
+#include "ScreenDebugSetup.h"
+#include "ScreenGPSSetup.h"
 #include "ScreenInfo.h"
 #include "ScreenMain.h"
 #include "ScreenSats.h"
 #include "ScreenSetup.h"
+#include "ScreenSystemSetup.h"
+#include "ScreenTFTSetup.h"
 #include "ScreenTest.h"
 
 /**
@@ -21,4 +25,9 @@ void ScreenManager::registerDefaultScreenFactories() {
     // Teszt képernyők regisztrálása
     registerScreenFactory(SCREEN_NAME_TEST, []() { return std::make_shared<ScreenTest>(); });
     // registerScreenFactory(SCREEN_NAME_EMPTY, []() { return std::make_shared<ScreenEmpty>(); });
+
+    registerScreenFactory(SCREEN_NAME_TFT_SETUP, []() { return std::make_shared<ScreenTFTSetup>(); });
+    registerScreenFactory(SCREEN_NAME_SYSTEM_SETUP, []() { return std::make_shared<ScreenSystemSetup>(); });
+    registerScreenFactory(SCREEN_NAME_GPS_SETUP, []() { return std::make_shared<ScreenGPSSetup>(); });
+    registerScreenFactory(SCREEN_NAME_DEBUG_SETUP, []() { return std::make_shared<ScreenDebugSetup>(); });
 }

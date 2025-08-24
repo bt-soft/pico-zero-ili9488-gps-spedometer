@@ -6,14 +6,57 @@
  * UI komponensek elhelyezése
  */
 void ScreenSetup::layoutComponents() {
-    // Back gomb jobb alsó sarokban
-    auto backButton = std::make_shared<UIButton>(
-        1,                                                                                                                                                                // id
-        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (jobb alsó sarok)
-        "Back",                                                                                                                                                           // label
-        UIButton::ButtonType::Pushable,                                                                                                                                   // type
-        [this](const UIButton::ButtonEvent &event) { this->onBackButtonClicked(event); });
+    int btnW = 180;
+    int btnH = 40;
+    int btnX = (::SCREEN_W - btnW) / 2;
+    int btnY = 80;
+    int btnGap = 10;
 
+    // TFT beállítások gomb
+    auto tftButton = std::make_shared<UIButton>( //
+        10, Rect(btnX, btnY, btnW, btnH), "TFT Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                getScreenManager()->switchToScreen(SCREEN_NAME_TFT_SETUP);
+            }
+        });
+
+    // System beállítások button
+    auto sysButton = std::make_shared<UIButton>( //
+        11, Rect(btnX, btnY + (btnH + btnGap), btnW, btnH), "System Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                getScreenManager()->switchToScreen(SCREEN_NAME_SYSTEM_SETUP);
+            }
+        });
+
+    // GPS beállítások gomb
+    auto gpsButton = std::make_shared<UIButton>( //
+        12, Rect(btnX, btnY + 2 * (btnH + btnGap), btnW, btnH), "GPS Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                getScreenManager()->switchToScreen(SCREEN_NAME_GPS_SETUP);
+            }
+        });
+
+    // Debug beállítások gomb
+    auto dbgButton = std::make_shared<UIButton>( //
+        13, Rect(btnX, btnY + 3 * (btnH + btnGap), btnW, btnH), "Debug Settings", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                getScreenManager()->switchToScreen(SCREEN_NAME_DEBUG_SETUP);
+            }
+        });
+
+    // Back gomb jobb alsó sarokban
+    auto backButton = std::make_shared<UIButton>( //
+        1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
+        [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                getScreenManager()->switchToScreen(SCREEN_NAME_MAIN);
+            }
+        });
+
+    addChild(tftButton);
+    addChild(sysButton);
+    addChild(gpsButton);
+    addChild(dbgButton);
     addChild(backButton);
 }
 
@@ -28,31 +71,5 @@ void ScreenSetup::drawContent() {
     tft.setTextDatum(MC_DATUM);
     tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("Setup Screen", ::SCREEN_W / 2, 50);
-
-    // Beállítások
-    tft.setFreeFont();
-    tft.setTextSize(2);
-    tft.setTextColor(TFT_CYAN, TFT_BLACK);
-    tft.drawString("Configuration Options", ::SCREEN_W / 2, 120);
-
-    tft.setTextSize(1);
-    tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-    tft.drawString("Temperature Unit", ::SCREEN_W / 2, 160);
-    tft.drawString("Display Brightness", ::SCREEN_W / 2, 180);
-    tft.drawString("GPS Update Rate", ::SCREEN_W / 2, 200);
-    tft.drawString("Speed Units", ::SCREEN_W / 2, 220);
-
-    tft.setTextColor(TFT_GREEN, TFT_BLACK);
-    tft.drawString("Under Development", ::SCREEN_W / 2, 260);
-}
-
-/**
- * Back gomb callback
- */
-void ScreenSetup::onBackButtonClicked(const UIButton::ButtonEvent &event) {
-    if (event.state == UIButton::EventButtonState::Clicked) {
-        DEBUG("ScreenSetup: Back button clicked, returning to main screen\n");
-        getScreenManager()->switchToScreen(SCREEN_NAME_MAIN);
-    }
+    tft.drawString("Setup Screen", ::SCREEN_W / 2, 30);
 }

@@ -1,0 +1,24 @@
+#include "ScreenDebugSetup.h"
+#include "Utils.h"
+#include "defines.h"
+
+void ScreenDebugSetup::layoutComponents() {
+    auto backButton = std::make_shared<UIButton>( //
+        1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
+        [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                getScreenManager()->switchToScreen(SCREEN_NAME_SETUP);
+            }
+        });
+    addChild(backButton);
+}
+
+void ScreenDebugSetup::drawContent() {
+    tft.fillScreen(TFT_BLACK);
+    tft.setTextDatum(MC_DATUM);
+    tft.setFreeFont(&FreeSansBold18pt7b);
+    tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    tft.drawString("Debug Settings", ::SCREEN_W / 2, 50);
+    tft.setFreeFont();
+    // ...ide jönnek majd a beállítási gombok/ValueChangeDialog...
+}

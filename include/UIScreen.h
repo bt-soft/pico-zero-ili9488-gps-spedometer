@@ -61,6 +61,7 @@ class UIScreen : public UIContainerComponent {
      * Alapértelmezés szerint üres implementáció.
      */
     virtual void drawContent() {}
+    virtual void layoutComponents() {}
 
   public:
     /**
@@ -162,7 +163,7 @@ class UIScreen : public UIContainerComponent {
      */
     virtual bool handleTouch(const TouchEvent &event) override;
 
-      /**
+    /**
      * @brief Folyamatos loop hívás kezelése
      *
      * Loop routing:
