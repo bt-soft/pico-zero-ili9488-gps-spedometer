@@ -414,13 +414,6 @@ bool ScreenSats::handleTouch(const TouchEvent &event) {
         int16_t x = event.x;
         int16_t y = event.y;
 
-        // Fejléc területének koordinátái (sprite pozíció + relatív koordináták)
-        const int16_t tableX = 5;            // sprite X pozíciója
-        const int16_t tableY = 55;           // sprite Y pozíciója
-        const int16_t headerY = tableY + 25; // fejléc Y pozíciója
-
-        //  DEBUG("ScreenSats header area: tableX=%d, tableY=%d, headerY=%d\n", tableX, tableY, headerY);
-
         // PRN oszlop fejléc területe (a logok alapján szélesebb és alacsonyabb)
         if (x >= 5 && x <= 40 && y >= 70 && y <= 90) {
             // DEBUG("ScreenSats: PRN header clicked\n");
