@@ -5,6 +5,12 @@
 
 extern GpsManager *gpsManager;
 
+// Területek méretei
+constexpr int16_t TABLE_WIDTH = 150; // +20 pixel szélesebb
+constexpr int16_t TABLE_HEIGHT = 200;
+constexpr int16_t CIRCLE_WIDTH = 200;
+constexpr int16_t CIRCLE_HEIGHT = 200;
+
 /**
  * @brief Konstruktor
  */
@@ -74,8 +80,6 @@ void ScreenSats::drawContent() {
         drawTitle();
         firstDraw = false;
 
-        DEBUG("ScreenSats: First draw - forcing initial render\n");
-
         // Első rajzoláskor mindig rajzoljunk
         drawSatelliteTable();
         drawSatelliteCircle();
@@ -92,8 +96,6 @@ void ScreenSats::drawContent() {
     // Műhold adatok lekérése
     auto satellites = gpsManager->getSatelliteSnapshotForUI();
     uint8_t satCount = gpsManager->getSatellites().isValid() ? gpsManager->getSatellites().value() : 0;
-
-    DEBUG("ScreenSats: Satellites count: %d, DB size: %d\n", satCount, satellites.size());
 
     // Csak akkor frissítünk, ha változtak az adatok
     if (satelliteDataChanged(satellites, satCount)) {
@@ -131,7 +133,6 @@ void ScreenSats::layoutComponents() {
         1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                DEBUG("ScreenSats: Back button clicked\n");
                 getScreenManager()->switchToScreen(SCREEN_NAME_MAIN);
             }
         });
@@ -156,11 +157,11 @@ void ScreenSats::drawTitle() {
  * @brief Műhold táblázat rajzolása
  */
 void ScreenSats::drawSatelliteTable() {
-    DEBUG("ScreenSats: Drawing satellite table (sprite: %s)\n", tableSprite ? "available" : "NULL");
 
     if (!tableSprite) {
         // Fallback közvetlen rajzolásra, ha nincs sprite
-        drawSatelliteTableDirect();
+        // drawSatelliteTableDirect();
+        DEBUG("ScreenSats: No table sprite available - skipping\n");
         return;
     }
 
@@ -170,17 +171,7 @@ void ScreenSats::drawSatelliteTable() {
     // Táblázat pozíciója
     const int16_t tableX = 0; // Sprite koordinátákban
     const int16_t tableY = 0;
-    const int16_t lineHeight = 12;
-
-    // Fejléc
-    tableSprite->setTextDatum(TL_DATUM);
-    tableSprite->setTextSize(1);
-    tableSprite->setFreeFont();
-    tableSprite->setTextColor(TFT_YELLOW, TFT_BLACK);
-    tableSprite->drawString("PRN Elv Azm SNR", tableX, tableY);
-
-    // Vonal a fejléc alatt
-    tableSprite->drawFastHLine(tableX, tableY + 10, 110, TFT_DARKGREY);
+    const int16_t lineHeight = 18; // Kicsit nagyobb sormagasság
 
     // Műholdak adatainak lekérése
     auto satellites = gpsManager->getSatelliteSnapshotForUI();
@@ -188,15 +179,27 @@ void ScreenSats::drawSatelliteTable() {
     // Műholdak száma
     uint8_t satCount = gpsManager->getSatellites().isValid() ? gpsManager->getSatellites().value() : 0;
 
+    tableSprite->setTextDatum(TL_DATUM);
+    tableSprite->setFreeFont();
+    tableSprite->setTextSize(1);
+
     // Státusz információk
     tableSprite->setTextColor(TFT_WHITE, TFT_BLACK);
-    tableSprite->drawString("In view: " + String(satCount), tableX, tableY + 15);
-    tableSprite->drawString("In DB: " + String(satellites.size()), tableX, tableY + 27);
+    tableSprite->drawString("In view: " + String(satCount), tableX, tableY);
+    tableSprite->drawString("In DB: " + String(satellites.size()), tableX, tableY + 8);
+
+    // Táblázat fejléc
+    tableSprite->setTextColor(TFT_YELLOW, TFT_BLACK);
+    tableSprite->drawString("PRN     Elv    Azm   SNR", tableX, tableY + 18);
+    // Vonal a fejléc alatt
+    tableSprite->drawFastHLine(tableX, tableY + 25, TABLE_WIDTH, TFT_DARKGREY);
 
     // Műholdak listázása
-    int16_t currentY = tableY + 45;
-    int itemCount = 0;
-    const int maxItems = 12; // Maximum megjelenítendő elemek száma
+    int16_t currentY = tableY + 30;
+    uint8_t itemCount = 0;
+    constexpr uint8_t maxItems = 12; // Maximum megjelenítendő elemek száma
+
+    tableSprite->setFreeFont(&FreeMono9pt7b);
 
     for (const auto &sat : satellites) {
         if (itemCount >= maxItems)
@@ -232,26 +235,30 @@ void ScreenSats::drawSatelliteTable() {
 
     // Sprite kirajzolása a képernyőre
     tableSprite->pushSprite(5, 55);
+
+    // Font visszaállítása
+    tableSprite->setFreeFont();
 }
 
 /**
  * @brief Műhold táblázat közvetlen rajzolása
  */
+/*
 void ScreenSats::drawSatelliteTableDirect() {
     DEBUG("ScreenSats: Using direct table drawing (fallback)\n");
 
     // Közvetlen rajzolás, ha nincs sprite (fallback)
     const int16_t tableX = 5;
     const int16_t tableY = 55;
-    const int16_t lineHeight = 12;
+    const int16_t lineHeight = 14; // Kicsit nagyobb sormagasság
 
     // Terület törlése
     tft.fillRect(tableX, tableY, TABLE_WIDTH, TABLE_HEIGHT, TFT_BLACK);
 
     // Fejléc
     tft.setTextDatum(TL_DATUM);
-    tft.setTextSize(1);
-    tft.setFreeFont();
+    tft.setTextSize(1); // Nagyobb font
+    tableSprite->setFreeFont(&FreeMono9pt7b);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.drawString("PRN Elv Azm SNR", tableX, tableY);
 
@@ -306,6 +313,7 @@ void ScreenSats::drawSatelliteTableDirect() {
         tft.drawString("+" + String(satellites.size() - maxItems) + " more...", tableX, currentY);
     }
 }
+*/
 
 /**
  * @brief Műhold kör rajzolása
@@ -315,7 +323,8 @@ void ScreenSats::drawSatelliteCircle() {
 
     if (!circleSprite) {
         // Fallback közvetlen rajzolásra, ha nincs sprite
-        drawSatelliteCircleDirect();
+        // drawSatelliteCircleDirect();
+        DEBUG("ScreenSats: No circle sprite available - skipping\n");
         return;
     }
 
@@ -371,6 +380,7 @@ void ScreenSats::drawSatelliteCircle() {
 /**
  * @brief Műhold kör rajzolása
  */
+/*
 void ScreenSats::drawSatelliteCircleDirect() {
     DEBUG("ScreenSats: Using direct circle drawing (fallback)\n");
 
@@ -416,6 +426,7 @@ void ScreenSats::drawSatelliteCircleDirect() {
         drawSatelliteOnCircle(nullptr, centerX, centerY, maxRadius, sat);
     }
 }
+*/
 
 /**
  * @brief Műhold rajzolása körön

@@ -45,12 +45,6 @@ class ScreenSats : public UIScreen {
     uint8_t lastSatCount;
     bool firstDraw;
 
-    // Területek méretei
-    static const int16_t TABLE_WIDTH = 130;
-    static const int16_t TABLE_HEIGHT = 200;
-    static const int16_t CIRCLE_WIDTH = 200;
-    static const int16_t CIRCLE_HEIGHT = 200;
-
     /**
      * @brief UI komponensek elhelyezése
      */
@@ -69,7 +63,7 @@ class ScreenSats : public UIScreen {
     /**
      * @brief Műholdak táblázatának rajzolása közvetlenül (fallback)
      */
-    void drawSatelliteTableDirect();
+    // void drawSatelliteTableDirect();
 
     /**
      * @brief Műholdak vizuális megjelenítése koncentrikus körben
@@ -79,7 +73,7 @@ class ScreenSats : public UIScreen {
     /**
      * @brief Műholdak vizuális megjelenítése közvetlenül (fallback)
      */
-    void drawSatelliteCircleDirect();
+    // void drawSatelliteCircleDirect();
 
     /**
      * @brief Egy műhold rajzolása a körön
