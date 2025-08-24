@@ -1,6 +1,7 @@
 #include "ScreenTFTSetup.h"
 #include "Config.h"
 #include "Utils.h"
+#include "ValueChangeDialog.h"
 #include "defines.h"
 
 #include "TftBackLightAdjuster.h"
@@ -57,7 +58,35 @@ void ScreenTFTSetup::layoutComponents() {
         UIButton::ButtonState::Off,                           //
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                DEBUG("Manual Brightness button pressed - not implemented yet\n");
+                DEBUG("Manual Brightness button pressed - opening dialog\n");
+
+                auto dialog = std::make_shared<ValueChangeDialog>(
+                    this,                                  // parent screen
+                    "Manual Brightness",                   // title
+                    "Set brightness level (5-255)",        // message
+                    &config.data.tftManualBrightnessValue, // value pointer
+                    (uint8_t)5,                            // min value (NIGHTLY_BRIGHTNESS)
+                    (uint8_t)255,                          // max value (TFT_BACKGROUND_LED_MAX_BRIGHTNESS)
+                    (uint8_t)5,                            // step value
+                    [this](const std::variant<int, float, bool> &newValue) {
+                        // Value change callback - frissítjük a fényerőt azonnal
+                        if (std::holds_alternative<int>(newValue)) {
+                            int brightness = std::get<int>(newValue);
+                            DEBUG("Brightness changed to: %d\n", brightness);
+                            tftBackLightAdjuster.setBacklightLevel(brightness);
+                        }
+                    },
+                    [this](UIDialogBase *dialog, UIDialogBase::DialogResult result) {
+                        // Dialog close callback
+                        DEBUG("Manual brightness dialog closed with result: %d\n", (int)result);
+                        if (result == UIDialogBase::DialogResult::Accepted) {
+                            // OK esetén mentjük a konfigurációt
+                            config.checkSave();
+                        }
+                        // Cancel esetén a ValueChangeDialog automatikusan visszaállítja az eredeti értéket
+                    });
+
+                showDialog(dialog);
             }
         } //
     );
