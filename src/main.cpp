@@ -103,7 +103,18 @@ void setup() {
     Utils::debugWaitForSerial(tft);
 #endif
 
+    // LittleFS filesystem indítása
+    LittleFS.begin();
+
+    // Trafipax adatok betöltése CSV-ből ha a LittleFS fájl létezik
+    if (trafipaxManager.checkFile(TrafipaxManager::CSV_FILE_NAME)) {
+        trafipaxManager.loadFromCSV(TrafipaxManager::CSV_FILE_NAME);
+    }
+    DEBUG("trafipaxok száma: %d\n", trafipaxManager.count());
+
+    // Splash screen
     drawSplashScreen();
+
     // Még egy picit mutatjuk a splash screent
     delay(1000);
 
@@ -135,15 +146,6 @@ void setup() {
 
     // TFT háttérvilágítás beállítása
     tftBackLightAdjuster.begin(config.data.tftAutoBrightnessActive, config.data.tftManualBrightnessValue);
-
-    // LittleFS filesystem indítása
-    LittleFS.begin();
-
-    // Trafipax adatok betöltése CSV-ből ha a LittleFS fájl létezik
-    if (trafipaxManager.checkFile(TrafipaxManager::CSV_FILE_NAME)) {
-        trafipaxManager.loadFromCSV(TrafipaxManager::CSV_FILE_NAME);
-    }
-    DEBUG("trafipaxok száma: %d\n", trafipaxManager.count());
 
     // TFT érintőképernyő kalibrálása
     // Kell kalibrálni a TFT Touch-t?

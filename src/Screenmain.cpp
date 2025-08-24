@@ -23,7 +23,6 @@ void ScreenMain::layoutComponents() {
         UIButton::ButtonType::Pushable,                                                                                             // type
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                DEBUG("ScreenMain: Info button clicked\n");
                 getScreenManager()->switchToScreen(SCREEN_NAME_INFO);
             }
         });
@@ -36,7 +35,6 @@ void ScreenMain::layoutComponents() {
         UIButton::ButtonType::Pushable,                                                                                                                                   // type
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                DEBUG("ScreenMain: Setup button clicked\n");
                 getScreenManager()->switchToScreen(SCREEN_NAME_SETUP);
             }
         });
@@ -305,7 +303,6 @@ void ScreenMain::handleOwnLoop() {
 
     // Kényszerített újrarajzolás esetén reseteljük a statikus változókat
     if (forceRedraw) {
-        DEBUG("ScreenMain::handleOwnLoop() - Force redraw detected, resetting static variables\n");
         lastSatCount = 255;     // Force satellite count redraw
         lastHdop = -1.0;        // Force hdop redraw
         lastMaxSpeed = -1.0;    // Force max speed redraw
@@ -605,9 +602,7 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
     int16_t satIconHeight = 35; // Ikon magassága + felirat
 
     if (event.x >= satIconX && event.x < satIconX + satIconWidth && event.y >= satIconY && event.y < satIconY + satIconHeight) {
-
-        DEBUG("ScreenMain::handleTouch() - Satellite area clicked, switching to SAT screen\n");
-        getScreenManager()->switchToScreen(SCREEN_NAME_SAT);
+        getScreenManager()->switchToScreen(SCREEN_NAME_SATS);
         return true; // Esemény kezelve
     }
 
@@ -626,8 +621,6 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
         // Sprite azonnal frissüljön a következő draw()-nál
         lastSpriteUpdate = 0;
 
-        DEBUG("ScreenMain::handleTouch() - Temperature mode switched to: %s\n", externalTemperatureMode ? "External" : "CPU");
-
         return true; // Esemény kezelve
     }
 
@@ -642,7 +635,6 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
  * Reseteli a statikus változókat hogy kényszerítse az újrarajzolást
  */
 void ScreenMain::activate() {
-    DEBUG("ScreenMain::activate() - Forcing redraw of all elements\n");
 
     // Beállítjuk a kényszerített újrarajzolás flag-et
     forceRedraw = true;
