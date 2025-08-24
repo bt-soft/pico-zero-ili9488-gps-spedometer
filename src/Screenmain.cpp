@@ -237,15 +237,15 @@ void ScreenMain::drawContent() {
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
     // Magasság mértékegység felirat
-    tft.drawString("m", ::SCREEN_W - 8, 10, 1);
+    tft.drawString("m", ::SCREEN_W - 8, 15, 1);
 
     // Maxspeed km/h felirat
-    tft.drawString("km/h", ::SCREEN_W - 14, 60, 1);
+    tft.drawString("km/h", ::SCREEN_W - 14, 65, 1);
 
     // Sebesség mértékegység felirat
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("km/h", ::SCREEN_W / 2 - 20, 105, 2);
+    tft.drawString("km/h", ::SCREEN_W / 2 + 10, 105, 2);
 }
 
 /**
@@ -299,7 +299,7 @@ void ScreenMain::handleOwnLoop() {
     String currentTime = "";
     GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
     bool dateTimeValid = localDateTime.valid;
-    char dateStr[11], timeStr[9];
+    char timeStr[9];
 
 #ifdef DEMO_MODE
     // Demó dátum
@@ -321,6 +321,7 @@ void ScreenMain::handleOwnLoop() {
     currentTime = String(timeStr);
     dateTimeValid = true;
 #else
+    char dateStr[11];
     if (dateTimeValid) {
         sprintf(dateStr, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
         sprintf(timeStr, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
@@ -339,13 +340,13 @@ void ScreenMain::handleOwnLoop() {
 
         // GPS dátum az ikon mellett (jobbra), idő alatta
         tft.setTextPadding(tft.textWidth("8888888888") + 10);
-        tft.drawString(dateTimeValid ? currentDate : "----/--/--", ::SCREEN_W / 2 - 60, 10, 1);
+        tft.drawString(dateTimeValid ? currentDate : "----/--/--", ::SCREEN_W / 2 - 60, 12, 1);
 
         // Idő kiírása
         tft.setTextSize(1);
         tft.setFreeFont(&FreeSansBold18pt7b);
         tft.setTextPadding(tft.textWidth("88:88:88") + 10);
-        tft.drawString(dateTimeValid ? currentTime : "--:--:--", ::SCREEN_W / 2 - 80, 40);
+        tft.drawString(dateTimeValid ? currentTime : "--:--:--", ::SCREEN_W / 2 - 80, 50);
 
         lastDateTime = currentDateTime;
         tft.setFreeFont(); // Alapértelmezett font
