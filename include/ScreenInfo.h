@@ -11,7 +11,8 @@ class ScreenInfo : public UIScreen {
     /**
      * @brief ScreenInfo konstruktor
      */
-    ScreenInfo() : UIScreen(SCREEN_NAME_INFO) { layoutComponents(); }
+    ScreenInfo();
+
     virtual ~ScreenInfo() = default;
 
     /**
@@ -27,6 +28,9 @@ class ScreenInfo : public UIScreen {
     virtual void handleOwnLoop() override;
 
   private:
+    uint16_t textPadding;
+    uint16_t bootTextPadding;
+
     /**
      * @brief UI komponensek létrehozása és elhelyezése
      */

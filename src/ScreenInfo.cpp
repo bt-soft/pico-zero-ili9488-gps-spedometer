@@ -16,6 +16,21 @@ extern SensorUtils sensorUtils;
 extern bool demoMode;
 
 /**
+ * @brief ScreenInfo konstruktor
+ */
+ScreenInfo::ScreenInfo() : UIScreen(SCREEN_NAME_INFO) {
+
+    // Padding kiszámítása
+    tft.setFreeFont();
+    tft.setTextSize(1);
+    textPadding = tft.textWidth("8888-88-88");
+    bootTextPadding = tft.textWidth("88 mins, 88 sec, 888 msec");
+
+    // Komponensek elrendezése
+    layoutComponents();
+}
+
+/**
  * UI komponensek elhelyezése
  */
 void ScreenInfo::layoutComponents() {
@@ -60,7 +75,7 @@ void ScreenInfo::drawContent() {
 
     uint16_t tableX = 100;
     uint16_t tableY = 110;
-    constexpr uint16_t lineHeight = 10;
+    constexpr uint8_t lineHeight = 10;
 
     tft.drawString("CPU", tableX, tableY);
     tableY += lineHeight;
@@ -78,7 +93,7 @@ void ScreenInfo::drawContent() {
     tft.setTextDatum(ML_DATUM);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
-    tableX = 130;
+    tableX = 120;
     tableY = 110;
     tft.drawString("Raspberry Pi Pico Zero", tableX, tableY);
     tableY += lineHeight;
@@ -91,10 +106,6 @@ void ScreenInfo::drawContent() {
     tft.drawString(String(__DATE__) + " " + String(__TIME__), tableX, tableY);
     tableY += lineHeight;
     tft.drawString(String(::trafipaxManager.count()), tableX, tableY);
-
-    // Változó adatok prompt
-    tft.setTextDatum(MR_DATUM);
-    tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
 
     // 2. tábla prompt - Azért kell a 2. tábla promptjait előbb kiírni,
     // mert az MR_DATUM törli az előtte lévő teljes tartalmat, így az 1. tábla promptokat is
@@ -154,84 +165,65 @@ void ScreenInfo::handleOwnLoop() {
     }
     lastUpdate = millis();
 
-    // Sprite paraméterek
-    int spriteX = 130;
-    int spriteY = 187;
-    constexpr int spriteW = 50;
-    constexpr int spriteH = 150;
+    tft.setFreeFont();
+    tft.setTextSize(1);
+    tft.setTextPadding(textPadding);
+    tft.setTextDatum(ML_DATUM);
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
-    constexpr int lineHeight = 10;
+    // 2. oszlop
+    uint16_t x = 340;
+    uint16_t y = 190;
+    constexpr uint8_t lineHeight = 10;
 
-    TFT_eSprite infoSprite(&tft);
+    tft.drawString(String(sensorUtils.readVBusExternal(), 2) + "V", x, y);
+    y += lineHeight;
+    tft.drawString(String(sensorUtils.readExternalTemperature(), 2) + "C", x, y);
+    y += lineHeight;
+    tft.drawString(String(sensorUtils.readCoreTemperature(), 2) + "C", x, y);
+    y += lineHeight;
+
+    // Nagyobb padding
+    tft.setTextPadding(bootTextPadding);
+    tft.drawString(Utils::msecToString(gpsManager->getGpsBootTime()), x, y);
+    y += lineHeight;
+
+    // Padding vissza
+    tft.setTextPadding(textPadding);
+    tft.drawString(::demoMode ? "Demo" : "Normal", x, y);
+    y += lineHeight;
 
     // 1. oszlop
-    infoSprite.createSprite(spriteW, spriteH);
-    infoSprite.fillSprite(TFT_BLACK);
-    infoSprite.setTextDatum(TL_DATUM);
-    infoSprite.setTextColor(TFT_YELLOW, TFT_BLACK);
-    infoSprite.setFreeFont();
-    infoSprite.setTextSize(1);
+    x = 120;
+    y = 190;
 
-    int y = 0;
-    infoSprite.drawString(String(gpsManager->getSatellites().value()), 0, y);
+    tft.drawString(String(gpsManager->getSatellites().value()), x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getSatelliteCountForUI()), 0, y);
+    tft.drawString(String(gpsManager->getSatelliteCountForUI()), x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getLocation().lat(), 6), 0, y);
+    tft.drawString(String(gpsManager->getLocation().lat(), 6), x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getLocation().lng(), 6), 0, y);
+    tft.drawString(String(gpsManager->getLocation().lng(), 6), x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getAltitude().meters(), 1) + "m", 0, y);
+    tft.drawString(String(gpsManager->getAltitude().meters(), 1) + "m", x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getGpsQualityString()), 0, y);
+    tft.drawString(String(gpsManager->getGpsQualityString()), x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getGpsModeToString()), 0, y);
+    tft.drawString(String(gpsManager->getGpsModeToString()), x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getSpeed().kmph(), 1) + "km/h", 0, y);
+    tft.drawString(String(gpsManager->getSpeed().kmph(), 1) + "km/h", x, y);
     y += lineHeight;
-    infoSprite.drawString(String(gpsManager->getHdop().hdop(), 2), 0, y);
+    tft.drawString(String(gpsManager->getHdop().hdop(), 2), x, y);
     y += lineHeight;
 
     char tmpBuf[20];
     GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
 
     sprintf(tmpBuf, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
-    infoSprite.drawString(String(tmpBuf), 0, y);
+    tft.drawString(tmpBuf, x, y);
     y += lineHeight;
 
     sprintf(tmpBuf, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
-    infoSprite.drawString(String(tmpBuf), 0, y);
+    tft.drawString(tmpBuf, x, y);
     y += lineHeight;
-
-    // Sprite kirajzolása
-    infoSprite.pushSprite(spriteX, spriteY);
-    infoSprite.deleteSprite();
-
-    // 2. oszlop
-    spriteX = 355;
-    spriteY = 187;
-
-    infoSprite.createSprite(spriteW, spriteH);
-    infoSprite.fillSprite(TFT_BLACK);
-    infoSprite.setTextDatum(TL_DATUM);
-    infoSprite.setTextColor(TFT_YELLOW, TFT_BLACK);
-    infoSprite.setFreeFont();
-    infoSprite.setTextSize(1);
-
-    y = 0;
-
-    infoSprite.drawString(String(sensorUtils.readVBusExternal(), 1) + "V", 0, y);
-    y += lineHeight;
-    infoSprite.drawString(String(sensorUtils.readExternalTemperature(), 1) + "C", 0, y);
-    y += lineHeight;
-    infoSprite.drawString(String(sensorUtils.readCoreTemperature(), 1) + "C", 0, y);
-    y += lineHeight;
-    infoSprite.drawString(Utils::msecToString(gpsManager->getGpsBootTime()), 0, y);
-    y += lineHeight;
-    infoSprite.drawString(::demoMode ? "Demo" : "Normal", 0, y);
-    y += lineHeight;
-
-    // Sprite kirajzolása
-    infoSprite.pushSprite(spriteX, spriteY);
-    infoSprite.deleteSprite();
 }

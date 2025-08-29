@@ -14,7 +14,7 @@ String msecToString(uint32_t msec) {
     uint32_t seconds = (msec % 60000) / 1000;
     uint32_t millis = msec % 1000;
     char buf[16];
-    snprintf(buf, sizeof(buf), "%u:%02u:%03u", minutes, seconds, millis);
+    snprintf(buf, sizeof(buf), "%02u mins, %02u sec, %03u msec", minutes, seconds, millis);
     return String(buf);
 }
 
