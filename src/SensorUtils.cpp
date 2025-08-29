@@ -79,7 +79,7 @@ float SensorUtils::readVBusExternal() {
 
     // Cache lejárt vagy nem érvényes, új mérés
     float voltageOut = (analogRead(PIN_VBUS_EXTERNAL_MEASURE_INPUT) * V_REFERENCE) / CONVERSION_FACTOR;
-    float vBusExtVoltage = voltageOut * EXTERNAL_VBUSDIVIDER_RATIO;
+    float vBusExtVoltage = voltageOut * EXTERNAL_VBUSDIVIDER_RATIO + 0.6f; // A D1 védő dióda nyitási feszültségével kompenzálva a mért feszültséget
 
     // Cache frissítése
     vBusExtValue = vBusExtVoltage;
