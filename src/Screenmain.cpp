@@ -397,7 +397,7 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.altitudeValid = true;
 
     // GPS pontosság - fix érték
-    data.hdop = random(0, 10000) / 100.0f; // 0.00 ... 99.99
+    data.hdop = random(300, 10000) / 100.0f; // 3.00 ... 99.99
     data.hdopValid = true;
 
     // Sebesség - 1.5 másodpercenként változik
