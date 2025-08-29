@@ -351,7 +351,23 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     }
     data.satelliteCount = demoSatCount;
     data.satelliteValid = true;
-    data.gpsMode = "3D";
+    switch (random(0, 4)) {
+        case 0:
+            data.gpsMode = "No Fix";
+            break;
+        case 1:
+            data.gpsMode = "Auto 2D/3D";
+            break;
+        case 2:
+            data.gpsMode = "Differential";
+            break;
+        case 3:
+            data.gpsMode = "Estimated";
+            break;
+        default:
+            data.gpsMode = "Unknown";
+            break;
+    }
 
     // Dátum és idő - folyamatosan növekvő
     static unsigned long demoStartTime = millis();
@@ -381,7 +397,7 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.altitudeValid = true;
 
     // GPS pontosság - fix érték
-    data.hdop = 1.2;
+    data.hdop = random(0, 10000) / 100.0f; // 0.00 ... 99.99
     data.hdopValid = true;
 
     // Sebesség - 1.5 másodpercenként változik
@@ -451,7 +467,8 @@ void ScreenMain::handleOwnLoop() {
         // GPS működési mód
         tft.setTextSize(1);
         gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? tft.setTextColor(TFT_ORANGE, TFT_BLACK) : tft.setTextColor(TFT_GREEN, TFT_BLACK);
-        tft.drawString(data.gpsMode, 70, 15, 1);
+        tft.setTextPadding(tft.textWidth("Differential"));
+        tft.drawString(data.gpsMode, 65, 15, 1);
 
         lastSatCount = data.satelliteCount;
         lastGpsMode = data.gpsMode;
