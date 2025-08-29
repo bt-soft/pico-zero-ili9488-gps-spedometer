@@ -21,6 +21,39 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
 
   public:
     /**
+     * @brief Adatok struktúrája a képernyő megjelenítéséhez
+     */
+    struct DisplayData {
+        // Műhold adatok
+        uint8_t satelliteCount = 0;
+        bool satelliteValid = false;
+        String gpsMode = "";
+
+        // Dátum és idő
+        String dateString = "";
+        String timeString = "";
+        bool dateTimeValid = false;
+
+        // Magasság
+        double altitude = 0.0;
+        bool altitudeValid = false;
+
+        // GPS pontosság
+        double hdop = 0.0;
+        bool hdopValid = false;
+
+        // Sebesség
+        double currentSpeed = 0.0;
+        double maxSpeed = 0.0;
+        bool speedValid = false;
+
+        // Szenzorok
+        float batteryVoltage = 0.0;
+        float temperature = 0.0;
+        String temperatureLabel = "";
+    };
+
+    /**
      * @brief ScreenMain konstruktor
      * @param tft TFT display referencia
      */
@@ -86,6 +119,18 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @brief Speedometer ikon rajzolása
      */
     void drawSpeedometerIcon(int16_t x, int16_t y);
+
+    /**
+     * @brief Normál módú adatok legyűjtése
+     * @return DisplayData struktúra a valós adatokkal
+     */
+    DisplayData collectRealData();
+
+    /**
+     * @brief Demó módú adatok generálása
+     * @return DisplayData struktúra a szimulált adatokkal
+     */
+    DisplayData collectDemoData();
 
   private:
     /**
