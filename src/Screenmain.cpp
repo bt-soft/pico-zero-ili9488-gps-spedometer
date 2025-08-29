@@ -478,13 +478,13 @@ void ScreenMain::handleOwnLoop() {
         tft.setFreeFont();
         tft.setTextDatum(ML_DATUM);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
-        tft.setTextPadding(tft.textWidth("8888888888") + 10);
+        tft.setTextPadding(tft.textWidth("8888-88-88") + 10);
         tft.drawString(data.dateString, ::SCREEN_W / 2 - 60, 12, 1);
 
         tft.setTextSize(1);
         tft.setFreeFont(&FreeSansBold18pt7b);
         tft.setTextPadding(tft.textWidth("88:88:88") + 10);
-        tft.drawString(data.timeString, ::SCREEN_W / 2 - 80, 50);
+        tft.drawString(data.timeString, ::SCREEN_W / 2 - 80, 40);
 
         lastDateTime = currentDateTime;
         tft.setFreeFont();
