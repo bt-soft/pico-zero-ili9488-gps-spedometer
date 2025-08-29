@@ -74,7 +74,9 @@ void drawSplashScreen() {
     tft.drawString(String(__DATE__) + " " + String(__TIME__), tft.width() / 2, 210, 1);
 
     // Trafipaxok száma
-    tft.drawString("Traffi cnt: " + String(trafipaxManager.count()), tft.width() / 2, 272, 4);
+    tft.setFreeFont(&FreeSansBold18pt7b);
+    tft.setTextSize(1);
+    tft.drawString("Traffipax cnt: " + String(trafipaxManager.count()), tft.width() / 2, 272, 1);
 }
 
 /**
