@@ -321,7 +321,6 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     if (data.speedValid && data.currentSpeed > maxSpeed) {
         maxSpeed = data.currentSpeed;
     }
-    data.maxSpeed = maxSpeed;
 
     // Szenzorok
     data.batteryVoltage = sensorUtils.readVBusExternal();
@@ -402,22 +401,13 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
 
     // Sebesség - 1.5 másodpercenként változik
     static unsigned long lastSpeedChange = 0;
-    static double demoSpeed = 80.0;
+    static double demoSpeed = 50.0;
     if (millis() - lastSpeedChange > 1500) {
-        demoSpeed = random(0, 150);
+        demoSpeed = random(0, 350);
         lastSpeedChange = millis();
     }
     data.currentSpeed = demoSpeed;
     data.speedValid = true;
-
-    // Maximum sebesség - 10 másodpercenként növekszik
-    static double maxSpeed = 120.0;
-    static unsigned long lastMaxSpeedChange = 0;
-    if (millis() - lastMaxSpeedChange > 10000) {
-        maxSpeed = max(maxSpeed, (double)random(100, 180));
-        lastMaxSpeedChange = millis();
-    }
-    data.maxSpeed = maxSpeed;
 
     // Szenzorok - szimulált értékek
     data.batteryVoltage = 3.7 + (random(-10, 10) / 100.0); // 3.6-3.8V közötti ingadozás
@@ -541,21 +531,21 @@ void ScreenMain::handleOwnLoop() {
         tft.setFreeFont();
     }
 
-    // Maximum sebesség
-    static double lastMaxSpeed = -1.0;
-
+    // Maximum sebesség, ez statikus változó
+    static double maxSpeed = -1.0;
     if (forceRedraw) {
-        lastMaxSpeed = -1.0;
+        maxSpeed = -1.0;
     }
+    if (data.currentSpeed > maxSpeed) {
+        // Ha változik a max speed
+        maxSpeed = data.currentSpeed;
 
-    if (abs(data.maxSpeed - lastMaxSpeed) > 0.5) {
         tft.setTextDatum(ML_DATUM);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setFreeFont();
         tft.setTextSize(2);
         tft.setTextPadding(tft.textWidth("888") + 10);
-        tft.drawString(String((int)data.maxSpeed), ::SCREEN_W - 90, 60, 2);
-        lastMaxSpeed = data.maxSpeed;
+        tft.drawString(String((int)maxSpeed), ::SCREEN_W - 90, 60, 2);
         tft.setFreeFont();
     }
 

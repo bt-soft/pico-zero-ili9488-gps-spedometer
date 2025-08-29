@@ -44,7 +44,6 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
 
         // Sebesség
         double currentSpeed = 0.0;
-        double maxSpeed = 0.0;
         bool speedValid = false;
 
         // Szenzorok
