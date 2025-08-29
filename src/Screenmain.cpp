@@ -337,9 +337,14 @@ void ScreenMain::handleOwnLoop() {
         tft.setTextPadding(tft.textWidth("88") + 10);
 
         // Szám pozíciója az ikon mellett
-        tft.drawString(String(currentSatCount), 35, 15, 2);
+        tft.drawString(String(currentSatCount), 30, 15, 2);
         lastSatCount = currentSatCount;
         tft.setFreeFont(); // Alapértelmezett font
+
+        // Aktuális GPS működési mód
+        tft.setTextSize(1);
+        gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? tft.setTextColor(TFT_RED, TFT_BLACK) : tft.setTextColor(TFT_GREEN, TFT_BLACK);
+        tft.drawString(gpsManager->getGpsModeToString(), 70, 15, 1);
     }
 
     // GPS dátum és idő ellenőrzése (helyi időzóna szerint korrigálva)
