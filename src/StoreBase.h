@@ -102,6 +102,8 @@ template <typename T> class StoreBase {
      * Ha különböznek, automatikusan menti az adatokat.
      */
     virtual void checkSave() {
+        DEBUG("[%s] CRC ellenőrzés és automatikus mentés...\n", getClassName());
+
         uint16_t currentCrc = Utils::calcCRC16(reinterpret_cast<const uint8_t *>(&getData()), sizeof(T));
 
         if (lastCRC != currentCrc) {

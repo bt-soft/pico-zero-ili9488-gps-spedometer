@@ -12,8 +12,6 @@ extern TftBackLightAdjuster tftBackLightAdjuster;
  */
 void ScreenTFTSetup::layoutComponents() {
 
-    DEBUG("ScreenTFTSetup: layoutComponents called\n");
-
     // Függőlegesen egymás alá
     int btnW = 180;
     int btnH = 60;
@@ -34,10 +32,7 @@ void ScreenTFTSetup::layoutComponents() {
                 config.data.tftAutoBrightnessActive = event.state == UIButton::EventButtonState::On;
                 tftBackLightAdjuster.setAutoBrightnessActive(config.data.tftAutoBrightnessActive);
 
-                DEBUG("Auto Brightness changed to: %s\n", config.data.tftAutoBrightnessActive ? "ON" : "OFF");
-
                 if (manualBrightnessBtn) {
-                    DEBUG("Setting manualBrightnessBtn enabled to: %s\n", config.data.tftAutoBrightnessActive ? "false" : "true");
                     manualBrightnessBtn->setEnabled(!config.data.tftAutoBrightnessActive);
                     manualBrightnessBtn->markForRedraw();
                 }
@@ -58,11 +53,9 @@ void ScreenTFTSetup::layoutComponents() {
         UIButton::ButtonState::Off,                           //
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                DEBUG("Manual Brightness button pressed - opening dialog\n");
 
                 // Lokális int változó a dialog számára
                 static int brightnessValue = static_cast<int>(config.data.tftManualBrightnessValue);
-                brightnessValue = static_cast<int>(config.data.tftManualBrightnessValue); // Frissítjük az aktuális értékkel
 
                 auto dialog = std::make_shared<ValueChangeDialog>(
                     this,                           // parent screen
@@ -76,7 +69,6 @@ void ScreenTFTSetup::layoutComponents() {
                         // Value change callback - frissítjük a fényerőt azonnal
                         if (std::holds_alternative<int>(newValue)) {
                             int brightness = std::get<int>(newValue);
-                            DEBUG("Brightness changed to: %d\n", brightness);
                             // Biztosítsuk, hogy a tartományban maradjon
                             brightness = constrain(brightness, 5, 255);
                             config.data.tftManualBrightnessValue = static_cast<uint8_t>(brightness);
@@ -85,10 +77,9 @@ void ScreenTFTSetup::layoutComponents() {
                     },
                     [this](UIDialogBase *dialog, UIDialogBase::DialogResult result) {
                         // Dialog close callback
-                        DEBUG("Manual brightness dialog closed with result: %d\n", (int)result);
                         if (result == UIDialogBase::DialogResult::Accepted) {
                             // OK esetén mentjük a konfigurációt
-                            config.checkSave();
+                            // config.checkSave();
                         }
                         // Cancel esetén a ValueChangeDialog automatikusan visszaállítja az eredeti értéket
                         // De nekünk is vissza kell állítani a config értéket
@@ -111,7 +102,6 @@ void ScreenTFTSetup::layoutComponents() {
         Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), //
         "Back", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                config.checkSave();
                 getScreenManager()->goBack();
             }
         }));
@@ -121,8 +111,6 @@ void ScreenTFTSetup::layoutComponents() {
  * Kirajzolja a képernyő saját tartalmát
  */
 void ScreenTFTSetup::drawContent() {
-
-    DEBUG("ScreenTFTSetup: drawContent called\n");
 
     tft.fillScreen(TFT_BLACK);
     tft.setTextDatum(MC_DATUM);
