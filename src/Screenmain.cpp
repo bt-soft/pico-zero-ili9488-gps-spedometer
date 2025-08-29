@@ -343,7 +343,7 @@ void ScreenMain::handleOwnLoop() {
 
         // Aktuális GPS működési mód
         tft.setTextSize(1);
-        gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? tft.setTextColor(TFT_RED, TFT_BLACK) : tft.setTextColor(TFT_GREEN, TFT_BLACK);
+        gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? tft.setTextColor(TFT_ORANGE, TFT_BLACK) : tft.setTextColor(TFT_GREEN, TFT_BLACK);
         tft.drawString(gpsManager->getGpsModeToString(), 70, 15, 1);
     }
 
