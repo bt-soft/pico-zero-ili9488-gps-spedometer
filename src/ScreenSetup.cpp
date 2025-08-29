@@ -35,24 +35,37 @@ void ScreenSetup::layoutComponents() {
     buttonY = 170;
 
     // GPS beállítások gomb
-    addChild(std::make_shared<UIButton>( //
-        12, Rect(buttonXGap, buttonY, btnW, btnH), "GPS Alarm", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+    addChild(std::make_shared<UIButton>(       //
+        12,                                    //
+        Rect(buttonXGap, buttonY, btnW, btnH), //
+        "GPS Alarm",                           //
+        UIButton::ButtonType::Pushable,        //
+        [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_GPS_SETUP);
             }
-        }));
+        }) //
+    );
 
     // Debug beállítások gomb
-    addChild(std::make_shared<UIButton>( //
-        13, Rect((::SCREEN_W - btnW) - buttonXGap, buttonY, btnW, btnH), "Debug", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
+    addChild(std::make_shared<UIButton>(                             //
+        13,                                                          //
+        Rect((::SCREEN_W - btnW) - buttonXGap, buttonY, btnW, btnH), //
+        "Debug",                                                     //
+        UIButton::ButtonType::Pushable,
+        [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_DEBUG_SETUP);
             }
-        }));
+        }) //
+    );
 
     // Back gomb jobb alsó sarokban
-    addChild(std::make_shared<UIButton>( //
-        1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
+    addChild(std::make_shared<UIButton>(                                                                                                                                  //
+        1,                                                                                                                                                                //
+        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), //
+        "Back",                                                                                                                                                           //
+        UIButton::ButtonType::Pushable,                                                                                                                                   //
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
 
@@ -60,7 +73,8 @@ void ScreenSetup::layoutComponents() {
                 config.checkSave();
                 getScreenManager()->goBack();
             }
-        }));
+        }) //
+    );
 }
 
 /**

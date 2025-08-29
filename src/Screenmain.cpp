@@ -11,6 +11,9 @@ constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
 TFT_eSprite spriteVerticalLinearMeter(&tft);
 TFT_eSprite spriteAlertBar(&tft);
 
+// Demó mód
+extern bool demoMode;
+
 /**
  * UI komponensek elhelyezése
  */
@@ -310,17 +313,18 @@ void ScreenMain::handleOwnLoop() {
         lastSpeed = -1.0;       // Force speed redraw
         forceRedraw = false;    // Reset flag
     }
-#ifdef DEMO_MODE
-    // Demo módban időnként változtatjuk a műholdak számát
-    static unsigned long lastSatChange = 0;
-    static uint8_t demoSatCount = 8; // Kezdő demo műholdszám
 
-    if (millis() - lastSatChange > 2000) { // 2 másodpercenként változik
-        demoSatCount = random(0, 16);      // Demo mód: 0-15 műhold
-        lastSatChange = millis();
+    if (demoMode) {
+        // Demo módban időnként változtatjuk a műholdak számát
+        static unsigned long lastSatChange = 0;
+        static uint8_t demoSatCount = 8; // Kezdő demo műholdszám
+
+        if (millis() - lastSatChange > 2000) { // 2 másodpercenként változik
+            demoSatCount = random(0, 16);      // Demo mód: 0-15 műhold
+            lastSatChange = millis();
+        }
+        currentSatCount = demoSatCount;
     }
-    currentSatCount = demoSatCount;
-#endif
 
     if (currentSatCount != lastSatCount) {
         // Műholdak száma az ikon mellé (jobbra)
@@ -346,34 +350,35 @@ void ScreenMain::handleOwnLoop() {
     bool dateTimeValid = localDateTime.valid;
     char timeStr[9];
 
-#ifdef DEMO_MODE
-    // Demó dátum
-    currentDate = "2025-08-23";
+    // Demó mód
+    if (demoMode) {
+        // Demó dátum
+        currentDate = "2025-08-23";
 
-    // Demo módban az idő folyamatosan növekszik
-    static unsigned long demoStartTime = millis();
-    unsigned long elapsed = (millis() - demoStartTime) / 1000; // másodpercek
+        // Demo módban az idő folyamatosan növekszik
+        static unsigned long demoStartTime = millis();
+        unsigned long elapsed = (millis() - demoStartTime) / 1000; // másodpercek
 
-    // Kezdő idő: 17:42:30
-    int startHour = 17, startMin = 42, startSec = 30;
-    int totalSeconds = startHour * 3600 + startMin * 60 + startSec + elapsed;
+        // Kezdő idő: 17:42:30
+        int startHour = 17, startMin = 42, startSec = 30;
+        int totalSeconds = startHour * 3600 + startMin * 60 + startSec + elapsed;
 
-    int hour = (totalSeconds / 3600) % 24;
-    int minute = (totalSeconds % 3600) / 60;
-    int second = totalSeconds % 60;
+        int hour = (totalSeconds / 3600) % 24;
+        int minute = (totalSeconds % 3600) / 60;
+        int second = totalSeconds % 60;
 
-    sprintf(timeStr, "%02d:%02d:%02d", hour, minute, second);
-    currentTime = String(timeStr);
-    dateTimeValid = true;
-#else
-    char dateStr[11];
-    if (dateTimeValid) {
-        sprintf(dateStr, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
-        sprintf(timeStr, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
-        currentDate = String(dateStr);
+        sprintf(timeStr, "%02d:%02d:%02d", hour, minute, second);
         currentTime = String(timeStr);
+        dateTimeValid = true;
+    } else {
+        char dateStr[11];
+        if (dateTimeValid) {
+            sprintf(dateStr, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
+            sprintf(timeStr, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
+            currentDate = String(dateStr);
+            currentTime = String(timeStr);
+        }
     }
-#endif
 
     String currentDateTime = currentDate + currentTime; // Összefűzés a változás ellenőrzéséhez
     if (currentDateTime != lastDateTime) {
@@ -400,22 +405,24 @@ void ScreenMain::handleOwnLoop() {
     // Magasság ellenőrzése - a lastAltitude statikus változó már deklarálva van fent
     double currentAltitude = 0.0;
     bool altitudeValid = gpsManager->getAltitude().isValid() && gpsManager->getAltitude().age() < GPS_DATA_MAX_AGE;
-#ifdef DEMO_MODE
-    // Demo módban időnként változtatjuk a magasságot
-    static unsigned long lastAltChange = 0;
-    static double demoAltitude = 150.0; // Kezdő demo magasság
 
-    if (millis() - lastAltChange > 3000) { // 3 másodpercenként változik
-        demoAltitude = random(50, 2000);   // Demo mód: 50-2000m
-        lastAltChange = millis();
+    // Demó mód
+    if (demoMode) {
+        // Demo módban időnként változtatjuk a magasságot
+        static unsigned long lastAltChange = 0;
+        static double demoAltitude = 150.0; // Kezdő demo magasság
+
+        if (millis() - lastAltChange > 3000) { // 3 másodpercenként változik
+            demoAltitude = random(50, 2000);   // Demo mód: 50-2000m
+            lastAltChange = millis();
+        }
+        currentAltitude = demoAltitude;
+        altitudeValid = true;
+    } else {
+        if (altitudeValid) {
+            currentAltitude = gpsManager->getAltitude().meters();
+        }
     }
-    currentAltitude = demoAltitude;
-    altitudeValid = true;
-#else
-    if (altitudeValid) {
-        currentAltitude = gpsManager->getAltitude().meters();
-    }
-#endif
 
     if (abs(currentAltitude - lastAltitude) > 1.0 || (altitudeValid != (lastAltitude != -9999.0))) {
         // Magasság bal oldalra igazítva az ikon után
@@ -437,15 +444,17 @@ void ScreenMain::handleOwnLoop() {
     // GPS HDOP érték ellenőrzése - a statikus változók már deklarálva vannak fent
     double currentHdop = 0.0;
     bool hdopValid = gpsManager->getHdop().isValid() && gpsManager->getHdop().age() < GPS_DATA_MAX_AGE;
-#ifdef DEMO_MODE
-    // Demo módban fix HDOP érték
-    currentHdop = 1.2;
-    hdopValid = true;
-#else
-    if (hdopValid) {
-        currentHdop = gpsManager->getHdop().hdop();
+
+    // Demó mód
+    if (demoMode) {
+        // Demo módban fix HDOP érték
+        currentHdop = 1.2;
+        hdopValid = true;
+    } else {
+        if (hdopValid) {
+            currentHdop = gpsManager->getHdop().hdop();
+        }
     }
-#endif
 
     if (abs(currentHdop - lastHdop) > 0.1 || (hdopValid != (lastHdop >= 0))) {
         // HDOP érték a pontosság ikon mellé (jobbra)
@@ -468,36 +477,40 @@ void ScreenMain::handleOwnLoop() {
     int16_t currentSpeed = 0;
     bool speedValid = gpsManager->getSpeed().isValid();
 
-#ifdef DEMO_MODE
-    // Demo módban időnként változtatjuk a sebességet
-    static unsigned long lastSpeedChange = 0;
-    static int16_t demoSpeed = 80; // Kezdő demo sebesség
+    // Demó mód
+    if (demoMode) {
 
-    if (millis() - lastSpeedChange > 1500) { // 1.5 másodpercenként változik
-        demoSpeed = random(0, 150);          // Demo mód: 0-150 km/h
-        lastSpeedChange = millis();
+        // Demo módban időnként változtatjuk a sebességet
+        static unsigned long lastSpeedChange = 0;
+        static int16_t demoSpeed = 80; // Kezdő demo sebesség
+
+        if (millis() - lastSpeedChange > 1500) { // 1.5 másodpercenként változik
+            demoSpeed = random(0, 150);          // Demo mód: 0-150 km/h
+            lastSpeedChange = millis();
+        }
+        currentSpeed = demoSpeed;
+        speedValid = true;
+    } else {
+        if (speedValid) {
+            currentSpeed = gpsManager->getSpeed().kmph();
+        }
     }
-    currentSpeed = demoSpeed;
-    speedValid = true;
-#else
-    if (speedValid) {
-        currentSpeed = gpsManager->getSpeed().kmph();
-    }
-#endif
 
     // Maximum sebesség frissítése
     if (speedValid && currentSpeed > maxSpeed) {
         maxSpeed = currentSpeed;
     }
 
-#ifdef DEMO_MODE
-    // Demo módban időnként növeljük a max sebességet
-    static unsigned long lastMaxSpeedChange = 0;
-    if (millis() - lastMaxSpeedChange > 10000) { // 10 másodpercenként
-        maxSpeed = max(maxSpeed, (double)random(100, 180));
-        lastMaxSpeedChange = millis();
+    // Demó mód
+    if (demoMode) {
+
+        // Demo módban időnként növeljük a max sebességet
+        static unsigned long lastMaxSpeedChange = 0;
+        if (millis() - lastMaxSpeedChange > 10000) { // 10 másodpercenként
+            maxSpeed = max(maxSpeed, (double)random(100, 180));
+            lastMaxSpeedChange = millis();
+        }
     }
-#endif
 
     // Maximum sebesség kiírása
     if (abs(maxSpeed - lastMaxSpeed) > 0.5) {

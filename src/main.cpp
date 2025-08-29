@@ -30,6 +30,9 @@ IScreenManager **iScreenManager = (IScreenManager **)&screenManager; // A UIComp
 #include "GpsManager.h"
 GpsManager *gpsManager = nullptr;
 
+//-------------------- Global Runtime variables
+bool demoMode = false; // Demó mód
+
 // ------------------------------------------------------------------------------------------------------------------------------
 // Core0
 // ------------------------------------------------------------------------------------------------------------------------------
