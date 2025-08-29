@@ -59,16 +59,12 @@
 #define SATS_RINGETER_MAX 15
 
 // Akkumulátor
-#define BATT_BARMETER_MIN 3
-#define BATT_BARMETER_MAX 6
+#define BATT_BARMETER_MIN 3.0f
+#define BATT_BARMETER_MAX 15.0f
 
 // Hőmérséklet
-#define TEMP_BARMETER_MIN -20
-#define TEMP_BARMETER_MAX +70
-
-// Speed RingMeter max érték
-#define SPEED_RINGMETER_MAX_VALUE 240
-#define SPEED_RINGMETER_RADIUS 140
+#define TEMP_BARMETER_MIN -20.0f
+#define TEMP_BARMETER_MAX +70.0f
 
 #define GPS_DATA_MAX_AGE 5000
 

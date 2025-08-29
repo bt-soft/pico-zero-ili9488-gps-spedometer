@@ -188,7 +188,7 @@ void ScreenSats::drawSatelliteTable() {
     // Státusz információk
     tableSprite->setTextColor(TFT_WHITE, TFT_BLACK);
     tableSprite->drawString("In view: " + String(satCount), tableX, tableY);
-    tableSprite->drawString("In DB: " + String(satellites.size()), tableX, tableY + 8);
+    tableSprite->drawString("In DB:   " + String(satellites.size()), tableX, tableY + 8);
 
     // Táblázat fejléc
     int16_t currentY = tableY + 25;
@@ -206,6 +206,7 @@ void ScreenSats::drawSatelliteTable() {
     uint16_t snrColor = (currentSortType == SatelliteDb::BY_SNR) ? TFT_CYAN : TFT_YELLOW;
     tableSprite->setTextColor(snrColor, TFT_BLACK);
     tableSprite->drawString("SNR", tableX + 120, currentY);
+
     // Vonal a fejléc alatt
     currentY += 7;
     tableSprite->drawFastHLine(tableX, currentY, TABLE_WIDTH, TFT_DARKGREY);

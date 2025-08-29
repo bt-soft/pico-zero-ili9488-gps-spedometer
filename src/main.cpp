@@ -76,7 +76,7 @@ void drawSplashScreen() {
     // Trafipaxok száma
     tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextSize(1);
-    tft.drawString("Traffipax cnt: " + String(trafipaxManager.count()), tft.width() / 2, 272, 1);
+    tft.drawString("Traffipax count: " + String(trafipaxManager.count()), tft.width() / 2, 272, 1);
 }
 
 /**
