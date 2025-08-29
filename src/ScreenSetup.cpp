@@ -72,6 +72,7 @@ void ScreenSetup::drawContent() {
 
     // Címsor
     tft.setTextDatum(MC_DATUM);
+    tft.setTextSize(1);
     tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString("Setup Screen", ::SCREEN_W / 2, 30);

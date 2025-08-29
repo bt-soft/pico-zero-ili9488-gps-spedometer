@@ -135,7 +135,7 @@ void ScreenSats::layoutComponents() {
         1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                getScreenManager()->switchToScreen(SCREEN_NAME_MAIN);
+                getScreenManager()->goBack();
             }
         });
 

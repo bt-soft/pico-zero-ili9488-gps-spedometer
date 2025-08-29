@@ -128,7 +128,7 @@ void GpsManager::readGPS() {
     }
 
     // Mikor bootolt be a GPS?
-    if (gpsBootTime == 0 && gps.speed.isValid()) {
+    if (gpsBootTime == 0 && gps.satellites.isValid() && gps.satellites.value() > 0) {
         gpsBootTime = (millis() - startTime) / 1000;
     }
 }
@@ -176,4 +176,51 @@ GpsManager::LocalDateTime GpsManager::getLocalDateTime() {
 
     result.valid = true;
     return result;
+}
+
+/**
+ * GPS minőségi szint lekérdezése
+ */
+String GpsManager::getGpsQualityString() {
+
+    switch (gps.location.FixQuality()) {
+        case TinyGPSLocation::Invalid:
+            return "Invalid";
+        case TinyGPSLocation::GPS:
+            return "GPS";
+        case TinyGPSLocation::DGPS:
+            return "DGPS";
+        case TinyGPSLocation::PPS:
+            return "PPS";
+        case TinyGPSLocation::RTK:
+            return "RTK";
+        case TinyGPSLocation::FloatRTK:
+            return "FloatRTK";
+        case TinyGPSLocation::Estimated:
+            return "Estimated";
+        case TinyGPSLocation::Manual:
+            return "Manual";
+        case TinyGPSLocation::Simulated:
+            return "Simulated";
+        default:
+            return "Unknown";
+    }
+}
+
+/**
+ * GPS üzemmód lekérdezése
+ */
+String GpsManager::getGpsModeToString() {
+    switch (gps.location.FixMode()) {
+        case TinyGPSLocation::N:
+            return "No Fix";
+        case TinyGPSLocation::A:
+            return "Auto 2D/3D";
+        case TinyGPSLocation::D:
+            return "Differential";
+        case TinyGPSLocation::E:
+            return "Estimated";
+        default:
+            return "Unknown";
+    }
 }

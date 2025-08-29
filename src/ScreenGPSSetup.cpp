@@ -97,8 +97,8 @@ void ScreenGPSSetup::layoutComponents() {
 void ScreenGPSSetup::drawContent() {
     tft.fillScreen(TFT_BLACK);
     tft.setTextDatum(MC_DATUM);
-    tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextSize(1);
+    tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextColor(TFT_CYAN, TFT_BLACK);
     tft.drawString("GPS Settings", ::SCREEN_W / 2, 20);
     tft.setFreeFont();

@@ -3,6 +3,21 @@
 #include "pins.h"
 
 namespace Utils {
+
+/**
+ * @brief Átalakít egy milliszekundum értéket "perc:mp:ms" formátumú szöveggé
+ * @param msec Időérték milliszekundumban
+ * @return Formázott string (pl. "2:05:123")
+ */
+String msecToString(uint32_t msec) {
+    uint32_t minutes = msec / 60000;
+    uint32_t seconds = (msec % 60000) / 1000;
+    uint32_t millis = msec % 1000;
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%u:%02u:%03u", minutes, seconds, millis);
+    return String(buf);
+}
+
 /**
  * @brief  Formáz egy lebegőpontos számot stringgé, a tizedesjegyek számát paraméterként adva meg.
  * @param value A lebegőpontos szám értéke

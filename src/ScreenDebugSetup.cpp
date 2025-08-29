@@ -94,6 +94,7 @@ void ScreenDebugSetup::layoutComponents() {
 void ScreenDebugSetup::drawContent() {
     tft.fillScreen(TFT_BLACK);
     tft.setTextDatum(MC_DATUM);
+    tft.setTextSize(1);
     tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextColor(TFT_CYAN, TFT_BLACK);
     tft.drawString("Debug Settings", ::SCREEN_W / 2, 20);

@@ -67,15 +67,11 @@ void drawSplashScreen() {
     tft.drawString(PROGRAM_AUTHOR, tft.width() / 2, 170, 2);
 
     // Build
-    char buf[64];
-    sprintf(buf, "%s %s", __DATE__, __TIME__);
     tft.setTextColor(TFT_CYAN);
-    tft.drawString(buf, tft.width() / 2, 210, 1);
+    tft.drawString(String(__DATE__) + " " + String(__TIME__), tft.width() / 2, 210, 1);
 
     // Trafipaxok száma
-    sprintf(buf, "Traffi cnt: %d", trafipaxManager.count());
-    tft.setTextColor(TFT_YELLOW);
-    tft.drawString(buf, tft.width() / 2, 272, 4);
+    tft.drawString("Traffi cnt: " + String(trafipaxManager.count()), tft.width() / 2, 272, 4);
 }
 
 /**

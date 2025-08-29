@@ -46,8 +46,10 @@ class GpsManager {
     /**
      * Thread-safe hozzáférés a műhold adatbázishoz UI számára (Core0)
      */
-    std::vector<SatelliteDb::SatelliteData> getSatelliteSnapshotForUI(SatelliteDb::SortType_t sortType = SatelliteDb::NONE) const { return satelliteDb.getSnapshotForUI(sortType); }
-
+    std::vector<SatelliteDb::SatelliteData> getSatelliteSnapshotForUI(SatelliteDb::SortType_t sortType = SatelliteDb::NONE) const {
+        //
+        return satelliteDb.getSnapshotForUI(sortType);
+    }
     /**
      * Thread-safe műholdak számának lekérdezése UI számára (Core0)
      */
@@ -81,6 +83,11 @@ class GpsManager {
     LocalDateTime getLocalDateTime();
     LocalDateTime getLocalTime() { return getLocalDateTime(); } // Alias
 
+    uint32_t getGpsBootTime() { return gpsBootTime; }
+
+    String getGpsQualityString();
+    String getGpsModeToString();
+
   private:
     HardwareSerial *gpsSerial;
     TinyGPSPlus gps;
@@ -103,8 +110,9 @@ class GpsManager {
 
     bool debugGpsSatellitesDatabase;
 
-    unsigned long startTime;
-    unsigned long gpsBootTime;
+    // Boot
+    uint32_t startTime;
+    uint32_t gpsBootTime;
 
     void processGSVMessages();
     void readGPS();
