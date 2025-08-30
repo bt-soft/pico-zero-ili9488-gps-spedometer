@@ -217,7 +217,7 @@ void loop() {
 //------------------- EEPROM mentés figyelése
 #define EEPROM_SAVE_CHECK_INTERVAL 1000 * 60 * 5 // 5 perc
     static uint32_t lastEepromSaveCheck = 0;
-    if (millis() - lastEepromSaveCheck >= EEPROM_SAVE_CHECK_INTERVAL) {
+    if (Utils::timeHasPassed(lastEepromSaveCheck, EEPROM_SAVE_CHECK_INTERVAL)) {
         config.checkSave();
         lastEepromSaveCheck = millis();
     }

@@ -208,7 +208,7 @@ const TraffipaxManager::TraffipaxRecord *TraffipaxManager::getClosestTraffipax(d
     return &traffipaxList[closestIdx];
 }
 
-#ifdef DEMO_MODE
+//-------------------------------------------------------- DEMO -------------------------------------------------------------------------------------
 
 /**
  * Demo indítása - 5mp várakozás, majd közeledés/távolodás szimulálása
@@ -218,19 +218,20 @@ void TraffipaxManager::startDemo() {
     demo.startTime = millis();
     demo.currentPhase = 0;
 
-    DEBUG("\n=== TRAFFIPAX DEMO INDÍTVA ===\n");
+    DEBUG("\n=== TRAFFIPAX DEMÓ INDÍTVA ===\n");
     DEBUG("Teszt fázisok:\n");
     DEBUG("0-5mp: Várakozás (nincs riasztás)\n");
-    DEBUG("5-20mp: Közeledés a litéri traffipaxhoz\n");
-    DEBUG("20-40mp: Távolodás a litéri traffipaxtól (lassítva)\n");
-    DEBUG("40-45mp: Demo befejezése\n");
+    DEBUG("5-20mp: Közeledés egy véletlenül kiválasztott traffipaxhoz\n");
+    DEBUG("20-40mp: Távolodás a véletlenül kiválasztott traffipaxtól\n");
+    DEBUG("40-45mp: Demó befejezése\n");
     DEBUG("------------------------------------------\n\n");
 }
 
 /**
  * Demo feldolgozása - szimulált GPS koordináták generálása
  */
-void TTraffipaxManager::processDemo() {
+void TraffipaxManager::processDemo() {
+
     if (!demo.isActive) {
         return;
     }
@@ -241,7 +242,7 @@ void TTraffipaxManager::processDemo() {
     if (elapsed >= TraffipaxDemo::PHASE_END) {
         demo.isActive = false;
         demo.hasValidCoords = false;
-        DEBUG("=== DEMO BEFEJEZVE ===\n");
+        DEBUG("=== TRAFFIPAX DEMÓ BEFEJEZVE ===\n");
         return;
     }
 
@@ -250,49 +251,49 @@ void TTraffipaxManager::processDemo() {
 
     if (elapsed < TraffipaxDemo::PHASE_WAIT) {
         // Várakozási fázis - messze vagyunk (1500m)
-        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135; // kb. 1500m délre
-        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
+        simLat = TraffipaxDemo::DEMO_TRAFFIPAX_LAT - 0.0135; // kb. 1500m délre
+        simLon = TraffipaxDemo::DEMO_TRAFFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
-            DEBUG("Demo fázis: Várakozás (%lus/5s)\n", elapsed);
+            DEBUG("Traffi Demo Fázis: Várakozás (%lus/5s)\n", elapsed);
         }
 
     } else if (elapsed < TraffipaxDemo::PHASE_APPROACH) {
         // Közeledési fázis - 1500m-ről 200m-ig
         float progress = (elapsed - TraffipaxDemo::PHASE_WAIT) / 15.0f; // 0.0 - 1.0 (15s alatt)
-        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
-        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
+        simLat = TraffipaxDemo::DEMO_TRAFFIPAX_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
+        simLon = TraffipaxDemo::DEMO_TRAFFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
-            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TraffipaxDemo::DEMO_TRAFIPAX_LAT, TraffipaxDemo::DEMO_TRAFIPAX_LON);
-            DEBUG("Demo fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
+            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TraffipaxDemo::DEMO_TRAFFIPAX_LAT, TraffipaxDemo::DEMO_TRAFFIPAX_LON);
+            DEBUG("Traffi Demo Fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
         }
 
     } else if (elapsed < TraffipaxDemo::PHASE_DEPART) {
         // Távolodási fázis - 200m-ről 1500m-ig (lassítva 20s alatt)
         float progress = (elapsed - TraffipaxDemo::PHASE_APPROACH) / 20.0f; // 0.0 - 1.0 (20s alatt)
-        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
-        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
+        simLat = TraffipaxDemo::DEMO_TRAFFIPAX_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
+        simLon = TraffipaxDemo::DEMO_TRAFFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
             double distance;
-            const TraffipaxInternal *closest = getClosestTraffipax(simLat, simLon, distance);
+            const TraffipaxRecord *closest = getClosestTraffipax(simLat, simLon, distance);
             if (closest) {
-                DEBUG("Demo fázis: Távolodás (%lus/40s) - %dm\n", elapsed, (int)distance);
+                DEBUG("Traffi Demo Fázis: Távolodás (%lus/40s) - %dm\n", elapsed, (int)distance);
             }
         }
 
     } else {
         // Befejező fázis - messze vagyunk
-        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135;
-        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
+        simLat = TraffipaxDemo::DEMO_TRAFFIPAX_LAT - 0.0135;
+        simLon = TraffipaxDemo::DEMO_TRAFFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
-            DEBUG("Demo fázis: Befejezés (%lus/45s)\n", elapsed);
+            DEBUG("Traffi Demo Fázis: Befejezés (%lus/45s)\n", elapsed);
         }
     }
 
@@ -318,4 +319,3 @@ bool TraffipaxManager::getDemoCoords(double &lat, double &lon) const {
     }
     return false;
 }
-#endif

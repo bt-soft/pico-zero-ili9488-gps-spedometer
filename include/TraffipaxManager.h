@@ -8,34 +8,6 @@
 #define MAX_CITY_LEN 25
 #define MAX_STREET_LEN 30
 
-#ifdef DEMO_MODE
-// Demo traffipax közeledés/távolodás szimulálása működés közben
-struct TraffipaxDemo {
-    bool isActive = false;
-    unsigned long startTime = 0;
-    unsigned long currentPhase = 0;
-
-    // Demo koordináták
-    double currentLat = 0.0;
-    double currentLon = 0.0;
-    bool hasValidCoords = false;
-
-    // Demo fázisok (másodpercben)
-    static constexpr unsigned long PHASE_WAIT = 5;      // 5mp várakozás
-    static constexpr unsigned long PHASE_APPROACH = 20; // 15mp közeledés (5-20mp)
-    static constexpr unsigned long PHASE_DEPART = 40;   // 20mp távolodás (20-40mp) - lassítva
-    static constexpr unsigned long PHASE_END = 45;      // 5mp befejezés (40-45mp)
-
-    // Litéri trafipax koordinátái
-    // Litér
-    // static constexpr double DEMO_TRAFFIPAX_LAT = 47.100934;  //Litér
-    // static constexpr double DEMO_TRAFFIPAX_LON = 18.011792;
-    // Hódmezővásárhely
-    static constexpr double DEMO_TRAFFIPAX_LAT = 46.428704; // Hódmezővásárhely
-    static constexpr double DEMO_TRAFFIPAX_LON = 20.326282;
-};
-#endif
-
 class TraffipaxManager {
   public:
     struct TraffipaxRecord {
@@ -60,13 +32,11 @@ class TraffipaxManager {
     // Legközelebbi trafipax keresése távolsággal együtt
     const TraffipaxRecord *getClosestTraffipax(double currentLat, double currentLon, double &outDistance) const;
 
-#ifdef DEMO_MODE
     // Demo funkciók
     void startDemo();
     void processDemo();
     bool isDemoActive() const;
     bool getDemoCoords(double &lat, double &lon) const;
-#endif
 
   private:
     TraffipaxRecord traffipaxList[MAX_TRAFIPAX_COUNT];
@@ -78,8 +48,32 @@ class TraffipaxManager {
     int lastClosestTraffipaxIdx = -1;
     double lastDistance = 999999.0;
 
-#ifdef DEMO_MODE
+    // Demo traffipax közeledés/távolodás szimulálása működés közben
+    struct TraffipaxDemo {
+        bool isActive = false;
+        unsigned long startTime = 0;
+        unsigned long currentPhase = 0;
+
+        // Demo koordináták
+        double currentLat = 0.0;
+        double currentLon = 0.0;
+        bool hasValidCoords = false;
+
+        // Demo fázisok (másodpercben)
+        static constexpr unsigned long PHASE_WAIT = 5;      // 5mp várakozás
+        static constexpr unsigned long PHASE_APPROACH = 20; // 15mp közeledés (5-20mp)
+        static constexpr unsigned long PHASE_DEPART = 40;   // 20mp távolodás (20-40mp) - lassítva
+        static constexpr unsigned long PHASE_END = 45;      // 5mp befejezés (40-45mp)
+
+        // Litéri trafipax koordinátái
+        // Litér
+        // static constexpr double DEMO_TRAFFIPAX_LAT = 47.100934;  //Litér
+        // static constexpr double DEMO_TRAFFIPAX_LON = 18.011792;
+        // Hódmezővásárhely
+        static constexpr double DEMO_TRAFFIPAX_LAT = 46.428704; // Hódmezővásárhely
+        static constexpr double DEMO_TRAFFIPAX_LON = 20.326282;
+    };
+
     // Demo objektum
     TraffipaxDemo demo;
-#endif
 };
