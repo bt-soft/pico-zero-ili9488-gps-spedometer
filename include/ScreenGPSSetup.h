@@ -9,5 +9,5 @@ class ScreenGPSSetup : public UIScreen {
     void drawContent() override;
 
   private:
-    std::shared_ptr<UIButton> gpsTrafiAlarmDistanceBtn;
+    std::shared_ptr<UIButton> gpsTraffiAlarmDistanceBtn;
 };

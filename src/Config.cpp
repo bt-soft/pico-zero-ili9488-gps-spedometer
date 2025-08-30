@@ -15,8 +15,9 @@ const Config_t DEFAULT_CONFIG = {
     .beeperEnabled = true, // Hangjelzés engedélyezése
 
     // GPS traffipax beállítások
-    .gpsTrafiAlarmDistance = 800, // GPS traffipax riasztási távolság méterben
-    .gpsTrafiAlarmEnabled = true, // GPS traffipax riasztás engedélyezése
+    .gpsTraffiAlarmDistance = 800,      // GPS traffipax riasztási távolság méterben
+    .gpsTraffiAlarmEnabled = true,      // GPS traffipax riasztás engedélyezése
+    .gpsTraffiSirenAlarmEnabled = true, // GPS traffipax sziréna riasztás engedélyezése
 
     // GPS debug opciók
     .debugGpsSerialOnInternalFastLed = true, // GPS soros adat kiírása a belső gyors LED-re

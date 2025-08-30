@@ -480,8 +480,6 @@ void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *
         spriteAlertBar.createSprite(tft.width(), ALERT_BAR_HEIGHT);
     }
 
-    DEBUG("Displaying traffipax alert: %s - %s\n", traffipax->city, traffipax->street_or_km);
-
     // Háttérszín meghatározása állapot szerint
     uint16_t backgroundColor;
     uint16_t textColor;
@@ -501,27 +499,29 @@ void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *
     }
 
     spriteAlertBar.fillSprite(backgroundColor);
-    spriteAlertBar.setFreeFont(&FreeSansBold18pt7b);
     spriteAlertBar.setTextColor(textColor, backgroundColor);
 
     // Város (első sor, balra igazítva)
     spriteAlertBar.setTextDatum(TL_DATUM);
     char cityText[MAX_CITY_LEN];
     strncpy(cityText, traffipax->city, MAX_CITY_LEN);
+    spriteAlertBar.setFreeFont(&FreeSansBold18pt7b);
     spriteAlertBar.drawString(cityText, ALERT_TEXT_PADDING, 10);
 
     // Utca/km (második sor, balra igazítva)
     char streetText[MAX_STREET_LEN];
     strncpy(streetText, traffipax->street_or_km, MAX_STREET_LEN);
+    spriteAlertBar.setFreeFont(&FreeSansBold12pt7b);
     spriteAlertBar.drawString(streetText, ALERT_TEXT_PADDING, 45);
 
     // Távolság (jobbra, vertikálisan középre)
     spriteAlertBar.setTextDatum(MR_DATUM);
     char distanceText[16];
     snprintf(distanceText, sizeof(distanceText), "%dm", (int)distance);
+    spriteAlertBar.setFreeFont(&FreeSansBold24pt7b);
     spriteAlertBar.drawString(distanceText, tft.width() - ALERT_TEXT_PADDING, ALERT_BAR_HEIGHT / 2);
 
-    spriteAlertBar.unloadFont();
+    spriteAlertBar.setFreeFont();
     spriteAlertBar.pushSprite(0, 0);
 }
 
@@ -540,92 +540,96 @@ void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *
  */
 void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double currentLon, bool positionValid) {
 
+    // Trafipax riasztás stabilizálása: csak tartósan nagy távolság után tűnik el a sprite
+    static unsigned long outOfRangeStart = 0;
+
     // Nincs érvényes GPS pozíció adat - riasztás kikapcsolása ha éppen aktív
     if (!positionValid) {
         if (traffipaxAlert.currentState != TraffipaxAlert::INACTIVE) {
             traffipaxAlert.currentState = TraffipaxAlert::INACTIVE;
             traffipaxAlert.activeTraffipax = nullptr;
             traffiAlarmActive = false;
-
-            // Figyelmeztető sáv törlése
             clearTraffipaxAlert();
-
-            // Beállítjuk a kényszerített újrarajzolás flag-et
             this->forceRedraw = true;
-
-            // a következő ciklusban kényszerítjük az újrarajzolást
-            markForRedraw(true); // a képernyőt és a gyerekeit  újrarajzolásra jelöljük
+            markForRedraw(true);
         }
+        outOfRangeStart = 0;
         return;
     }
 
     // Legközelebbi trafipax keresése
     double minDistance = 999999.0;
     const TraffipaxManager::TraffipaxRecord *closestTraffipax = traffipaxManager.getClosestTraffipax(currentLat, currentLon, minDistance);
-
     const unsigned long currentTime = millis();
 
     // Ha nincs közeli traffipax a kritikus távolságon belül
-    if (minDistance > config.data.gpsTrafiAlarmDistance) {
-        if (traffipaxAlert.currentState != TraffipaxAlert::INACTIVE) {
-            traffipaxAlert.currentState = TraffipaxAlert::INACTIVE;
-            traffipaxAlert.activeTraffipax = nullptr;
-            traffiAlarmActive = false; // Riasztás kikapcsolása
-
-            // Figyelmeztető sáv törlése
-            clearTraffipaxAlert();
-
-            // Beállítjuk a kényszerített újrarajzolás flag-et
-            this->forceRedraw = true;
-
-            // a következő ciklusban kényszerítjük az újrarajzolást
-            markForRedraw(true);
-
+    if (minDistance > config.data.gpsTraffiAlarmDistance) {
+        // Először jegyezzük fel, mikor kerültünk ki a tartományból
+        if (outOfRangeStart == 0) {
+            outOfRangeStart = currentTime;
+        }
+        // Ha már legalább 3 másodperce kívül vagyunk, akkor kapcsoljuk ki a riasztást
+        if (currentTime - outOfRangeStart > 3000) {
+            if (traffipaxAlert.currentState != TraffipaxAlert::INACTIVE) {
+                traffipaxAlert.currentState = TraffipaxAlert::INACTIVE;
+                traffipaxAlert.activeTraffipax = nullptr;
+                traffiAlarmActive = false;
+                clearTraffipaxAlert();
+                this->forceRedraw = true;
+                markForRedraw(true);
+            }
+            return;
+        } else {
+            // Még nem telt le a stabilizációs idő, a sprite maradjon!
+            if (traffipaxAlert.currentState != TraffipaxAlert::INACTIVE && traffipaxAlert.activeTraffipax) {
+                traffiAlarmActive = true;
+                traffipaxAlert.currentDistance = minDistance;
+                displayTraffipaxAlert(traffipaxAlert.activeTraffipax, minDistance);
+            }
             return;
         }
+    } else {
+        // Visszaléptünk a tartományba, nullázzuk az időzítőt
+        outOfRangeStart = 0;
+    }
 
-        // Van közeli traffipax - állapot meghatározása
-        // Stabil állapotváltás - csak 10m+ változásnál váltunk
-        bool isApproaching = minDistance < (traffipaxAlert.lastDistance - 10.0);
-        bool isDeparting = minDistance > (traffipaxAlert.lastDistance + 10.0);
+    // Van közeli traffipax - állapot meghatározása
+    bool isApproaching = minDistance < (traffipaxAlert.lastDistance - 10.0);
+    bool isDeparting = minDistance > (traffipaxAlert.lastDistance + 10.0);
 
-        // Ha még nincs beállítva állapot, akkor a távolság alapján indítjuk
-        TraffipaxAlert::State newState = traffipaxAlert.currentState;
-        if (traffipaxAlert.currentState == TraffipaxAlert::INACTIVE) {
-            newState = TraffipaxAlert::APPROACHING; // Kezdetben közeledés
-        } else if (isApproaching) {
-            newState = TraffipaxAlert::APPROACHING;
-        } else if (isDeparting) {
-            newState = TraffipaxAlert::DEPARTING;
-        }
-        // Ha nincs jelentős változás, akkor marad a jelenlegi állapot
+    TraffipaxAlert::State newState = traffipaxAlert.currentState;
+    if (traffipaxAlert.currentState == TraffipaxAlert::INACTIVE) {
+        newState = TraffipaxAlert::APPROACHING;
+    } else if (isApproaching) {
+        newState = TraffipaxAlert::APPROACHING;
+    } else if (isDeparting) {
+        newState = TraffipaxAlert::DEPARTING;
+    }
 
-        // Állapotváltás detektálása
-        if (newState != traffipaxAlert.currentState) {
-            traffipaxAlert.currentState = newState;
-            traffipaxAlert.lastStateChange = currentTime;
-            traffipaxAlert.activeTraffipax = closestTraffipax;
-        }
+    if (newState != traffipaxAlert.currentState) {
+        traffipaxAlert.currentState = newState;
+        traffipaxAlert.lastStateChange = currentTime;
+        traffipaxAlert.activeTraffipax = closestTraffipax;
+    }
 
-        // Figyelmeztető sáv megjelenítése
-        traffiAlarmActive = true;
-        traffipaxAlert.currentDistance = minDistance;
+    // Figyelmeztető sáv megjelenítése minden ciklusban, amíg aktív
+    traffiAlarmActive = true;
+    traffipaxAlert.currentDistance = minDistance;
+    displayTraffipaxAlert(closestTraffipax, minDistance);
 
-        // Megjelenítés
-        displayTraffipaxAlert(closestTraffipax, minDistance);
-
-        // Szirénázás csak közeledés esetén, 10mp-enként
+    // Szirénázás csak közeledés esetén, 10mp-enként, ha engedélyezve van
+    if (config.data.gpsTraffiSirenAlarmEnabled) {
         if (traffipaxAlert.currentState == TraffipaxAlert::APPROACHING) {
             if (currentTime - traffipaxAlert.lastSirenTime >= TraffipaxAlert::SIREN_INTERVAL) {
                 Utils::beepSiren(2, 600, 1800, 20, 8, 100);
                 traffipaxAlert.lastSirenTime = currentTime;
             }
         }
+    }
 
-        // Távolság frissítése - csak 5m+ változásnál
-        if (abs(minDistance - traffipaxAlert.lastDistance) >= 5.0) {
-            traffipaxAlert.lastDistance = minDistance;
-        }
+    // Távolság frissítése - csak 5m+ változásnál
+    if (abs(minDistance - traffipaxAlert.lastDistance) >= 5.0) {
+        traffipaxAlert.lastDistance = minDistance;
     }
 }
 
@@ -680,8 +684,10 @@ void ScreenMain::handleOwnLoop() {
         }
     }
 
-    // Trafipax figyelmeztetés feldolgozása
-    processIntelligentTraffipaxAlert(data.latitude, data.longitude, data.positionValid);
+    // Trafipax figyelmeztetés feldolgozása, ha engedélyezve van
+    if (config.data.gpsTraffiAlarmEnabled) {
+        processIntelligentTraffipaxAlert(data.latitude, data.longitude, data.positionValid);
+    }
 
     // Általános buffer a megjelenítéshez
     char buf[11];

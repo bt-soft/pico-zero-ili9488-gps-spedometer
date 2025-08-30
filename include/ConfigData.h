@@ -13,8 +13,10 @@ struct Config_t {
     //--- System
     bool beeperEnabled; // Hangjelzés engedélyezése
 
-    uint16_t gpsTrafiAlarmDistance; // GPS traffipax riasztási távolság méterben
-    bool gpsTrafiAlarmEnabled;      // GPS traffipax riasztás engedélyezése
+    // GPS traffipax riasztási beállítások
+    uint16_t gpsTraffiAlarmDistance; // GPS traffipax riasztási távolság méterben
+    bool gpsTraffiAlarmEnabled;      // GPS traffipax riasztás engedélyezése
+    bool gpsTraffiSirenAlarmEnabled; // GPS traffipax sziréna riasztás engedélyezése
 
     //--- Debug
     bool debugGpsSerialOnInternalFastLed; //  Az RGB LED villogtatása, ha van GPS soros adat
