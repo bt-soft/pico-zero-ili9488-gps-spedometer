@@ -11,7 +11,9 @@
 //   https://www.autopalyamatrica.hu/fix-traffipax-lista-veda-terkep
 //
 // CSV feltöltése a LittleFS-re:
-//  pio run --target uploadfs
+//      0) A CSV ISO-8859-2 kódolású legyen
+//      1) BOOTSEL módba kell rakni a PICO-t
+//      2) pio run --target uploadfs
 //
 
 constexpr double TRAFFIPAX_DEMO_FAR_DISTANCE_M = 2000.0;
@@ -47,7 +49,7 @@ boolean TraffipaxManager::checkFile(const char *filename) {
 }
 
 /**
- * Betölti a Trafipax adatokat CSV fájlból
+ * Betölti a Trafipax adatokat CSV fájlból (ISO-8859-2 kódólású a fájl!)
  */
 void TraffipaxManager::loadFromCSV(const char *filename) {
     traffipaxCount = 0;
@@ -62,14 +64,13 @@ void TraffipaxManager::loadFromCSV(const char *filename) {
     // Skip header
     file.readBytesUntil('\n', line, sizeof(line));
     while (file.available() && traffipaxCount < MAX_TRAFIPAX_COUNT) {
-
         int len = file.readBytesUntil('\n', line, sizeof(line) - 1);
-
         if (len <= 0) {
             continue;
         }
         line[len] = 0;
 
+        // ISO-8859-2: minden karakter 1 bájt, nincs UTF-8 szekvencia
         // Skip empty lines (only whitespace)
         char *trimmed = line;
         while (*trimmed == ' ' || *trimmed == '\t' || *trimmed == '\r') {
@@ -80,7 +81,6 @@ void TraffipaxManager::loadFromCSV(const char *filename) {
         }
 
         // CSV: Vármegye,Település neve,Útszám,Kilométer-szelvény/utca,GPS koordináta szélesség,GPS koordináta hosszúság
-        // Parse manually to handle commas in field values
         char *fields[6];
         int fieldCount = 0;
         char *start = trimmed;
@@ -113,6 +113,10 @@ void TraffipaxManager::loadFromCSV(const char *filename) {
         if (!city || !street || !latstr || !lonstr) {
             continue;
         }
+
+        // Ékezetes karakterek eltávolítása ISO-8859-2 szerint
+        Utils::removeAccents(city);
+        Utils::removeAccents(street);
 
         TraffipaxRecord &t = traffipaxList[traffipaxCount++];
         strncpy(t.city, city, MAX_CITY_LEN - 1);

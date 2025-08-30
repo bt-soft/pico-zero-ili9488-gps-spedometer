@@ -177,4 +177,9 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * Trafipax figyelmeztető sáv megjelenítése
      */
     void displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *trafipax, double distance);
+
+    /**
+     * Trafipax figyelmeztető sáv törlése
+     */
+    void clearTraffipaxAlert();
 };

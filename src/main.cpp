@@ -83,9 +83,12 @@ void drawSplashScreen() {
  * @brief Setup függvény
  */
 void setup() {
+
+    // Soros port felhúzása a DEBUG üzenetekhez
 #ifdef __DEBUG
     Serial.begin(115200);
 #endif
+
     // Beeper
     pinMode(PIN_BUZZER, OUTPUT);
     digitalWrite(PIN_BUZZER, LOW);
@@ -99,7 +102,7 @@ void setup() {
     SCREEN_W = tft.width();
     SCREEN_H = tft.height();
 
-#ifdef DEBUG_WAIT_FOR_SERIAL
+#ifdef __DEBUG_WAIT_FOR_SERIAL
     tftBackLightAdjuster.begin(true);
     Utils::debugWaitForSerial(tft);
 #endif

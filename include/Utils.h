@@ -30,7 +30,7 @@ void tftTouchCalibrate(TFT_eSPI &tft, uint16_t (&calData)[5]);
  * Ékezetes karakterek ASCII karakterekre konvertálása
  * @param text A konvertálandó szöveg (in-place módosítás)
  */
-void convertToASCII(char *text);
+void removeAccents(char *text);
 
 //--- Beep ----
 /**

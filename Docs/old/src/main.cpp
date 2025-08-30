@@ -537,7 +537,7 @@ void setup(void) {
     tft.setRotation(1);
     tft.fillScreen(TFT_BLACK);
 
-#ifdef DEBUG_WAIT_FOR_SERIAL
+#ifdef __DEBUG_WAIT_FOR_SERIAL
     tftBackLightAdjuster.begin(true);
     Utils::debugWaitForSerial(tft);
 #endif

@@ -457,11 +457,30 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
 }
 
 /**
+ * Alert bar törlése
+ */
+void ScreenMain::clearTraffipaxAlert() {
+    spriteAlertBar.fillSprite(TFT_BLACK);
+    spriteAlertBar.pushSprite(0, 0);
+
+    spriteAlertBar.deleteSprite();
+}
+
+/**
  * Traffipax figyelmeztető sáv megjelenítése sprite-tal és villogással
  */
 void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *traffipax, double distance) {
-    if (traffipax == nullptr)
+
+    if (traffipax == nullptr) {
         return;
+    }
+
+    // Alert bar sprite létrehozása
+    if (!spriteAlertBar.created()) {
+        spriteAlertBar.createSprite(tft.width(), ALERT_BAR_HEIGHT);
+    }
+
+    DEBUG("Displaying traffipax alert: %s - %s\n", traffipax->city, traffipax->street_or_km);
 
     // Háttérszín meghatározása állapot szerint
     uint16_t backgroundColor;
@@ -489,20 +508,17 @@ void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *
     spriteAlertBar.setTextDatum(TL_DATUM);
     char cityText[MAX_CITY_LEN];
     strncpy(cityText, traffipax->city, MAX_CITY_LEN);
-    Utils::convertToASCII(cityText);
     spriteAlertBar.drawString(cityText, ALERT_TEXT_PADDING, 10);
 
     // Utca/km (második sor, balra igazítva)
     char streetText[MAX_STREET_LEN];
     strncpy(streetText, traffipax->street_or_km, MAX_STREET_LEN);
-    Utils::convertToASCII(streetText);
     spriteAlertBar.drawString(streetText, ALERT_TEXT_PADDING, 45);
 
     // Távolság (jobbra, vertikálisan középre)
     spriteAlertBar.setTextDatum(MR_DATUM);
     char distanceText[16];
     snprintf(distanceText, sizeof(distanceText), "%dm", (int)distance);
-    Utils::convertToASCII(distanceText);
     spriteAlertBar.drawString(distanceText, tft.width() - ALERT_TEXT_PADDING, ALERT_BAR_HEIGHT / 2);
 
     spriteAlertBar.unloadFont();
@@ -531,6 +547,9 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
             traffipaxAlert.activeTraffipax = nullptr;
             traffiAlarmActive = false;
 
+            // Figyelmeztető sáv törlése
+            clearTraffipaxAlert();
+
             // Beállítjuk a kényszerített újrarajzolás flag-et
             this->forceRedraw = true;
 
@@ -553,11 +572,15 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
             traffipaxAlert.activeTraffipax = nullptr;
             traffiAlarmActive = false; // Riasztás kikapcsolása
 
+            // Figyelmeztető sáv törlése
+            clearTraffipaxAlert();
+
             // Beállítjuk a kényszerített újrarajzolás flag-et
             this->forceRedraw = true;
 
             // a következő ciklusban kényszerítjük az újrarajzolást
-            markForRedraw(true); // a képernyőt és a gyerekeit  újrarajzolásra jelöljük        }
+            markForRedraw(true);
+
             return;
         }
 
@@ -612,7 +635,7 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
 void ScreenMain::handleOwnLoop() {
 
     // 1 másodperces frissítés
-    static long lastUpdate = millis() - 1000;
+    static long lastUpdate = 0;
     if (!Utils::timeHasPassed(lastUpdate, 1000)) {
         return;
     }
@@ -652,6 +675,8 @@ void ScreenMain::handleOwnLoop() {
         // Demó módban a közelítés/tavolodás adatokat is frissítjük
         if (isTraffipaxManagerDemoActive) {
             traffipaxManager.processDemo();
+            traffipaxManager.getDemoCoords(data.latitude, data.longitude);
+            data.positionValid = true;
         }
     }
 

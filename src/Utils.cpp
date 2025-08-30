@@ -87,79 +87,69 @@ void tftTouchCalibrate(TFT_eSPI &tft, uint16_t (&calData)[5]) {
 }
 
 /**
- * Ékezetes karakterek ASCII karakterekre konvertálása
+ * ISO-8859-2 ékezetes karakterek cseréje
  */
-void convertToASCII(char *text) {
+void removeAccents(char *text) {
+
     int len = strlen(text);
+
     for (int i = 0; i < len; i++) {
         unsigned char c = (unsigned char)text[i];
         switch (c) {
-            case 0xC3: // UTF-8 prefix for accented characters
-                if (i + 1 < len) {
-                    unsigned char next = (unsigned char)text[i + 1];
-                    char replacement = '?';
-                    switch (next) {
-                        case 0xA1:
-                            replacement = 'a';
-                            break; // á
-                        case 0xA9:
-                            replacement = 'e';
-                            break; // é
-                        case 0xAD:
-                            replacement = 'i';
-                            break; // í
-                        case 0xB3:
-                            replacement = 'o';
-                            break; // ó
-                        case 0xB6:
-                            replacement = 'o';
-                            break; // ö
-                        case 0xB5:
-                            replacement = 'o';
-                            break; // õ
-                        case 0xBA:
-                            replacement = 'u';
-                            break; // ú
-                        case 0xBC:
-                            replacement = 'u';
-                            break; // ü
-                        case 0xBB:
-                            replacement = 'u';
-                            break; // û
-                        case 0x81:
-                            replacement = 'A';
-                            break; // Á
-                        case 0x89:
-                            replacement = 'E';
-                            break; // É
-                        case 0x8D:
-                            replacement = 'I';
-                            break; // Í
-                        case 0x93:
-                            replacement = 'O';
-                            break; // Ó
-                        case 0x96:
-                            replacement = 'O';
-                            break; // Ö
-                        case 0x95:
-                            replacement = 'O';
-                            break; // Õ
-                        case 0x9A:
-                            replacement = 'U';
-                            break; // Ú
-                        case 0x9C:
-                            replacement = 'U';
-                            break; // Ü
-                        case 0x9B:
-                            replacement = 'U';
-                            break; // Û
-                    }
-                    // Shift left to overwrite the UTF-8 sequence
-                    text[i] = replacement;
-                    memmove(&text[i + 1], &text[i + 2], len - i - 1);
-                    len--;
-                }
-                break;
+            case 0xE1:
+                text[i] = 'a';
+                break; // á
+            case 0xE9:
+                text[i] = 'e';
+                break; // é
+            case 0xED:
+                text[i] = 'i';
+                break; // í
+            case 0xF3:
+                text[i] = 'o';
+                break; // ó
+            case 0xF6:
+                text[i] = 'o';
+                break; // ö
+            case 0xF5:
+                text[i] = 'o';
+                break; // ő
+            case 0xFA:
+                text[i] = 'u';
+                break; // ú
+            case 0xFC:
+                text[i] = 'u';
+                break; // ü
+            case 0xFB:
+                text[i] = 'u';
+                break; // ű
+            case 0xC1:
+                text[i] = 'A';
+                break; // Á
+            case 0xC9:
+                text[i] = 'E';
+                break; // É
+            case 0xCD:
+                text[i] = 'I';
+                break; // Í
+            case 0xD3:
+                text[i] = 'O';
+                break; // Ó
+            case 0xD6:
+                text[i] = 'O';
+                break; // Ö
+            case 0xD5:
+                text[i] = 'O';
+                break; // Ő
+            case 0xDA:
+                text[i] = 'U';
+                break; // Ú
+            case 0xDC:
+                text[i] = 'U';
+                break; // Ü
+            case 0xDB:
+                text[i] = 'U';
+                break; // Ű
         }
     }
 }

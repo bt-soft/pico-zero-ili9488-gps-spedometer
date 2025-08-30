@@ -22,7 +22,7 @@
 #define SCREEN_NAME_TEST "Test"
 
 #define __DEBUG
-// #define DEBUG_WAIT_FOR_SERIAL
+#define __DEBUG_WAIT_FOR_SERIAL
 
 // Színsémák
 #define RED2RED 0
