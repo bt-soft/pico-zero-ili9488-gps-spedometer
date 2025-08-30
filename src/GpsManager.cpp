@@ -3,14 +3,16 @@
 #include "defines.h"
 
 // Belső LED;  PICO: LED_BUILTIN (sima LED), Zero: GP16 (WS2812 RGB LED)
-#define LED_PIN 16
+#define INTERNAL_RGB_LED_PIN 16
+#define INTERNAL_RGB_LED_BRIGHTNESS 10
+#define INTERNAL_RGB_LED_NUM 1
+
 // PICO ZERO WS2812 RGB LED driver
 #define FASTLED_INTERNAL
 #include <FastLED.h>
 #define FASTLED_FORCE_SOFTWARE_SPI
 #define FASTLED_FORCE_SOFTWARE_PINS
-#define NUM_LEDS 1
-CRGB leds[NUM_LEDS];
+CRGB leds[INTERNAL_RGB_LED_NUM];
 #define INTERNAL_LED_COLOR CRGB::Red // Pirosan villogjon, ha GPS adat érkezik
 
 constexpr uint8_t MAX_SATELLITES = 50;
@@ -21,23 +23,23 @@ constexpr uint8_t MAX_SATELLITES = 50;
 GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugGpsSerialOnInternalFastLed(false), debugGpsSerialData(false), debugGpsSatellitesDatabase(false) {
 
     // Initialize FastLED for Pico Zero WS2812 RGB LED
-    FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setBrightness(50); // Set brightness to 50%
+    FastLED.addLeds<WS2812, INTERNAL_RGB_LED_PIN, GRB>(leds, INTERNAL_RGB_LED_NUM);
+    FastLED.setBrightness(INTERNAL_RGB_LED_BRIGHTNESS); // Set brightness
     FastLED.clear();
     FastLED.show();
 
-    // Initialize TinyGPSCustom objects for GSV parsing - main GSV fields
-    gsv_msg_num.begin(gps, "GPGSV", 1);          // Message number
-    gsv_total_msgs.begin(gps, "GPGSV", 2);       // Total messages
-    gsv_num_sats_in_view.begin(gps, "GPGSV", 3); // Number of satellites in view
+    // TinyGPSCustom objektumok inicializálása GSV feldolgozáshoz - fő GSV mezők
+    gsv_msg_num.begin(gps, "GPGSV", 1);          // Üzenet sorszáma
+    gsv_total_msgs.begin(gps, "GPGSV", 2);       // Üzenetek száma
+    gsv_num_sats_in_view.begin(gps, "GPGSV", 3); // Látható műholdak száma
 
-    // Initialize TinyGPSCustom objects for GSV parsing
-    //    Each GSV sentence contains data for up to 4 satellites
-    //    The fields are: PRN, Elevation, Azimuth, SNR
-    //    Field indices start from 0, so for $GPGSV,1,2,3,4,5,6,7,...
-    //    4th field is PRN, 5th is Elevation, 6th is Azimuth, 7th is SNR
-    //    For the first satellite in the sentence:
-    // Initialize all the uninitialized TinyGPSCustom objects
+    // TinyGPSCustom objektumok inicializálása GSV feldolgozáshoz
+    //    Minden GSV mondat legfeljebb 4 műhold adatait tartalmazza
+    //    A mezők: PRN, Eleváció, Azimut, SNR
+    //    A mező indexek 0-tól indulnak, tehát $GPGSV,1,2,3,4,5,6,7,...
+    //    4. mező: PRN, 5. mező: Eleváció, 6. mező: Azimut, 7. mező: SNR
+    //    Az első műhold esetén:
+    // Inicializáld az összes TinyGPSCustom objektumot, ami még nincs inicializálva
     for (byte i = 0; i < 4; ++i) {
         gsv_prn[i].begin(gps, "GPGSV", 4 + 4 * i);       // offsets 4, 8, 12, 16
         gsv_elevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
