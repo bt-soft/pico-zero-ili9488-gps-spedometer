@@ -109,4 +109,14 @@ class ScreenSats : public UIScreen {
      * @brief SNR oszlop fejléc kattintásának kezelése
      */
     void handleSnrHeaderClick();
+
+    /**
+     * @brief Műhold táblázat rajzolása közvetlenül a képernyőre (fallback)
+     */
+    void drawSatelliteTableDirect();
+
+    /**
+     * @brief Műhold kör rajzolása közvetlenül a képernyőre (fallback)
+     */
+    void drawSatelliteCircleDirect();
 };

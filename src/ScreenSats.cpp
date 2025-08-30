@@ -161,10 +161,16 @@ void ScreenSats::drawTitle() {
 void ScreenSats::drawSatelliteTable() {
 
     if (!tableSprite) {
-        // Fallback közvetlen rajzolásra, ha nincs sprite
-        // drawSatelliteTableDirect();
-        DEBUG("ScreenSats: No table sprite available - skipping\n");
-        return;
+        // Sprite újralétrehozása, ha nem létezik
+        DEBUG("ScreenSats: Table sprite not available, recreating...\n");
+        tableSprite = new TFT_eSprite(&tft);
+        if (!tableSprite->createSprite(TABLE_WIDTH, TABLE_HEIGHT)) {
+            delete tableSprite;
+            tableSprite = nullptr;
+            DEBUG("ScreenSats: Failed to recreate table sprite, using direct drawing\n");
+            drawSatelliteTableDirect();
+            return;
+        }
     }
 
     // Sprite törlése
@@ -253,10 +259,16 @@ void ScreenSats::drawSatelliteTable() {
 void ScreenSats::drawSatelliteCircle() {
 
     if (!circleSprite) {
-        // Fallback közvetlen rajzolásra, ha nincs sprite
-        // drawSatelliteCircleDirect();
-        DEBUG("ScreenSats: No circle sprite available - skipping\n");
-        return;
+        // Sprite újralétrehozása, ha nem létezik
+        DEBUG("ScreenSats: Circle sprite not available, recreating...\n");
+        circleSprite = new TFT_eSprite(&tft);
+        if (!circleSprite->createSprite(CIRCLE_WIDTH, CIRCLE_HEIGHT)) {
+            delete circleSprite;
+            circleSprite = nullptr;
+            DEBUG("ScreenSats: Failed to recreate circle sprite, using direct drawing\n");
+            drawSatelliteCircleDirect();
+            return;
+        }
     }
 
     // Sprite törlése
@@ -449,4 +461,120 @@ void ScreenSats::handleSnrHeaderClick() {
     currentSortType = SatelliteDb::BY_SNR;
     sortOrderChanged = true;
     // DEBUG("ScreenSats: Sorting by SNR\n");
+}
+
+/**
+ * @brief Műhold táblázat rajzolása közvetlenül a képernyőre (fallback)
+ */
+void ScreenSats::drawSatelliteTableDirect() {
+    const int16_t tableX = 5;
+    const int16_t tableY = 55;
+    const int16_t lineHeight = 18;
+
+    // Háttér törlése
+    tft.fillRect(tableX, tableY, TABLE_WIDTH, TABLE_HEIGHT, TFT_BLACK);
+
+    // Műholdak adatainak lekérése rendezéssel
+    auto satellites = gpsManager->getSatelliteSnapshotForUI(currentSortType);
+    uint8_t satCount = gpsManager->getSatellites().isValid() ? gpsManager->getSatellites().value() : 0;
+
+    tft.setTextDatum(TL_DATUM);
+    tft.setFreeFont();
+    tft.setTextSize(1);
+
+    // Státusz információk
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("In view: " + String(satCount), tableX, tableY);
+    tft.drawString("In DB:   " + String(satellites.size()), tableX, tableY + 8);
+
+    // Táblázat fejléc
+    int16_t currentY = tableY + 25;
+
+    uint16_t prnColor = (currentSortType == SatelliteDb::BY_PRN) ? TFT_CYAN : TFT_YELLOW;
+    tft.setTextColor(prnColor, TFT_BLACK);
+    tft.drawString("PRN", tableX, currentY);
+
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.drawString("     Elv    Azm   ", tableX + 18, currentY);
+
+    uint16_t snrColor = (currentSortType == SatelliteDb::BY_SNR) ? TFT_CYAN : TFT_YELLOW;
+    tft.setTextColor(snrColor, TFT_BLACK);
+    tft.drawString("SNR", tableX + 120, currentY);
+
+    currentY += 7;
+    tft.drawFastHLine(tableX, currentY, TABLE_WIDTH, TFT_DARKGREY);
+
+    currentY += 10;
+    uint8_t itemCount = 0;
+
+    tft.setFreeFont(&FreeMono9pt7b);
+
+    for (const auto &sat : satellites) {
+        if (itemCount >= MAX_SATS_TABLE_ITEMS)
+            break;
+
+        uint16_t color = getColorBySnr(sat.snr);
+        tft.setTextColor(color, TFT_BLACK);
+
+        char line[20];
+        sprintf(line, "%2d %3d %3d %2d", sat.prn, sat.elevation, sat.azimuth, sat.snr);
+        tft.drawString(line, tableX, currentY);
+
+        currentY += lineHeight;
+        itemCount++;
+    }
+
+    if (satellites.size() > MAX_SATS_TABLE_ITEMS) {
+        tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
+        tft.drawString("+" + String(satellites.size() - MAX_SATS_TABLE_ITEMS) + " more...", tableX, currentY);
+    }
+
+    tft.setFreeFont();
+}
+
+/**
+ * @brief Műhold kör rajzolása közvetlenül a képernyőre (fallback)
+ */
+void ScreenSats::drawSatelliteCircleDirect() {
+    const int16_t screenX = ::SCREEN_W - CIRCLE_WIDTH - 40;
+    const int16_t screenY = 55;
+    const int16_t centerX = screenX + CIRCLE_WIDTH / 2;
+    const int16_t centerY = screenY + CIRCLE_HEIGHT / 2;
+    const int16_t maxRadius = 80;
+
+    // Háttér törlése
+    tft.fillRect(screenX, screenY, CIRCLE_WIDTH, CIRCLE_HEIGHT, TFT_BLACK);
+
+    // Koncentrikus körök rajzolása
+    tft.drawCircle(centerX, centerY, maxRadius, TFT_DARKGREY);
+    tft.drawCircle(centerX, centerY, maxRadius * 2 / 3, TFT_DARKGREY);
+    tft.drawCircle(centerX, centerY, maxRadius * 1 / 3, TFT_DARKGREY);
+    tft.drawCircle(centerX, centerY, 5, TFT_DARKGREY);
+
+    // Azimuth vonalak
+    tft.drawLine(centerX, centerY - maxRadius, centerX, centerY + maxRadius, TFT_DARKGREY);
+    tft.drawLine(centerX - maxRadius, centerY, centerX + maxRadius, centerY, TFT_DARKGREY);
+
+    // Irány feliratok
+    tft.setTextDatum(MC_DATUM);
+    tft.setTextSize(1);
+    tft.setFreeFont();
+    tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+    tft.drawString("N", centerX, centerY - maxRadius - 12);
+    tft.drawString("S", centerX, centerY + maxRadius + 8);
+    tft.drawString("E", centerX + maxRadius + 8, centerY + 5);
+    tft.drawString("W", centerX - maxRadius - 8, centerY + 5);
+
+    // Elevation címkék
+    tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
+    tft.drawString("90°", centerX + 8, centerY - 5);
+    tft.drawString("60°", centerX + maxRadius * 1 / 3 + 8, centerY - 5);
+    tft.drawString("30°", centerX + maxRadius * 2 / 3 + 8, centerY - 5);
+    tft.drawString("0°", centerX + maxRadius + 8, centerY - 5);
+
+    // Műholdak rajzolása
+    auto satellites = gpsManager->getSatelliteSnapshotForUI();
+    for (const auto &sat : satellites) {
+        drawSatelliteOnCircle(nullptr, centerX, centerY, maxRadius, sat);
+    }
 }
