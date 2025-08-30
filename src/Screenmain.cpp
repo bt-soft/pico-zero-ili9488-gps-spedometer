@@ -359,10 +359,8 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     data.batteryVoltage = sensorUtils.readVBusExternal();
     if (externalTemperatureMode) {
         data.temperature = sensorUtils.readExternalTemperature();
-        data.temperatureLabel = "Ext [C]";
     } else {
         data.temperature = sensorUtils.readCoreTemperature();
-        data.temperatureLabel = "CPU [C]";
     }
 
     return data;
@@ -448,9 +446,14 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.speedValid = true;
 
     // Szenzorok - szimulált értékek
-    data.batteryVoltage = 3.7 + (random(-10, 10) / 100.0); // 3.6-3.8V közötti ingadozás
-    data.temperature = 22.5 + (random(-50, 50) / 10.0);    // 17.5-27.5°C közötti hőmérséklet
-    data.temperatureLabel = externalTemperatureMode ? "Ext [C]" : "CPU [C]";
+    // batteryVoltage: 3.5 ... 15.5 V
+    data.batteryVoltage = 3.5 + (random(0, 1001) / 100.0); // 3.5 ... 13.5 V (1000 lépés, 0.01V)
+
+    // Ha 15.5 a felső határ, akkor random(0, 1201) / 100.0 = 3.5 ... 15.5
+    data.batteryVoltage = 3.5 + (random(0, 1201) / 100.0); // 3.5 ... 15.5 V
+
+    // temperature: -15.5 ... +65.5 °C
+    data.temperature = -15.5 + (random(0, 811) / 10.0); // -15.5 ... +65.5 (811 lépés, 0.1°C)
 
     return data;
 }
@@ -841,12 +844,13 @@ void ScreenMain::handleOwnLoop() {
         lastSpeed = data.speedValid ? data.currentSpeed : -1.0;
     }
 
-    // -- Vertikális bar komponensek - 5 másodperces frissítés ------------------------------------
+    // -- Vertikális bar komponensek  ------------------------------------
 
-    if (!Utils::timeHasPassed(lastSpriteUpdate, 5000)) {
+    // // 5 másodperces frissítés
+    if (!Utils::timeHasPassed(lastVerticalLinearSpriteUpdate, 5000)) {
         return;
     }
-    lastSpriteUpdate = millis();
+    lastVerticalLinearSpriteUpdate = millis();
 
     // Sprite legyártása, ha még nem létezik
     if (!spriteVerticalLinearMeter.created()) {
@@ -866,11 +870,11 @@ void ScreenMain::handleOwnLoop() {
                         10,                   // bar-h
                         2,                    // gap
                         10,                   // n
-                        BLUE2RED);            // color
+                        RED2GREEN);           // color
 
     // Vertical Line bar - Temperature
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        data.temperatureLabel.c_str(),                    // category
+                        externalTemperatureMode ? "Ext [C]" : "CPU [C]",  // category
                         data.temperature,                                 // val
                         TEMP_BARMETER_MIN,                                // minVal
                         TEMP_BARMETER_MAX,                                // maxVal
@@ -922,7 +926,7 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
         externalTemperatureMode = !externalTemperatureMode;
 
         // Sprite azonnal frissüljön a következő draw()-nál
-        lastSpriteUpdate = 0;
+        lastVerticalLinearSpriteUpdate = 0;
 
         return true; // Esemény kezelve
     }

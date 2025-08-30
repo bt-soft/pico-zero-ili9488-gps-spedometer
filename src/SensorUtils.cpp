@@ -111,7 +111,10 @@ float SensorUtils::readCoreTemperature() {
 /**
  * @brief visszaadja a külső hőmérsékletet
  */
-float SensorUtils::readExternalTemperature() { return externalTemperatureValue; }
+float SensorUtils::readExternalTemperature() {
+    // Itt nem kell cache-t használni, mert csak a változáskor frissül az externalTemperatureValue értéke
+    return externalTemperatureValue;
+}
 
 /**
  * Loop - TIMEOUT VÉDELEMMEL

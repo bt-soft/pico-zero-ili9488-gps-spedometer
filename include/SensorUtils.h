@@ -9,7 +9,7 @@
 #include "pins.h"
 
 // Cache konstans
-#define SENSORS_CACHE_TIMEOUT_MS (1 * 1000) // 1 másodperc a cache idő
+#define SENSORS_CACHE_TIMEOUT_MS (5 * 1000) // 5 másodperc a cache idő
 
 // Cache struktúra
 class SensorUtils {

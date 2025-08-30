@@ -54,7 +54,6 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
         // Szenzorok
         float batteryVoltage = 0.0;
         float temperature = 0.0;
-        String temperatureLabel = "";
     };
 
     /**
@@ -104,12 +103,9 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      */
     bool forceRedraw = false;
 
-    /**
-     * @brief Sprite frissítés időzítő
-     */
-    uint32_t lastSpriteUpdate = 0;
-
     bool traffiAlarmActive = false;
+
+    uint32_t lastVerticalLinearSpriteUpdate = 0;
 
     // Intelligens traffipax figyelmeztető rendszer
     struct TraffipaxAlert {
