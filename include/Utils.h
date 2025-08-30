@@ -1,5 +1,4 @@
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#pragma once
 
 #include <TFT_eSPI.h> // Hardware-specific library
 
@@ -84,5 +83,3 @@ template <typename T, size_t N> bool isZeroArray(T (&arr)[N]) {
 inline bool timeHasPassed(long fromWhen, int howLong) { return millis() - fromWhen >= howLong; }
 
 }; // namespace Utils
-
-#endif // __UTILS_H__

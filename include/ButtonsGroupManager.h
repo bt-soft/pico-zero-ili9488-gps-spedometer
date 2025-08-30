@@ -1,5 +1,4 @@
-#ifndef __BUTTONS_GROUP_MANAGER_H
-#define __BUTTONS_GROUP_MANAGER_H
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -368,5 +367,3 @@ class ButtonsGroupManager {
         }
     }
 };
-
-#endif // __BUTTONS_GROUP_MANAGER_H

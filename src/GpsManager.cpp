@@ -155,26 +155,35 @@ void GpsManager::loop() {
  * Helyi időzóna szerint korrigált dátum és idő lekérdezése (CET/CEST)
  */
 GpsManager::LocalDateTime GpsManager::getLocalDateTime() {
-    LocalDateTime result = {0, 0, 0, 0, 0, 0, false};
+    LocalDateTime result = {0, 0, 0, false, 0, 0, 0, false};
 
-    // Ellenőrizzük, hogy érvényesek-e a GPS adatok
-    if (!gps.date.isValid() || !gps.time.isValid()) {
-        return result; // valid = false
+    // Érvényes GPS időadatok másolása
+    if (gps.time.isValid()) {
+
+        result.hour = gps.time.hour();
+        result.minute = gps.time.minute();
+        result.second = gps.time.second();
+
+        result.timeValid = true;
     }
 
-    // GPS adatok másolása
-    result.hour = gps.time.hour();
-    result.minute = gps.time.minute();
-    result.second = gps.time.second();
-    result.day = gps.date.day();
-    result.month = gps.date.month();
-    result.year = gps.date.year();
+    // Érvényes GPS dátumok másolása
+    if (gps.date.isValid()) {
+        result.day = gps.date.day();
+        result.month = gps.date.month();
+        result.year = gps.date.year();
 
-    // Nyári/téli időszámítás korrekció
-    uint8_t mins = result.minute; // A DaylightSaving::correctTime várja a referenciát
-    DaylightSaving::correctTime(mins, result.hour, result.day, result.month, result.year);
+        result.dateValid = true;
+    }
 
-    result.valid = true;
+    // Ha érvényesek a GPS adatok, akkor nyári/téli időszámítás korrekciót is végrehajtunk
+    if (gps.date.isValid() && gps.time.isValid()) {
+
+        // Nyári/téli időszámítás korrekció
+        // uint8_t mins = result.minute; // A DaylightSaving::correctTime várja a referenciát
+        DaylightSaving::correctTime(result.minute, result.hour, result.day, result.month, result.year);
+    }
+
     return result;
 }
 

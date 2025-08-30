@@ -1,5 +1,4 @@
-#ifndef __UI_COMPONENT_H
-#define __UI_COMPONENT_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -229,5 +228,3 @@ class UIComponent {
     virtual void markForRedraw(bool markChildren = false) { needsRedraw = true; }
     virtual bool isRedrawNeeded() const { return needsRedraw; }
 };
-
-#endif // __UI_COMPONENT_H

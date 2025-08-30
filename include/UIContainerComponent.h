@@ -1,5 +1,4 @@
-#ifndef __UI_CONTAINER_COMPONENT_H
-#define __UI_CONTAINER_COMPONENT_H
+#pragma once
 
 #include <algorithm>
 #include <memory>
@@ -163,5 +162,3 @@ class UIContainerComponent : public UIComponent {
     virtual void handleOwnLoop() {} // Pl. animációkhoz a konténeren belül
     virtual void drawSelf() {}      // Pl. háttér vagy keret rajzolása a konténeren belül
 };
-
-#endif // __UI_CONTAINER_COMPONENT_H

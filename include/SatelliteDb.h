@@ -1,5 +1,4 @@
-#ifndef __SATELLITES_DB_H__
-#define __SATELLITES_DB_H__
+#pragma once
 
 #include <TinyGPS++.h>
 #include <algorithm>
@@ -51,5 +50,3 @@ class SatelliteDb {
         return std::find_if(satellites.begin(), satellites.end(), [prn](const SatelliteData &sat) { return sat.prn == prn; });
     }
 };
-
-#endif // __SATELLITES_DB_H__

@@ -1,5 +1,4 @@
-#ifndef __LINEARMETER_H
-#define __LINEARMETER_H
+#pragma once
 
 #include <TFT_eSPI.h>
 
@@ -220,5 +219,3 @@ void verticalLinearMeter(TFT_eSprite *sprite, int meterHeight, int meterWidth, c
 
     sprite->pushSprite(drawX, drawY);
 }
-
-#endif // __LINEARMETER_H

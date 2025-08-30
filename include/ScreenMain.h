@@ -1,5 +1,4 @@
-#ifndef __SCREEN_MAIN_H
-#define __SCREEN_MAIN_H
+#pragma once
 
 #include "ButtonsGroupManager.h"
 #include "GpsManager.h"
@@ -147,5 +146,3 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      */
     uint32_t lastSpriteUpdate = 0;
 };
-
-#endif // __SCREEN_MAIN_H

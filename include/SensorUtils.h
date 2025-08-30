@@ -1,5 +1,4 @@
-#ifndef __SENSOR_UTILS_H
-#define __SENSOR_UTILS_H
+#pragma once
 
 #include <Arduino.h>
 #include <DallasTemperature.h>
@@ -61,5 +60,3 @@ class SensorUtils {
 
 // Globális cache példány
 extern SensorUtils sensorUtils;
-
-#endif // __SENSOR_UTILS_H

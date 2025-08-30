@@ -284,7 +284,7 @@ void MessageDialog::layoutDialogContent() {
                                 UIButton::DEFAULT_BUTTON_WIDTH, // defaultButtonWidthRef (ha def.width=0 lenne)
                                 buttonHeight,                   // defaultButtonHeightRef
                                 UIDialogBase::PADDING,          // rowGap (egy sor esetén nem releváns)
-                                UIDialogBase::PADDING,          // buttonGap (gombok közötti rés)
+                                UIDialogBase::BUTTONS_GAP,      // buttonGap (gombok közötti rés)
                                 true                            // centerHorizontally = true
     );
 

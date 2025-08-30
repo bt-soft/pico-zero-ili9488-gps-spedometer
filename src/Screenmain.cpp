@@ -47,7 +47,24 @@ void ScreenMain::layoutComponents() {
 }
 
 /**
- * Műhold ikon rajzolása (flaticon 2863489 stílusban - minimális)
+ * @brief Képernyő aktiválása
+ *
+ * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
+ */
+void ScreenMain::activate() {
+
+    // Beállítjuk a kényszerített újrarajzolás flag-et
+    this->forceRedraw = true;
+
+    // a következő ciklusban kényszerítjük az újrarajzolást
+    markForRedraw(true); // a képernyőt és a gyerekeit  újrarajzolásra jelöljük
+
+    // Ős activate() metódus hívása
+    UIScreen::activate();
+}
+
+/**
+ * Műhold ikon rajzolása
  */
 void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
     // Központi műhold test (kör)
@@ -88,7 +105,7 @@ void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
 }
 
 /**
- * Naptár ikon rajzolása (flaticon stílusban)
+ * Naptár ikon rajzolása
  */
 void ScreenMain::drawCalendarIcon(int16_t x, int16_t y) {
     // Naptár alapja (téglalap)
@@ -116,20 +133,20 @@ void ScreenMain::drawCalendarIcon(int16_t x, int16_t y) {
 }
 
 /**
- * Magasság ikon rajzolása (hegy + magassági vonalak) - nagyobb méret
+ * Magasság ikon rajzolása (hegy + magassági vonalak)
  */
 void ScreenMain::drawAltitudeIcon(int16_t x, int16_t y) {
-    // Hegy/domb alakzat - nagyobb méret
+    // Hegy/domb alakzat
     tft.fillTriangle(x + 5, y + 18, x + 20, y + 4, x + 35, y + 18, TFT_GREEN);
     tft.drawTriangle(x + 5, y + 18, x + 20, y + 4, x + 35, y + 18, TFT_DARKGREEN);
 
-    // Magassági vonalak (szintvonalak) - nagyobb és több vonal
+    // Magassági vonalak (szintvonalak)
     tft.drawFastHLine(x + 8, y + 15, 24, TFT_WHITE);
     tft.drawFastHLine(x + 10, y + 12, 20, TFT_WHITE);
     tft.drawFastHLine(x + 13, y + 9, 14, TFT_WHITE);
     tft.drawFastHLine(x + 16, y + 7, 8, TFT_WHITE);
 
-    // Magasság jelölő nyíl - nagyobb
+    // Magasság jelölő nyíl
     tft.drawFastVLine(x + 2, y + 2, 14, TFT_WHITE);
     tft.drawLine(x + 2, y + 2, x + 5, y + 5, TFT_WHITE);
     tft.drawLine(x + 2, y + 2, x - 1, y + 5, TFT_WHITE);
@@ -290,17 +307,23 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     data.satelliteCount = data.satelliteValid ? gpsManager->getSatellites().value() : 0;
     data.gpsMode = gpsManager->getGpsModeToString();
 
-    // Dátum és idő
+    // Dátum
     GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
-    data.dateTimeValid = localDateTime.valid;
-    if (data.dateTimeValid) {
-        char dateStr[11], timeStr[9];
+    if (localDateTime.dateValid) {
+        char dateStr[11];
         sprintf(dateStr, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
-        sprintf(timeStr, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
         data.dateString = String(dateStr);
-        data.timeString = String(timeStr);
     } else {
-        data.dateString = "----/--/--";
+        data.dateString = "----.--.--";
+    }
+
+    // Idő
+    if (localDateTime.timeValid) {
+        char timeStr[9];
+        sprintf(timeStr, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
+        data.timeString = String(timeStr);
+
+    } else {
         data.timeString = "--:--:--";
     }
 
@@ -312,8 +335,8 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     data.hdopValid = gpsManager->getHdop().isValid() && gpsManager->getHdop().age() < GPS_DATA_MAX_AGE;
     data.hdop = data.hdopValid ? gpsManager->getHdop().hdop() : 0.0;
 
-    // Sebesség
-    data.speedValid = gpsManager->getSpeed().isValid();
+    // Sebesség - 1km/h esetén indulunk el
+    data.speedValid = gpsManager->getSpeed().isValid() && gpsManager->getSpeed().age() < GPS_DATA_MAX_AGE && gpsManager->getSpeed().kmph() > 1;
     data.currentSpeed = data.speedValid ? gpsManager->getSpeed().kmph() : 0.0;
 
     // Maximum sebesség (statikus változó)
@@ -395,7 +418,7 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.altitude = demoAltitude;
     data.altitudeValid = true;
 
-    // GPS pontosság - fix érték
+    // GPS pontosság - random érték 3.00-99.99 között
     data.hdop = random(300, 10000) / 100.0f; // 3.00 ... 99.99
     data.hdopValid = true;
 
@@ -434,19 +457,15 @@ void ScreenMain::handleOwnLoop() {
 
     char buf[11];
 
-    // Műholdak száma
+    // Műholdak száma + GPS működési mód
     static uint8_t lastSatCount = 255; // Kényszerített első frissítés
     static String lastGpsMode = "";
-
-    // Kényszerített újrarajzolás esetén reseteljük a statikus változókat
-    if (forceRedraw) {
+    if (this->forceRedraw) {
+        // Kényszerített újrarajzolás esetén reseteljük a statikus változókat
         lastSatCount = 255;
         lastGpsMode = "";
-        forceRedraw = false;
     }
-
     if (data.satelliteCount != lastSatCount || data.gpsMode != lastGpsMode) {
-        // Műholdak száma az ikon mellé (jobbra)
         tft.setTextDatum(ML_DATUM);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setFreeFont();
@@ -468,11 +487,10 @@ void ScreenMain::handleOwnLoop() {
     // Dátum és idő
     static String lastDateTime = "";
     String currentDateTime = data.dateString + data.timeString;
-
-    if (forceRedraw) {
-        lastDateTime = "";
+    if (this->forceRedraw) {
+        // Kényszerített újrarajzolás esetén reseteljük a statikus változót
+        lastDateTime = "?";
     }
-
     if (currentDateTime != lastDateTime) {
         tft.setTextSize(2);
         tft.setFreeFont();
@@ -492,11 +510,10 @@ void ScreenMain::handleOwnLoop() {
 
     // Magasság
     static double lastAltitude = -9999.0;
-
-    if (forceRedraw) {
+    if (this->forceRedraw) {
+        // Kényszerített újrarajzolás esetén reseteljük a statikus változót
         lastAltitude = -9999.0;
     }
-
     if (abs(data.altitude - lastAltitude) > 1.0 || (data.altitudeValid != (lastAltitude != -9999.0))) {
         tft.setTextDatum(ML_DATUM);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -513,11 +530,10 @@ void ScreenMain::handleOwnLoop() {
 
     // GPS HDOP
     static double lastHdop = -1.0;
-
-    if (forceRedraw) {
+    if (this->forceRedraw) {
+        // Kényszerített újrarajzolás esetén reseteljük a statikus változót
         lastHdop = -1.0;
     }
-
     if (abs(data.hdop - lastHdop) > 0.1 || (data.hdopValid != (lastHdop >= 0))) {
         tft.setTextDatum(ML_DATUM);
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -533,7 +549,8 @@ void ScreenMain::handleOwnLoop() {
 
     // Maximum sebesség, ez statikus változó
     static double maxSpeed = -1.0;
-    if (forceRedraw) {
+    if (this->forceRedraw) {
+        // Kényszerített újrarajzolás esetén reseteljük a statikus változót
         maxSpeed = -1.0;
     }
     if (data.currentSpeed > maxSpeed) {
@@ -551,11 +568,10 @@ void ScreenMain::handleOwnLoop() {
 
     // Aktuális sebesség
     static double lastSpeed = -1.0;
-
-    if (forceRedraw) {
+    if (this->forceRedraw) {
+        // Kényszerített újrarajzolás esetén reseteljük a statikus változót
         lastSpeed = -1.0;
     }
-
     if (abs(data.currentSpeed - lastSpeed) > 0.1 || (data.speedValid != (lastSpeed >= 0))) {
         tft.loadFont(Arial_Narrow_Bold120);
         tft.setTextDatum(MC_DATUM);
@@ -609,6 +625,11 @@ void ScreenMain::handleOwnLoop() {
                         10,                                               // n
                         BLUE2RED,                                         // color
                         true);                                            // bal oldalt legyenek az értékek
+
+    // Ha kényszerített újrarajzolás volt, akkor reseteljük a flag-et
+    if (this->forceRedraw) {
+        this->forceRedraw = false;
+    }
 }
 
 /**
@@ -651,22 +672,4 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
 
     // Ha nem volt találat, továbbítjuk az alaposztálynak
     return UIScreen::handleTouch(event);
-}
-
-/**
- * @brief Képernyő aktiválása - Reset statikus változók
- *
- * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
- * Reseteli a statikus változókat hogy kényszerítse az újrarajzolást
- */
-void ScreenMain::activate() {
-
-    // Beállítjuk a kényszerített újrarajzolás flag-et
-    forceRedraw = true;
-
-    // Force immediate redraw on next loop
-    markForRedraw(true); // Jelöljük újrarajzolásra a képernyőt és gyerekeit
-
-    // Call parent activate
-    UIScreen::activate();
 }

@@ -1,5 +1,4 @@
-#ifndef __TFT_BACKLIGHT_ADJUSTER_H
-#define __TFT_BACKLIGHT_ADJUSTER_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -77,5 +76,3 @@ class TftBackLightAdjuster {
      */
     void loop(void);
 };
-
-#endif // __TFT_BACKLIGHT_ADJUSTER_H

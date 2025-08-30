@@ -1,5 +1,4 @@
-#ifndef CONFIG_DATA_H
-#define CONFIG_DATA_H
+#pragma once
 
 #include <stdint.h> // uint8_t, uint16_t, stb.
 
@@ -22,5 +21,3 @@ struct Config_t {
     bool debugGpsSerialData;              //  GPS adatok kiírása a Soros portra
     bool debugGpsSatellitesDatabase;      //  GPS műhold adatbázis debug logolása
 };
-
-#endif // CONFIG_DATA_H

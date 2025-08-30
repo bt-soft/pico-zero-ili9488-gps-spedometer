@@ -1,5 +1,4 @@
-#ifndef __SCREEN_MANAGER_H
-#define __SCREEN_MANAGER_H
+#pragma once
 
 #include <functional>
 #include <map>
@@ -228,5 +227,3 @@ class ScreenManager : public IScreenManager {
         return currentScreen->isDialogActive();
     }
 };
-
-#endif // __SCREEN_MANAGER_H

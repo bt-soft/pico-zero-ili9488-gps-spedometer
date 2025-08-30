@@ -1,5 +1,4 @@
-#ifndef __DAYLIGHTSAVING_H
-#define __DAYLIGHTSAVING_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -65,12 +64,13 @@ class DaylightSaving {
 
   public:
     /**
-     * Meant to correct for time zone and summer time
+     * Korrigálja az időt a helyi időzóna és a nyári időszámítás figyelembevételével
      */
     static void correctTime(uint8_t &mins, uint8_t &hours, uint8_t &day, uint8_t &month, uint16_t &year) {
         int timeShift = 1; // Alapértelmezett CET (+1)
-        if (inSummerTime(hours, day, month, year))
+        if (inSummerTime(hours, day, month, year)) {
             timeShift += 1; // CEST (+2)
+        }
 
         hours += timeShift;
 
@@ -99,15 +99,4 @@ class DaylightSaving {
             }
         }
     }
-
-    /**
-     * Eredeti függvény kompatibilitás miatt (deprecated)
-     */
-    static void correctTime(uint8_t &mins, uint8_t &hours, uint8_t day, uint8_t month, uint8_t year) {
-        uint16_t fullYear = year > 50 ? 1900 + year : 2000 + year; // Y2K korrekcó
-        uint8_t tempDay = day;
-        uint8_t tempMonth = month;
-        correctTime(mins, hours, tempDay, tempMonth, fullYear);
-    }
 };
-#endif // __DAYLIGHTSAVING_H

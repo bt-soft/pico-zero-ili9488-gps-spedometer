@@ -158,7 +158,7 @@ void ScreenInfo::drawContent() {
  */
 void ScreenInfo::handleOwnLoop() {
 
-    // 1 másodperces frissítés
+    // 5 másodperces frissítés
     static long lastUpdate = millis() - 5000;
     if (!Utils::timeHasPassed(lastUpdate, 5000)) {
         return;

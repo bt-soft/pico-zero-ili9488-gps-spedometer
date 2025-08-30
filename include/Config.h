@@ -1,5 +1,4 @@
-#ifndef __CONFIG_H
-#define __CONFIG_H
+#pragma once
 
 #include "ConfigData.h"
 #include "DebugDataInspector.h"
@@ -76,5 +75,3 @@ class Config : public StoreBase<Config_t> {
 
 // Globális config példány deklaráció
 extern Config config;
-
-#endif // __CONFIG_H

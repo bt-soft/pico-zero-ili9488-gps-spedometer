@@ -1,5 +1,4 @@
-#ifndef __DEBUGDATAINSPECTOR_H
-#define __DEBUGDATAINSPECTOR_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -13,5 +12,3 @@ class DebugDataInspector {
      */
     static void printConfigData(const Config_t &configData); // Csak a deklaráció marad
 };
-
-#endif // __DEBUGDATAINSPECTOR_H

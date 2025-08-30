@@ -1,5 +1,4 @@
-#ifndef __TRAFIPAX_MANAGER_H
-#define __TRAFIPAX_MANAGER_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -84,4 +83,3 @@ class TrafipaxManager {
     TrafipaxDemo demo;
 #endif
 };
-#endif // __TRAFIPAX_MANAGER_H

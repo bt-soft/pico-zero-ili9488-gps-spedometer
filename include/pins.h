@@ -1,5 +1,4 @@
-#ifndef __PINS_H__
-#define __PINS_H__
+#pragma once
 
 // Pin definitions
 
@@ -15,5 +14,3 @@
 #define PIN_DS18B20_TEMP_SENSOR 8
 #define PIN_VBUS_EXTERNAL_MEASURE_INPUT A0
 #define PIN_BUZZER 9
-
-#endif // __PINS_H__

@@ -1,5 +1,4 @@
-#ifndef __SCREEN_TEST_H
-#define __SCREEN_TEST_H
+#pragma once
 
 #include "ButtonsGroupManager.h"
 #include "MessageDialog.h"
@@ -248,5 +247,3 @@ class ScreenTest : public UIScreen, public ButtonsGroupManager<ScreenTest> {
         layoutVerticalButtonGroup(verticalButtonDefs, nullptr, 5, 5, marginBottomForVerticalLayout);
     }
 };
-
-#endif // __SCREEN_TEST_H

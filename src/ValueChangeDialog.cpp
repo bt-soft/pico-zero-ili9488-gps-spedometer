@@ -180,48 +180,72 @@ void ValueChangeDialog::createDialogContent() {
     // Itt csak az érték-specifikus gombokat kell létrehozni.    // Érték módosító gombok (csak integer és float esetén)
     if (_valueType == ValueType::Integer || _valueType == ValueType::Float || _valueType == ValueType::UInt8) {
         // Csökkentő gomb (-)
-        _decreaseButton = std::make_shared<UIButton>(BUTTON_DECREASE_ID, Rect(0, 0, SMALL_BUTTON_WIDTH, BUTTON_HEIGHT), "-", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
-            if (event.state == UIButton::EventButtonState::Clicked) {
-                decrementValue();
-                // A decrementValue már hívja a validateAndClampValue-t és a notifyValueChange-t.
-                // Az érték terület újrarajzolása itt továbbra is szükséges.
-                redrawValueArea();
-            }
-        });
-        _decreaseButton->setUseMiniFont(true);
+        _decreaseButton = std::make_shared<UIButton>( //
+            BUTTON_DECREASE_ID,                       //
+            Rect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT),  //
+            "-",                                      //
+            UIButton::ButtonType::Pushable,           //
+            [this](const UIButton::ButtonEvent &event) {
+                if (event.state == UIButton::EventButtonState::Clicked) {
+                    decrementValue();
+                    // A decrementValue már hívja a validateAndClampValue-t és a notifyValueChange-t.
+                    // Az érték terület újrarajzolása itt továbbra is szükséges.
+                    redrawValueArea();
+                }
+            } //
+        );
+        //_decreaseButton->setUseMiniFont(true);
         addChild(_decreaseButton);
 
         // Növelő gomb (+)
-        _increaseButton = std::make_shared<UIButton>(BUTTON_INCREASE_ID, Rect(0, 0, SMALL_BUTTON_WIDTH, BUTTON_HEIGHT), "+", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
-            if (event.state == UIButton::EventButtonState::Clicked) {
-                incrementValue();
-                // Az incrementValue már hívja a validateAndClampValue-t és a notifyValueChange-t.
-                redrawValueArea();
-            }
-        });
-        _increaseButton->setUseMiniFont(true);
+        _increaseButton = std::make_shared<UIButton>( //
+            BUTTON_INCREASE_ID,                       //
+            Rect(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT),  //
+            "+",                                      //
+            UIButton::ButtonType::Pushable,           //
+            [this](const UIButton::ButtonEvent &event) {
+                if (event.state == UIButton::EventButtonState::Clicked) {
+                    incrementValue();
+                    // Az incrementValue már hívja a validateAndClampValue-t és a notifyValueChange-t.
+                    redrawValueArea();
+                }
+            } //
+        );
+        //_increaseButton->setUseMiniFont(true);
         addChild(_increaseButton);
 
     } else {
         // Boolean esetén FALSE/TRUE gombok létrehozása
-        _decreaseButton = std::make_shared<UIButton>(BUTTON_DECREASE_ID, Rect(0, 0, SMALL_BUTTON_WIDTH + 10, BUTTON_HEIGHT), "FALSE", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
-            if (event.state == UIButton::EventButtonState::Clicked) {
-                decrementValue(); // FALSE-ra állítás a decrementValue() függvényen keresztül
-                // A decrementValue már hívja a notifyValueChange-t.
-                redrawValueTextOnly();
-            }
-        });
-        _decreaseButton->setUseMiniFont(true);
+        _decreaseButton = std::make_shared<UIButton>(     //
+            BUTTON_DECREASE_ID,                           //
+            Rect(0, 0, BUTTON_WIDTH + 10, BUTTON_HEIGHT), //
+            "FALSE",                                      //
+            UIButton::ButtonType::Pushable,               //
+            [this](const UIButton::ButtonEvent &event) {
+                if (event.state == UIButton::EventButtonState::Clicked) {
+                    decrementValue(); // FALSE-ra állítás a decrementValue() függvényen keresztül
+                    // A decrementValue már hívja a notifyValueChange-t.
+                    redrawValueTextOnly();
+                }
+            } //
+        );
+        //_decreaseButton->setUseMiniFont(true);
         addChild(_decreaseButton);
 
-        _increaseButton = std::make_shared<UIButton>(BUTTON_INCREASE_ID, Rect(0, 0, SMALL_BUTTON_WIDTH + 10, BUTTON_HEIGHT), "TRUE", UIButton::ButtonType::Pushable, [this](const UIButton::ButtonEvent &event) {
-            if (event.state == UIButton::EventButtonState::Clicked) {
-                incrementValue(); // TRUE-ra állítás a incrementValue() függvényen keresztül
-                // Az incrementValue már hívja a notifyValueChange-t.
-                redrawValueTextOnly();
-            }
-        });
-        _increaseButton->setUseMiniFont(true);
+        _increaseButton = std::make_shared<UIButton>(     //
+            BUTTON_INCREASE_ID,                           //
+            Rect(0, 0, BUTTON_WIDTH + 10, BUTTON_HEIGHT), //
+            "TRUE",                                       //
+            UIButton::ButtonType::Pushable,               //
+            [this](const UIButton::ButtonEvent &event) {
+                if (event.state == UIButton::EventButtonState::Clicked) {
+                    incrementValue(); // TRUE-ra állítás a incrementValue() függvényen keresztül
+                    // Az incrementValue már hívja a notifyValueChange-t.
+                    redrawValueTextOnly();
+                }
+            } //
+        );
+        //_increaseButton->setUseMiniFont(true);
         addChild(_increaseButton);
     }
 
@@ -256,16 +280,16 @@ void ValueChangeDialog::layoutDialogContent() {
         // +/- gombok az érték körül - UGYANAZON A VONALON
         const int16_t valueBoxWidth = 100;
         const int16_t valueButtonSpacing = 10;
-        const int16_t totalWidth = 2 * SMALL_BUTTON_WIDTH + 2 * valueButtonSpacing + valueBoxWidth;
+        const int16_t totalWidth = 2 * BUTTON_WIDTH + 2 * valueButtonSpacing + valueBoxWidth;
         const int16_t startX2 = centerX - totalWidth / 2;
 
-        _decreaseButton->setBounds(Rect(startX2, valueAreaY, SMALL_BUTTON_WIDTH, BUTTON_HEIGHT));
-        _increaseButton->setBounds(Rect(startX2 + SMALL_BUTTON_WIDTH + 2 * valueButtonSpacing + valueBoxWidth, valueAreaY, SMALL_BUTTON_WIDTH, BUTTON_HEIGHT));
+        _decreaseButton->setBounds(Rect(startX2, valueAreaY, BUTTON_WIDTH, BUTTON_HEIGHT));
+        _increaseButton->setBounds(Rect(startX2 + BUTTON_WIDTH + 2 * valueButtonSpacing + valueBoxWidth, valueAreaY, BUTTON_WIDTH, BUTTON_HEIGHT));
     } else {
         // Boolean TRUE/FALSE gombok az érték körül
         const int16_t valueBoxWidth = 100;
         const int16_t valueButtonSpacing = 10;
-        const int16_t boolButtonWidth = SMALL_BUTTON_WIDTH + 10;
+        const int16_t boolButtonWidth = BUTTON_WIDTH + 10;
         const int16_t totalWidth = 2 * boolButtonWidth + 2 * valueButtonSpacing + valueBoxWidth;
         const int16_t startX2 = centerX - totalWidth / 2;
 

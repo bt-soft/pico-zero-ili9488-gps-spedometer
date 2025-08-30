@@ -74,10 +74,11 @@ class GpsManager {
         uint8_t hour;
         uint8_t minute;
         uint8_t second;
+        bool timeValid;
         uint8_t day;
         uint8_t month;
         uint16_t year;
-        bool valid;
+        bool dateValid;
     };
 
     LocalDateTime getLocalDateTime();

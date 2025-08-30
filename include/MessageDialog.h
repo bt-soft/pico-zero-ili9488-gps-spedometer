@@ -1,5 +1,4 @@
-#ifndef __MESSAGE_DIALOG_H
-#define __MESSAGE_DIALOG_H
+#pragma once
 
 #include "ButtonsGroupManager.h" // Hozzáadva
 #include "UIDialogBase.h"
@@ -79,5 +78,3 @@ class MessageDialog : public UIDialogBase, public ButtonsGroupManager<MessageDia
      */
     std::shared_ptr<UIButton> getOkButton() const { return (_buttonsList.empty()) ? nullptr : _buttonsList[0]; }
 };
-
-#endif // __MESSAGE_DIALOG_H

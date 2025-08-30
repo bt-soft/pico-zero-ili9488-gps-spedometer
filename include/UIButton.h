@@ -1,5 +1,4 @@
-#ifndef __UI_BUTTON_H
-#define __UI_BUTTON_H
+#pragma once
 
 #include <functional>
 
@@ -778,5 +777,3 @@ class UIButton : public UIComponent {
      */
     virtual int16_t getTouchMargin() const override { return BUTTON_TOUCH_MARGIN; }
 };
-
-#endif // __UI_BUTTON_H

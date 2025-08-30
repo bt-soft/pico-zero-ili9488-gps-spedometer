@@ -1,5 +1,4 @@
-#ifndef __VALUE_CHANGE_DIALOG_H
-#define __VALUE_CHANGE_DIALOG_H
+#pragma once
 
 #include "MessageDialog.h"
 #include <functional>
@@ -62,9 +61,9 @@ class ValueChangeDialog : public MessageDialog {
     std::shared_ptr<UIButton> _increaseButton; ///< Érték növelő gomb
 
     // Gomb méretek és elrendezés
-    static constexpr uint16_t BUTTON_WIDTH = 60;
-    static constexpr uint16_t BUTTON_HEIGHT = 30;
-    static constexpr uint16_t SMALL_BUTTON_WIDTH = 40;
+    static constexpr uint16_t BUTTON_WIDTH = 40;  // 60;
+    static constexpr uint16_t BUTTON_HEIGHT = 40; // 30;
+    // static constexpr uint16_t SMALL_BUTTON_WIDTH = 40;
     static constexpr uint16_t BUTTON_SPACING = 8;
     static constexpr uint16_t VALUE_DISPLAY_HEIGHT = 40;
     static constexpr uint16_t FOOTER_AREA_HEIGHT = BUTTON_HEIGHT + 2 * PADDING;
@@ -215,5 +214,3 @@ class ValueChangeDialog : public MessageDialog {
      */
     virtual ~ValueChangeDialog() = default;
 };
-
-#endif // __VALUE_CHANGE_DIALOG_H

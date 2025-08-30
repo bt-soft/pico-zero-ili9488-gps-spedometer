@@ -102,7 +102,7 @@ template <typename T> class StoreBase {
      * Ha különböznek, automatikusan menti az adatokat.
      */
     virtual void checkSave() {
-        DEBUG("[%s] CRC ellenőrzés és automatikus mentés...\n", getClassName());
+        DEBUG("[%s] CRC ellenőrzés a mentéshez\n", getClassName());
 
         uint16_t currentCrc = Utils::calcCRC16(reinterpret_cast<const uint8_t *>(&getData()), sizeof(T));
 
@@ -110,6 +110,8 @@ template <typename T> class StoreBase {
             DEBUG("[%s] CRC eltérés (RAM: %d != EEPROM: %d). Mentés...\n", getClassName(), currentCrc, lastCRC);
 
             uint16_t savedCrc = performSave();
+            DEBUG("[%s] Mentés OK\n", getClassName());
+
             if (savedCrc != 0) {
                 lastCRC = savedCrc;
             } else {
@@ -117,6 +119,7 @@ template <typename T> class StoreBase {
             }
         }
     }
+
     /**
      * @brief Utolsó CRC érték lekérdezése
      * @return uint16_t Az utoljára mentett CRC érték

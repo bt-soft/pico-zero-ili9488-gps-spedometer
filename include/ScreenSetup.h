@@ -1,5 +1,4 @@
-#ifndef __SCREEN_SETUP_H
-#define __SCREEN_SETUP_H
+#pragma once
 
 #include "UIButton.h"
 #include "UIScreen.h"
@@ -27,5 +26,3 @@ class ScreenSetup : public UIScreen {
      */
     void layoutComponents();
 };
-
-#endif // __SCREEN_SETUP_H

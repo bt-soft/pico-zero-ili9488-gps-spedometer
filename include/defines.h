@@ -1,5 +1,4 @@
-#ifndef __DEFINES_H
-#define __DEFINES_H
+#pragma once
 
 //---- Program Information ------------------------------------------
 
@@ -86,5 +85,3 @@
 #else
 #define DEBUG(fmt, ...) // Üres makró, ha __DEBUG nincs definiálva
 #endif
-
-#endif // __DEFINES_H

@@ -1,5 +1,4 @@
-#ifndef __SCREEN_MAIN_H
-#define __SCREEN_MAIN_H
+#pragma once
 
 #include "ButtonsGroupManager.h"
 #include "MessageDialog.h"
@@ -56,5 +55,3 @@ class ScreenEmpty : public UIScreen, public ButtonsGroupManager<ScreenEmpty> {
      */
     void layoutComponents() {}
 };
-
-#endif // __SCREEN_MAIN_H

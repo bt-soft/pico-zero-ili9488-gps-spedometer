@@ -1,5 +1,4 @@
-#ifndef __UI_COLOR_PALETTE_H
-#define __UI_COLOR_PALETTE_H
+#pragma once
 
 #include <TFT_eSPI.h>
 
@@ -171,5 +170,3 @@ class UIColorPalette {
         return colors;
     }
 };
-
-#endif // __UI_COLOR_PALETTE_H

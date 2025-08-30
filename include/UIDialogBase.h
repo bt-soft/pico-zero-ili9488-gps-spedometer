@@ -1,5 +1,4 @@
-#ifndef __UI_DIALOG_BASE_H
-#define __UI_DIALOG_BASE_H
+#pragma once
 
 #include <functional>
 
@@ -40,6 +39,7 @@ class UIDialogBase : public UIContainerComponent {
     // Dialógus elrendezési konstansok
     static constexpr uint16_t HEADER_HEIGHT = 28;                                  // Fejléc magassága
     static constexpr uint16_t PADDING = 5;                                         // Belső margó
+    static constexpr uint16_t BUTTONS_GAP = 30;                                    // Bombok közötti rés
     static constexpr uint16_t BORDER_RADIUS = 8;                                   // Saroklekerekítés
     static constexpr uint16_t CLOSE_BUTTON_SIZE = HEADER_HEIGHT - 2 * PADDING - 2; // Bezáró gomb mérete
     static constexpr uint16_t VEIL_COLOR = TFT_DARKGREY;                           // Fátyol színe (lehetne tft.color565(30,30,30) egy sötétebbért)
@@ -113,5 +113,3 @@ class UIDialogBase : public UIContainerComponent {
      */
     virtual std::vector<std::shared_ptr<UIButton>> getButtonsList() const { return {}; }
 };
-
-#endif // __UI_DIALOG_BASE_H
