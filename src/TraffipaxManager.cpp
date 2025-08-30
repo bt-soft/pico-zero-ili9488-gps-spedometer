@@ -102,7 +102,7 @@ void TraffipaxManager::loadFromCSV(const char *filename) {
             continue;
         }
 
-        TraffipaxInternal &t = traffipaxList[traffipaxCount++];
+        TraffipaxRecord &t = traffipaxList[traffipaxCount++];
         strncpy(t.city, city, MAX_CITY_LEN - 1);
         t.city[MAX_CITY_LEN - 1] = 0;
         strncpy(t.street_or_km, street, MAX_STREET_LEN - 1);
@@ -128,7 +128,7 @@ int TraffipaxManager::count() const { return traffipaxCount; }
  * @param alertDistanceMeters riasztási távolság méterben
  * @return trafipax rekord ha közeledünk és a távolság <= alertDistanceMeters, egyébként nullptr
  */
-const TraffipaxManager::TraffipaxInternal *TraffipaxManager::checkTraffipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
+const TraffipaxManager::TraffipaxRecord *TraffipaxManager::checkTraffipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
 
     // Legközelebbi trafipax keresése
     int closestIdx = -1;
@@ -181,7 +181,7 @@ const TraffipaxManager::TraffipaxInternal *TraffipaxManager::checkTraffipaxAppro
  * @param outDistance kimeneti paraméter a távolsághoz
  * @return legközelebbi trafipax rekord vagy nullptr ha nincs
  */
-const TraffipaxManager::TraffipaxInternal *TraffipaxManager::getClosestTraffipax(double currentLat, double currentLon, double &outDistance) const {
+const TraffipaxManager::TraffipaxRecord *TraffipaxManager::getClosestTraffipax(double currentLat, double currentLon, double &outDistance) const {
 
     if (traffipaxCount == 0) {
         outDistance = 999999.0;

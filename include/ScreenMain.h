@@ -116,7 +116,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
         enum State { INACTIVE, APPROACHING, NEARBY_STOPPED, DEPARTING };
 
         State currentState = INACTIVE;
-        const TraffipaxManager::TraffipaxInternal *activeTraffipax = nullptr;
+        const TraffipaxManager::TraffipaxRecord *activeTraffipax = nullptr;
         double currentDistance = 0.0;
         double lastDistance = 999999.0;
         unsigned long lastSirenTime = 0;
@@ -176,5 +176,5 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     /**
      * Trafipax figyelmeztető sáv megjelenítése
      */
-    void displayTraffipaxAlert(const TraffipaxManager::TraffipaxInternal *trafipax, double distance);
+    void displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *trafipax, double distance);
 };

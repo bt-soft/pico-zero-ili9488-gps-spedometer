@@ -459,7 +459,7 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
 /**
  * Traffipax figyelmeztető sáv megjelenítése sprite-tal és villogással
  */
-void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxInternal *traffipax, double distance) {
+void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *traffipax, double distance) {
     if (traffipax == nullptr)
         return;
 
@@ -550,7 +550,7 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
 
     // Legközelebbi trafipax keresése
     double minDistance = 999999.0;
-    const TraffipaxManager::TraffipaxInternal *closestTraffipax = traffipaxManager.getClosestTraffipax(currentLat, currentLon, minDistance);
+    const TraffipaxManager::TraffipaxRecord *closestTraffipax = traffipaxManager.getClosestTraffipax(currentLat, currentLon, minDistance);
 
     const unsigned long currentTime = millis();
 

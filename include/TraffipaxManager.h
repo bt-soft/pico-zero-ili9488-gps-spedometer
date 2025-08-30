@@ -38,7 +38,7 @@ struct TraffipaxDemo {
 
 class TraffipaxManager {
   public:
-    struct TraffipaxInternal {
+    struct TraffipaxRecord {
         char city[MAX_CITY_LEN];
         char street_or_km[MAX_STREET_LEN];
         double lat;
@@ -55,10 +55,10 @@ class TraffipaxManager {
     int count() const;
 
     // Trafipax riasztás - csak közeledés esetén riaszt
-    const TraffipaxInternal *checkTraffipaxApproach(double currentLat, double currentLon, double alertDistanceMeters);
+    const TraffipaxRecord *checkTraffipaxApproach(double currentLat, double currentLon, double alertDistanceMeters);
 
     // Legközelebbi trafipax keresése távolsággal együtt
-    const TraffipaxInternal *getClosestTraffipax(double currentLat, double currentLon, double &outDistance) const;
+    const TraffipaxRecord *getClosestTraffipax(double currentLat, double currentLon, double &outDistance) const;
 
 #ifdef DEMO_MODE
     // Demo funkciók
@@ -69,7 +69,7 @@ class TraffipaxManager {
 #endif
 
   private:
-    TraffipaxInternal traffipaxList[MAX_TRAFIPAX_COUNT];
+    TraffipaxRecord traffipaxList[MAX_TRAFIPAX_COUNT];
     int traffipaxCount = 0;
 
     // Távolság követés közeledés detektáláshoz
