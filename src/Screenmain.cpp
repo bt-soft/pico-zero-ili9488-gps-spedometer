@@ -716,7 +716,7 @@ void ScreenMain::handleOwnLoop() {
         tft.setTextColor(TFT_WHITE, TFT_BLACK);
         tft.setFreeFont();
         tft.setTextSize(2);
-        tft.setTextPadding(tft.textWidth("88.88") + 10);
+        tft.setTextPadding(tft.textWidth("88.88") + 15);
 
         dtostrf(data.hdop, 0, 2, buf);
         tft.drawString(data.hdopValid ? String(buf) : "--", 35, 63, 2);
