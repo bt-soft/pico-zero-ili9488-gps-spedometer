@@ -20,7 +20,12 @@ constexpr uint8_t MAX_SATELLITES = 50;
 /**
  * Konstruktor
  */
-GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugGpsSerialOnInternalFastLed(false), debugGpsSerialData(false), debugGpsSatellitesDatabase(false) {
+GpsManager::GpsManager(HardwareSerial *serial)
+    : gpsSerial(serial),                      //
+      debugGpsSerialOnInternalFastLed(false), //
+      debugGpsSerialData(false),              //
+      debugGpsSatellitesDatabase(false)       //
+{
 
     // Initialize FastLED for Pico Zero WS2812 RGB LED
     FastLED.addLeds<WS2812, INTERNAL_RGB_LED_PIN, GRB>(leds, INTERNAL_RGB_LED_NUM);
@@ -38,8 +43,8 @@ GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugGpsSeri
     //    A mezők: PRN, Eleváció, Azimut, SNR
     //    A mező indexek 0-tól indulnak, tehát $GPGSV,1,2,3,4,5,6,7,...
     //    4. mező: PRN, 5. mező: Eleváció, 6. mező: Azimut, 7. mező: SNR
-    //    Az első műhold esetén:
-    // Inicializáld az összes TinyGPSCustom objektumot, ami még nincs inicializálva
+
+    // Inicializáljuk az összes TinyGPSCustom objektumot
     for (byte i = 0; i < 4; ++i) {
         gsv_prn[i].begin(gps, "GPGSV", 4 + 4 * i);       // offsets 4, 8, 12, 16
         gsv_elevation[i].begin(gps, "GPGSV", 5 + 4 * i); // offsets 5, 9, 13, 17
@@ -47,9 +52,93 @@ GpsManager::GpsManager(HardwareSerial *serial) : gpsSerial(serial), debugGpsSeri
         gsv_snr[i].begin(gps, "GPGSV", 7 + 4 * i);       // offsets 7, 11, 15, 19
     }
 
-    // Ekkon indultunk
-    startTime = millis();
+    // Ekkor indultunk
+    bootStartTime = millis();
     gpsBootTime = 0;
+}
+
+/**
+ * Helyi időzóna szerint korrigált dátum és idő lekérdezése (CET/CEST)
+ */
+GpsManager::LocalDateTime GpsManager::getLocalDateTime() {
+
+    // Visszatérési érték
+    LocalDateTime result = {0, 0, 0, false, 0, 0, 0, false};
+
+    // Érvényes GPS időadatok másolása
+    if (gps.time.isValid()) {
+
+        result.hour = gps.time.hour();
+        result.minute = gps.time.minute();
+        result.second = gps.time.second();
+
+        result.timeValid = true;
+    }
+
+    // Érvényes GPS dátumok másolása
+    if (gps.date.isValid()) {
+        result.day = gps.date.day();
+        result.month = gps.date.month();
+        result.year = gps.date.year();
+
+        result.dateValid = true;
+    }
+
+    // Ha érvényesek a GPS adatok, akkor nyári/téli időszámítás korrekciót is végrehajtunk
+    if (gps.date.isValid() && gps.time.isValid()) {
+
+        // Nyári/téli időszámítás korrekció
+        DaylightSaving::correctTime(result.minute, result.hour, result.day, result.month, result.year);
+    }
+
+    return result;
+}
+
+/**
+ * GPS minőségi szint lekérdezése
+ */
+String GpsManager::getGpsQualityString() {
+
+    switch (gps.location.FixQuality()) {
+        case TinyGPSLocation::Invalid:
+            return "Invalid";
+        case TinyGPSLocation::GPS:
+            return "GPS";
+        case TinyGPSLocation::DGPS:
+            return "DGPS";
+        case TinyGPSLocation::PPS:
+            return "PPS";
+        case TinyGPSLocation::RTK:
+            return "RTK";
+        case TinyGPSLocation::FloatRTK:
+            return "FloatRTK";
+        case TinyGPSLocation::Estimated:
+            return "Estimated";
+        case TinyGPSLocation::Manual:
+            return "Manual";
+        case TinyGPSLocation::Simulated:
+            return "Simulated";
+        default:
+            return "Unknown";
+    }
+}
+
+/**
+ * GPS üzemmód lekérdezése
+ */
+String GpsManager::getGpsModeToString() {
+    switch (gps.location.FixMode()) {
+        case TinyGPSLocation::N:
+            return "No Fix";
+        case TinyGPSLocation::A:
+            return "Auto 2D/3D";
+        case TinyGPSLocation::D:
+            return "Differential";
+        case TinyGPSLocation::E:
+            return "Estimated";
+        default:
+            return "Unknown";
+    }
 }
 
 /**
@@ -102,136 +191,48 @@ void GpsManager::processGSVMessages() {
 }
 
 /**
- * GPS adatok kiolvasása
+ * GPS olvasása
  */
-void GpsManager::readGPS() {
+void GpsManager::loop() {
 
-    // Kiolvassuk és dekódoljuk az összes GPS adatot
+    bool isValidSentence = false;
+
     while (gpsSerial->available() > 0) {
-
         char c = gpsSerial->read();
-
         if (gps.encode(c)) {
-
-            // beépített RGB LED villogtatása, ha van érvényes bejövő GPS mondat
-            if (debugGpsSerialOnInternalFastLed) {
-                leds[0] = INTERNAL_LED_COLOR;
-                FastLED.show();
-
-                leds[0] = CRGB::Black;
-                FastLED.show();
-            }
+            isValidSentence = true;
         }
 
-        // Debug: kiírjuk a bejövő karaktereket
+        // Debug: kiírjuk a GPS soros porton küldött karaktereit
         if (debugGpsSerialData) {
             DEBUG("%c", c);
         }
     }
 
-    // Mikor bootolt be a GPS?
-    if (gpsBootTime == 0 && gps.satellites.isValid() && gps.satellites.value() > 0) {
-        gpsBootTime = (millis() - startTime) / 1000;
-    }
-}
+    // Ha van érvényes GPS NMEA mondat
+    if (isValidSentence) {
 
-/**
- * GPS olvasás
- */
-void GpsManager::loop() {
-
-    // Van GPS adat?
-    if (Serial1.available()) {
-        readGPS();
+        // GPS mondatok feldolgozása
         processGSVMessages();
+
+        // GPS boot idő számítása (első érvényes műholdadat)
+        if (gpsBootTime == 0 && gps.satellites.isValid() && gps.satellites.value() > 0) {
+            gpsBootTime = (millis() - bootStartTime) / 1000;
+        }
+
+        // beépített RGB LED villogtatása, ha volt érvényes bejövő GPS mondat
+        if (debugGpsSerialOnInternalFastLed) {
+            leds[0] = INTERNAL_LED_COLOR;
+            FastLED.show();
+
+            leds[0] = CRGB::Black;
+            FastLED.show();
+        }
     }
 
-    // Update satellite information
+    // Műhold adatbázis karbantartása másodpercenként
     static long lastWiseSatellitesData = millis();
     if (Utils::timeHasPassed(lastWiseSatellitesData, 1000)) {
         satelliteDb.deleteUntrackedSatellites();
-    }
-}
-
-/**
- * Helyi időzóna szerint korrigált dátum és idő lekérdezése (CET/CEST)
- */
-GpsManager::LocalDateTime GpsManager::getLocalDateTime() {
-    LocalDateTime result = {0, 0, 0, false, 0, 0, 0, false};
-
-    // Érvényes GPS időadatok másolása
-    if (gps.time.isValid()) {
-
-        result.hour = gps.time.hour();
-        result.minute = gps.time.minute();
-        result.second = gps.time.second();
-
-        result.timeValid = true;
-    }
-
-    // Érvényes GPS dátumok másolása
-    if (gps.date.isValid()) {
-        result.day = gps.date.day();
-        result.month = gps.date.month();
-        result.year = gps.date.year();
-
-        result.dateValid = true;
-    }
-
-    // Ha érvényesek a GPS adatok, akkor nyári/téli időszámítás korrekciót is végrehajtunk
-    if (gps.date.isValid() && gps.time.isValid()) {
-
-        // Nyári/téli időszámítás korrekció
-        // uint8_t mins = result.minute; // A DaylightSaving::correctTime várja a referenciát
-        DaylightSaving::correctTime(result.minute, result.hour, result.day, result.month, result.year);
-    }
-
-    return result;
-}
-
-/**
- * GPS minőségi szint lekérdezése
- */
-String GpsManager::getGpsQualityString() {
-
-    switch (gps.location.FixQuality()) {
-        case TinyGPSLocation::Invalid:
-            return "Invalid";
-        case TinyGPSLocation::GPS:
-            return "GPS";
-        case TinyGPSLocation::DGPS:
-            return "DGPS";
-        case TinyGPSLocation::PPS:
-            return "PPS";
-        case TinyGPSLocation::RTK:
-            return "RTK";
-        case TinyGPSLocation::FloatRTK:
-            return "FloatRTK";
-        case TinyGPSLocation::Estimated:
-            return "Estimated";
-        case TinyGPSLocation::Manual:
-            return "Manual";
-        case TinyGPSLocation::Simulated:
-            return "Simulated";
-        default:
-            return "Unknown";
-    }
-}
-
-/**
- * GPS üzemmód lekérdezése
- */
-String GpsManager::getGpsModeToString() {
-    switch (gps.location.FixMode()) {
-        case TinyGPSLocation::N:
-            return "No Fix";
-        case TinyGPSLocation::A:
-            return "Auto 2D/3D";
-        case TinyGPSLocation::D:
-            return "Differential";
-        case TinyGPSLocation::E:
-            return "Estimated";
-        default:
-            return "Unknown";
     }
 }

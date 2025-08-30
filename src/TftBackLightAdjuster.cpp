@@ -1,12 +1,13 @@
 #include "TftBackLightAdjuster.h"
+#include "Utils.h"
 
 /**
  * LED háttérvilágítás PWM állítgatás
  */
 void TftBackLightAdjuster::loop(void) {
 
-    // 200msec-enként frissítjük a célértéket
-    if (millis() - lastSensorCheckMsec > SENSOR_CHECK_MSEC) {
+    // SENSOR_CHECK_MSEC msec-enként frissítjük a célértéket
+    if (Utils::timeHasPassed(lastSensorCheckMsec, SENSOR_CHECK_MSEC)) {
         lastSensorCheckMsec = millis();
 
         if (_tftAutoBrightnessActive) {

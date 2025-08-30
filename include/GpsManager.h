@@ -111,10 +111,9 @@ class GpsManager {
 
     bool debugGpsSatellitesDatabase;
 
-    // Boot
-    uint32_t startTime;
+    // Boot time - a GPS mikor látott érvényes műholdat?
+    uint32_t bootStartTime;
     uint32_t gpsBootTime;
 
     void processGSVMessages();
-    void readGPS();
 };
