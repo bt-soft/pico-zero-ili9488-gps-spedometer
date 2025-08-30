@@ -656,11 +656,7 @@ void ScreenMain::handleOwnLoop() {
     }
 
     // Trafipax figyelmeztetés feldolgozása
-    static unsigned long lastTrafipaxCheck = 0;
-    if (Utils::timeHasPassed(lastTrafipaxCheck, 500)) {
-        processIntelligentTraffipaxAlert(data.latitude, data.longitude, data.positionValid);
-        lastTrafipaxCheck = millis();
-    }
+    processIntelligentTraffipaxAlert(data.latitude, data.longitude, data.positionValid);
 
     // Általános buffer a megjelenítéshez
     char buf[11];

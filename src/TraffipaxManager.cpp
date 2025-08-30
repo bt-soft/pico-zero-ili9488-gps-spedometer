@@ -242,12 +242,16 @@ void TraffipaxManager::startDemo() {
         const TraffipaxRecord &selected = traffipaxList[random(traffipaxCount)];
         TraffipaxDemo::demoTraffipaxLat = selected.lat;
         TraffipaxDemo::demoTraffipaxLon = selected.lon;
-        DEBUG("Demo trafipax kiválasztva: %s, %s, lat: %.6f, lon: %.6f\n", selected.city, selected.street_or_km, selected.lat, selected.lon);
+        DEBUG("Demo trafipax kiválasztva: %s - %s, lat: %s, lon: %s\n", //
+              selected.city, selected.street_or_km,                     //
+              Utils::floatToString(selected.lat, 6).c_str(),            //
+              Utils::floatToString(selected.lon, 6).c_str()             //
+        );
     } else {
         // Ha nincs trafipax, akkor a litéri VÉDA koordináták
         TraffipaxDemo::demoTraffipaxLat = 47.100934;
         TraffipaxDemo::demoTraffipaxLon = 18.011792;
-        DEBUG("Demo trafipax: nincs elérhető rekord, default koordináták.\n");
+        DEBUG("Demo trafipax: nincs elérhető rekord, a litéri VÉDA lesz szimulálva.\n");
     }
 
     DEBUG("------------------------------------------\n\n");
