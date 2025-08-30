@@ -301,8 +301,9 @@ void TraffipaxManager::processDemo() {
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
-            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TraffipaxDemo::demoTraffipaxLat, TraffipaxDemo::demoTraffipaxLon);
-            DEBUG("Traffi Demo Fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
+            DEBUG("Traffi Demo Fázis: Közeledés (%lus/20s) - %dm\n", //
+                  elapsed,                                           //
+                  (int)TinyGPSPlus::distanceBetween(simLat, simLon, TraffipaxDemo::demoTraffipaxLat, TraffipaxDemo::demoTraffipaxLon));
         }
 
     } else if (elapsed < TraffipaxDemo::PHASE_DEPART) {
