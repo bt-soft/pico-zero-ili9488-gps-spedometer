@@ -21,7 +21,7 @@ constexpr double TRAFFIPAX_DEMO_FAR_LAT_OFFSET = TRAFFIPAX_DEMO_FAR_DISTANCE_M /
 constexpr double TRAFFIPAX_DEMO_NEAR_DISTANCE_M = 200.0;
 constexpr double TRAFFIPAX_DEMO_NEAR_LAT_OFFSET = TRAFFIPAX_DEMO_NEAR_DISTANCE_M / 111000.0; // ≈ 0.0018
 
-// TraffipaxManager.cpp vagy egy másik .cpp-ben:
+// A Demo statikus változóinak deklarálása:
 double TraffipaxManager::TraffipaxDemo::demoTraffipaxLat = 0.0;
 double TraffipaxManager::TraffipaxDemo::demoTraffipaxLon = 0.0;
 
