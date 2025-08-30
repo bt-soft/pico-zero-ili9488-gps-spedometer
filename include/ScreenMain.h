@@ -5,6 +5,7 @@
 #include "Large_Font.h"
 #include "MessageDialog.h"
 #include "SensorUtils.h"
+#include "TraffipaxManager.h"
 #include "UIScreen.h"
 #include "ValueChangeDialog.h"
 
@@ -32,6 +33,11 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
         String dateString = "";
         String timeString = "";
         bool dateTimeValid = false;
+
+        // Pozíció
+        double latitude = 0.0;
+        double longitude = 0.0;
+        bool positionValid = false;
 
         // Magasság
         double altitude = 0.0;
@@ -89,6 +95,38 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
 
   private:
     /**
+     * @brief Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet
+     */
+    bool externalTemperatureMode = true; // true = external, false = CPU
+
+    /**
+     * @brief Kényszerített újrarajzolás flag - amikor visszatérünk más képernyőről
+     */
+    bool forceRedraw = false;
+
+    /**
+     * @brief Sprite frissítés időzítő
+     */
+    uint32_t lastSpriteUpdate = 0;
+
+    bool traffiAlarmActive = false;
+
+    // Intelligens traffipax figyelmeztető rendszer
+    struct TraffipaxAlert {
+        enum State { INACTIVE, APPROACHING, NEARBY_STOPPED, DEPARTING };
+
+        State currentState = INACTIVE;
+        const TraffipaxManager::TraffipaxInternal *activeTraffipax = nullptr;
+        double currentDistance = 0.0;
+        double lastDistance = 999999.0;
+        unsigned long lastSirenTime = 0;
+        unsigned long lastStateChange = 0;
+
+        static constexpr unsigned long SIREN_INTERVAL = 10000; // 10 sec szirénázási intervallum
+    };
+    TraffipaxAlert traffipaxAlert;
+
+    /**
      * @brief UI komponensek létrehozása és elhelyezése
      */
     void layoutComponents();
@@ -130,19 +168,13 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      */
     DisplayData collectDemoData();
 
-  private:
     /**
-     * @brief Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet
+     * @brief Intelligens traffipax figyelmeztetés feldolgozása
      */
-    bool externalTemperatureMode = true; // true = external, false = CPU
+    void processIntelligentTraffipaxAlert(double currentLat, double currentLon, bool positionValid);
 
     /**
-     * @brief Kényszerített újrarajzolás flag - amikor visszatérünk más képernyőről
+     * Trafipax figyelmeztető sáv megjelenítése
      */
-    bool forceRedraw = false;
-
-    /**
-     * @brief Sprite frissítés időzítő
-     */
-    uint32_t lastSpriteUpdate = 0;
+    void displayTraffipaxAlert(const TraffipaxManager::TraffipaxInternal *trafipax, double distance);
 };

@@ -17,8 +17,8 @@ SensorUtils sensorUtils;
 #include "TftBackLightAdjuster.h"
 TftBackLightAdjuster tftBackLightAdjuster;
 
-#include "TrafipaxManager.h"
-TrafipaxManager trafipaxManager; // Automatikusan betölti a CSV-t
+#include "TraffipaxManager.h"
+TraffipaxManager traffipaxManager; // Automatikusan betölti a CSV-t
 
 //-------------------- Screens
 // Globális képernyőkezelő pointer - inicializálás a setup()-ban történik
@@ -76,7 +76,7 @@ void drawSplashScreen() {
     // Trafipaxok száma
     tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextSize(1);
-    tft.drawString("Traffipax count: " + String(trafipaxManager.count()), tft.width() / 2, 272, 1);
+    tft.drawString("Traffipax count: " + String(traffipaxManager.count()), tft.width() / 2, 272, 1);
 }
 
 /**
@@ -108,10 +108,10 @@ void setup() {
     LittleFS.begin();
 
     // Trafipax adatok betöltése CSV-ből ha a LittleFS fájl létezik
-    if (trafipaxManager.checkFile(TrafipaxManager::CSV_FILE_NAME)) {
-        trafipaxManager.loadFromCSV(TrafipaxManager::CSV_FILE_NAME);
+    if (traffipaxManager.checkFile(TraffipaxManager::CSV_FILE_NAME)) {
+        traffipaxManager.loadFromCSV(TraffipaxManager::CSV_FILE_NAME);
     }
-    DEBUG("trafipaxok száma: %d\n", trafipaxManager.count());
+    DEBUG("traffipaxok száma: %d\n", traffipaxManager.count());
 
     // Splash screen
     drawSplashScreen();

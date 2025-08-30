@@ -3,7 +3,7 @@
 #include <TinyGPS++.h>
 #include <math.h>
 
-#include "TrafiPaxManager.h"
+#include "TraffipaxManager.h"
 #include "Utils.h"
 #include "defines.h"
 
@@ -16,12 +16,12 @@
 /**
  *
  */
-TrafipaxManager::TrafipaxManager() {}
+TraffipaxManager::TraffipaxManager() {}
 
 /**
  * Ellenőrizzük, hogy létezik-e a CSV fájl
  */
-boolean TrafipaxManager::checkFile(const char *filename) {
+boolean TraffipaxManager::checkFile(const char *filename) {
     //
     if (LittleFS.exists(filename)) {
         File file = LittleFS.open(filename, "r");
@@ -37,8 +37,8 @@ boolean TrafipaxManager::checkFile(const char *filename) {
 /**
  * Betölti a Trafipax adatokat CSV fájlból
  */
-void TrafipaxManager::loadFromCSV(const char *filename) {
-    tafipaxCount = 0;
+void TraffipaxManager::loadFromCSV(const char *filename) {
+    traffipaxCount = 0;
     File file = LittleFS.open(filename, "r");
     if (!file) {
         DEBUG("Failed to open file: %s\n", filename);
@@ -49,7 +49,7 @@ void TrafipaxManager::loadFromCSV(const char *filename) {
 
     // Skip header
     file.readBytesUntil('\n', line, sizeof(line));
-    while (file.available() && tafipaxCount < MAX_TRAFIPAX_COUNT) {
+    while (file.available() && traffipaxCount < MAX_TRAFIPAX_COUNT) {
 
         int len = file.readBytesUntil('\n', line, sizeof(line) - 1);
 
@@ -102,7 +102,7 @@ void TrafipaxManager::loadFromCSV(const char *filename) {
             continue;
         }
 
-        TrafipaxInternal &t = tafipaxList[tafipaxCount++];
+        TraffipaxInternal &t = traffipaxList[traffipaxCount++];
         strncpy(t.city, city, MAX_CITY_LEN - 1);
         t.city[MAX_CITY_LEN - 1] = 0;
         strncpy(t.street_or_km, street, MAX_STREET_LEN - 1);
@@ -119,7 +119,7 @@ void TrafipaxManager::loadFromCSV(const char *filename) {
 /**
  * Visszaadja a Trafipaxok számát
  */
-int TrafipaxManager::count() const { return tafipaxCount; }
+int TraffipaxManager::count() const { return traffipaxCount; }
 
 /**
  * Trafipax riasztás - csak közeledés esetén riaszt
@@ -128,14 +128,14 @@ int TrafipaxManager::count() const { return tafipaxCount; }
  * @param alertDistanceMeters riasztási távolság méterben
  * @return trafipax rekord ha közeledünk és a távolság <= alertDistanceMeters, egyébként nullptr
  */
-const TrafipaxInternal *TrafipaxManager::checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
+const TraffipaxManager::TraffipaxInternal *TraffipaxManager::checkTraffipaxApproach(double currentLat, double currentLon, double alertDistanceMeters) {
 
     // Legközelebbi trafipax keresése
     int closestIdx = -1;
     double minDistance = 999999.0;
 
-    for (int i = 0; i < tafipaxCount; i++) {
-        double distance = TinyGPSPlus::distanceBetween(currentLat, currentLon, tafipaxList[i].lat, tafipaxList[i].lon);
+    for (int i = 0; i < traffipaxCount; i++) {
+        double distance = TinyGPSPlus::distanceBetween(currentLat, currentLon, traffipaxList[i].lat, traffipaxList[i].lon);
         if (distance < minDistance) {
             minDistance = distance;
             closestIdx = i;
@@ -147,9 +147,9 @@ const TrafipaxInternal *TrafipaxManager::checkTrafipaxApproach(double currentLat
         return nullptr;
     }
 
-    // Ha ez egy új legközelebbi trafipax, vagy első hívás
-    if (closestIdx != lastClosestTrafipaxIdx) {
-        lastClosestTrafipaxIdx = closestIdx;
+    // Ha ez egy új legközelebbi traffipax, vagy első hívás
+    if (closestIdx != lastClosestTraffipaxIdx) {
+        lastClosestTraffipaxIdx = closestIdx;
         lastDistance = minDistance;
         lastLat = currentLat;
         lastLon = currentLon;
@@ -166,9 +166,9 @@ const TrafipaxInternal *TrafipaxManager::checkTrafipaxApproach(double currentLat
 
     // Riasztás feltételei:
     // 1. A távolság <= riasztási távolság
-    // 2. Közeledünk a trafipaxhoz
+    // 2. Közeledünk a traffipaxhoz
     if (minDistance <= alertDistanceMeters && isApproaching) {
-        return &tafipaxList[closestIdx];
+        return &traffipaxList[closestIdx];
     }
 
     return nullptr;
@@ -181,9 +181,9 @@ const TrafipaxInternal *TrafipaxManager::checkTrafipaxApproach(double currentLat
  * @param outDistance kimeneti paraméter a távolsághoz
  * @return legközelebbi trafipax rekord vagy nullptr ha nincs
  */
-const TrafipaxInternal *TrafipaxManager::getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const {
+const TraffipaxManager::TraffipaxInternal *TraffipaxManager::getClosestTraffipax(double currentLat, double currentLon, double &outDistance) const {
 
-    if (tafipaxCount == 0) {
+    if (traffipaxCount == 0) {
         outDistance = 999999.0;
         return nullptr;
     }
@@ -191,8 +191,8 @@ const TrafipaxInternal *TrafipaxManager::getClosestTrafipax(double currentLat, d
     int closestIdx = -1;
     double minDistance = 999999.0;
 
-    for (int i = 0; i < tafipaxCount; i++) {
-        double distance = TinyGPSPlus::distanceBetween(currentLat, currentLon, tafipaxList[i].lat, tafipaxList[i].lon);
+    for (int i = 0; i < traffipaxCount; i++) {
+        double distance = TinyGPSPlus::distanceBetween(currentLat, currentLon, traffipaxList[i].lat, traffipaxList[i].lon);
         if (distance < minDistance) {
             minDistance = distance;
             closestIdx = i;
@@ -205,7 +205,7 @@ const TrafipaxInternal *TrafipaxManager::getClosestTrafipax(double currentLat, d
         return nullptr;
     }
 
-    return &tafipaxList[closestIdx];
+    return &traffipaxList[closestIdx];
 }
 
 #ifdef DEMO_MODE
@@ -213,16 +213,16 @@ const TrafipaxInternal *TrafipaxManager::getClosestTrafipax(double currentLat, d
 /**
  * Demo indítása - 5mp várakozás, majd közeledés/távolodás szimulálása
  */
-void TrafipaxManager::startDemo() {
+void TraffipaxManager::startDemo() {
     demo.isActive = true;
     demo.startTime = millis();
     demo.currentPhase = 0;
 
-    DEBUG("\n=== TRAFIPAX DEMO INDÍTVA ===\n");
+    DEBUG("\n=== TRAFFIPAX DEMO INDÍTVA ===\n");
     DEBUG("Teszt fázisok:\n");
     DEBUG("0-5mp: Várakozás (nincs riasztás)\n");
-    DEBUG("5-20mp: Közeledés a litéri trafipaxhoz\n");
-    DEBUG("20-40mp: Távolodás a litéri trafipaxtól (lassítva)\n");
+    DEBUG("5-20mp: Közeledés a litéri traffipaxhoz\n");
+    DEBUG("20-40mp: Távolodás a litéri traffipaxtól (lassítva)\n");
     DEBUG("40-45mp: Demo befejezése\n");
     DEBUG("------------------------------------------\n\n");
 }
@@ -230,7 +230,7 @@ void TrafipaxManager::startDemo() {
 /**
  * Demo feldolgozása - szimulált GPS koordináták generálása
  */
-void TrafipaxManager::processDemo() {
+void TTraffipaxManager::processDemo() {
     if (!demo.isActive) {
         return;
     }
@@ -238,7 +238,7 @@ void TrafipaxManager::processDemo() {
     unsigned long elapsed = (millis() - demo.startTime) / 1000; // másodpercek
 
     // Demo befejezése
-    if (elapsed >= TrafipaxDemo::PHASE_END) {
+    if (elapsed >= TraffipaxDemo::PHASE_END) {
         demo.isActive = false;
         demo.hasValidCoords = false;
         DEBUG("=== DEMO BEFEJEZVE ===\n");
@@ -248,38 +248,38 @@ void TrafipaxManager::processDemo() {
     // Szimulált GPS koordináták generálása a fázis alapján
     double simLat, simLon;
 
-    if (elapsed < TrafipaxDemo::PHASE_WAIT) {
+    if (elapsed < TraffipaxDemo::PHASE_WAIT) {
         // Várakozási fázis - messze vagyunk (1500m)
-        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135; // kb. 1500m délre
-        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
+        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135; // kb. 1500m délre
+        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
             DEBUG("Demo fázis: Várakozás (%lus/5s)\n", elapsed);
         }
 
-    } else if (elapsed < TrafipaxDemo::PHASE_APPROACH) {
+    } else if (elapsed < TraffipaxDemo::PHASE_APPROACH) {
         // Közeledési fázis - 1500m-ről 200m-ig
-        float progress = (elapsed - TrafipaxDemo::PHASE_WAIT) / 15.0f; // 0.0 - 1.0 (15s alatt)
-        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
-        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
+        float progress = (elapsed - TraffipaxDemo::PHASE_WAIT) / 15.0f; // 0.0 - 1.0 (15s alatt)
+        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135 + (0.0135 - 0.0018) * progress;
+        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
-            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TrafipaxDemo::DEMO_TRAFIPAX_LAT, TrafipaxDemo::DEMO_TRAFIPAX_LON);
+            double distance = TinyGPSPlus::distanceBetween(simLat, simLon, TraffipaxDemo::DEMO_TRAFIPAX_LAT, TraffipaxDemo::DEMO_TRAFIPAX_LON);
             DEBUG("Demo fázis: Közeledés (%lus/20s) - %dm\n", elapsed, (int)distance);
         }
 
-    } else if (elapsed < TrafipaxDemo::PHASE_DEPART) {
+    } else if (elapsed < TraffipaxDemo::PHASE_DEPART) {
         // Távolodási fázis - 200m-ről 1500m-ig (lassítva 20s alatt)
-        float progress = (elapsed - TrafipaxDemo::PHASE_APPROACH) / 20.0f; // 0.0 - 1.0 (20s alatt)
-        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
-        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
+        float progress = (elapsed - TraffipaxDemo::PHASE_APPROACH) / 20.0f; // 0.0 - 1.0 (20s alatt)
+        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0018 - (0.0135 - 0.0018) * progress;
+        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
             double distance;
-            const TrafipaxInternal *closest = getClosestTrafipax(simLat, simLon, distance);
+            const TraffipaxInternal *closest = getClosestTraffipax(simLat, simLon, distance);
             if (closest) {
                 DEBUG("Demo fázis: Távolodás (%lus/40s) - %dm\n", elapsed, (int)distance);
             }
@@ -287,8 +287,8 @@ void TrafipaxManager::processDemo() {
 
     } else {
         // Befejező fázis - messze vagyunk
-        simLat = TrafipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135;
-        simLon = TrafipaxDemo::DEMO_TRAFIPAX_LON;
+        simLat = TraffipaxDemo::DEMO_TRAFIPAX_LAT - 0.0135;
+        simLon = TraffipaxDemo::DEMO_TRAFIPAX_LON;
 
         if (elapsed != demo.currentPhase) {
             demo.currentPhase = elapsed;
@@ -305,12 +305,12 @@ void TrafipaxManager::processDemo() {
 /**
  * Visszaadja, hogy aktív-e a demo
  */
-bool TrafipaxManager::isDemoActive() const { return demo.isActive; }
+bool TraffipaxManager::isDemoActive() const { return demo.isActive; }
 
 /**
  * Demo koordináták lekérése
  */
-bool TrafipaxManager::getDemoCoords(double &lat, double &lon) const {
+bool TraffipaxManager::getDemoCoords(double &lat, double &lon) const {
     if (demo.isActive && demo.hasValidCoords) {
         lat = demo.currentLat;
         lon = demo.currentLon;

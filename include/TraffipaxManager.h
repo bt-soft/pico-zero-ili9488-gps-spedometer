@@ -9,8 +9,8 @@
 #define MAX_STREET_LEN 30
 
 #ifdef DEMO_MODE
-// Demo trafipax közeledés/távolodás szimulálása működés közben
-struct TrafipaxDemo {
+// Demo traffipax közeledés/távolodás szimulálása működés közben
+struct TraffipaxDemo {
     bool isActive = false;
     unsigned long startTime = 0;
     unsigned long currentPhase = 0;
@@ -28,26 +28,26 @@ struct TrafipaxDemo {
 
     // Litéri trafipax koordinátái
     // Litér
-    // static constexpr double DEMO_TRAFIPAX_LAT = 47.100934;  //Litér
-    // static constexpr double DEMO_TRAFIPAX_LON = 18.011792;
+    // static constexpr double DEMO_TRAFFIPAX_LAT = 47.100934;  //Litér
+    // static constexpr double DEMO_TRAFFIPAX_LON = 18.011792;
     // Hódmezővásárhely
-    static constexpr double DEMO_TRAFIPAX_LAT = 46.428704; // Hódmezővásárhely
-    static constexpr double DEMO_TRAFIPAX_LON = 20.326282;
+    static constexpr double DEMO_TRAFFIPAX_LAT = 46.428704; // Hódmezővásárhely
+    static constexpr double DEMO_TRAFFIPAX_LON = 20.326282;
 };
 #endif
 
-struct TrafipaxInternal {
-    char city[MAX_CITY_LEN];
-    char street_or_km[MAX_STREET_LEN];
-    double lat;
-    double lon;
-};
-
-class TrafipaxManager {
+class TraffipaxManager {
   public:
+    struct TraffipaxInternal {
+        char city[MAX_CITY_LEN];
+        char street_or_km[MAX_STREET_LEN];
+        double lat;
+        double lon;
+    };
+
     constexpr static const char *CSV_FILE_NAME = "/trafipaxes.csv";
 
-    TrafipaxManager();
+    TraffipaxManager();
 
     // Fájl kezelés/betöltés
     boolean checkFile(const char *filename);
@@ -55,10 +55,10 @@ class TrafipaxManager {
     int count() const;
 
     // Trafipax riasztás - csak közeledés esetén riaszt
-    const TrafipaxInternal *checkTrafipaxApproach(double currentLat, double currentLon, double alertDistanceMeters);
+    const TraffipaxInternal *checkTraffipaxApproach(double currentLat, double currentLon, double alertDistanceMeters);
 
     // Legközelebbi trafipax keresése távolsággal együtt
-    const TrafipaxInternal *getClosestTrafipax(double currentLat, double currentLon, double &outDistance) const;
+    const TraffipaxInternal *getClosestTraffipax(double currentLat, double currentLon, double &outDistance) const;
 
 #ifdef DEMO_MODE
     // Demo funkciók
@@ -69,17 +69,17 @@ class TrafipaxManager {
 #endif
 
   private:
-    TrafipaxInternal tafipaxList[MAX_TRAFIPAX_COUNT];
-    int tafipaxCount = 0;
+    TraffipaxInternal traffipaxList[MAX_TRAFIPAX_COUNT];
+    int traffipaxCount = 0;
 
     // Távolság követés közeledés detektáláshoz
     double lastLat = 0.0;
     double lastLon = 0.0;
-    int lastClosestTrafipaxIdx = -1;
+    int lastClosestTraffipaxIdx = -1;
     double lastDistance = 999999.0;
 
 #ifdef DEMO_MODE
     // Demo objektum
-    TrafipaxDemo demo;
+    TraffipaxDemo demo;
 #endif
 };

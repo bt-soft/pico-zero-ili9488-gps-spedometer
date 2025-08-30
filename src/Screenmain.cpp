@@ -1,11 +1,17 @@
 #include "ScreenMain.h"
+#include "Config.h"
 #include "LinearMeter.h"
 #include "UIButton.h"
 #include "Utils.h"
 #include "defines.h"
 
-constexpr int SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
-constexpr int SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
+extern TraffipaxManager traffipaxManager;
+
+constexpr uint16_t SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // max n=10, h=10, g=2
+constexpr uint8_t SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
+
+constexpr uint8_t ALERT_BAR_HEIGHT = 80;
+constexpr uint8_t ALERT_TEXT_PADDING = 20;
 
 // Sprite a vertikális bar-oknak
 TFT_eSprite spriteVerticalLinearMeter(&tft);
@@ -327,6 +333,11 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
         data.timeString = "--:--:--";
     }
 
+    // Pozíció
+    data.positionValid = gpsManager->getLocation().isValid() && gpsManager->getLocation().age() < GPS_DATA_MAX_AGE;
+    data.latitude = data.positionValid ? gpsManager->getLocation().lat() : 0.0;
+    data.longitude = data.positionValid ? gpsManager->getLocation().lng() : 0.0;
+
     // Magasság
     data.altitudeValid = gpsManager->getAltitude().isValid() && gpsManager->getAltitude().age() < GPS_DATA_MAX_AGE;
     data.altitude = data.altitudeValid ? gpsManager->getAltitude().meters() : 0.0;
@@ -408,6 +419,11 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.timeString = String(timeStr);
     data.dateTimeValid = true;
 
+    // Pozíció
+    data.positionValid = false;
+    data.latitude = 0.0;
+    data.longitude = 0.0;
+
     // Magasság - 3 másodpercenként változik
     static unsigned long lastAltChange = 0;
     static double demoAltitude = 150.0;
@@ -441,6 +457,164 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
 }
 
 /**
+ * Traffipax figyelmeztető sáv megjelenítése sprite-tal és villogással
+ */
+void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxInternal *traffipax, double distance) {
+    if (traffipax == nullptr)
+        return;
+
+    // Háttérszín meghatározása állapot szerint
+    uint16_t backgroundColor;
+    uint16_t textColor;
+
+    switch (traffipaxAlert.currentState) {
+        case TraffipaxAlert::APPROACHING:
+        case TraffipaxAlert::NEARBY_STOPPED:
+            backgroundColor = TFT_RED;
+            textColor = TFT_WHITE;
+            break;
+        case TraffipaxAlert::DEPARTING:
+            backgroundColor = TFT_ORANGE;
+            textColor = TFT_BLACK;
+            break;
+        default:
+            return; // INACTIVE
+    }
+
+    spriteAlertBar.fillSprite(backgroundColor);
+    spriteAlertBar.setFreeFont(&FreeSansBold18pt7b);
+    spriteAlertBar.setTextColor(textColor, backgroundColor);
+
+    // Város (első sor, balra igazítva)
+    spriteAlertBar.setTextDatum(TL_DATUM);
+    char cityText[MAX_CITY_LEN];
+    strncpy(cityText, traffipax->city, MAX_CITY_LEN);
+    Utils::convertToASCII(cityText);
+    spriteAlertBar.drawString(cityText, ALERT_TEXT_PADDING, 10);
+
+    // Utca/km (második sor, balra igazítva)
+    char streetText[MAX_STREET_LEN];
+    strncpy(streetText, traffipax->street_or_km, MAX_STREET_LEN);
+    Utils::convertToASCII(streetText);
+    spriteAlertBar.drawString(streetText, ALERT_TEXT_PADDING, 45);
+
+    // Távolság (jobbra, vertikálisan középre)
+    spriteAlertBar.setTextDatum(MR_DATUM);
+    char distanceText[16];
+    snprintf(distanceText, sizeof(distanceText), "%dm", (int)distance);
+    Utils::convertToASCII(distanceText);
+    spriteAlertBar.drawString(distanceText, tft.width() - ALERT_TEXT_PADDING, ALERT_BAR_HEIGHT / 2);
+
+    spriteAlertBar.unloadFont();
+    spriteAlertBar.pushSprite(0, 0);
+}
+
+/**
+ * Intelligens traffipax figyelmeztető rendszer
+ * - 800m-en belül: piros sáv + város/utca + távolság
+ * - Közeledés esetén: 10mp-enként szirénázás
+ * - Megállás esetén: nincs szirénázás, csak a piros sáv
+ * - Távolodás esetén: narancssárga sáv, nincs szirénázás
+ *
+ * Állapotok:
+ * - INACTIVE: Nincs közeli traffipax (> 800m)
+ * - APPROACHING: Közeledik (piros háttér + szirénázás)
+ * - NEARBY_STOPPED: Megállt közel (piros háttér, nincs szirénázás)
+ * - DEPARTING: Távolodik (narancssárga háttér, nincs szirénázás)
+ */
+void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double currentLon, bool positionValid) {
+
+    // GPS adatok validálása - optimalizált verzió
+#ifdef DEMO_MODE
+    if (traffipaxManager.getDemoCoords(currentLat, currentLon)) {
+        // Demo koordináták használata
+        positionValid = true;
+    }
+#endif
+
+    // Nincs érvényes GPS pozíció adat - riasztás kikapcsolása ha éppen aktív
+    if (!positionValid) {
+        if (traffipaxAlert.currentState != TraffipaxAlert::INACTIVE) {
+            traffipaxAlert.currentState = TraffipaxAlert::INACTIVE;
+            traffipaxAlert.activeTraffipax = nullptr;
+            traffiAlarmActive = false;
+
+            // Beállítjuk a kényszerített újrarajzolás flag-et
+            this->forceRedraw = true;
+
+            // a következő ciklusban kényszerítjük az újrarajzolást
+            markForRedraw(true); // a képernyőt és a gyerekeit  újrarajzolásra jelöljük
+        }
+        return;
+    }
+
+    // Legközelebbi trafipax keresése
+    double minDistance = 999999.0;
+    const TraffipaxManager::TraffipaxInternal *closestTraffipax = traffipaxManager.getClosestTraffipax(currentLat, currentLon, minDistance);
+
+    const unsigned long currentTime = millis();
+
+    // Ha nincs közeli traffipax a kritikus távolságon belül
+    if (minDistance > config.data.gpsTrafiAlarmDistance) {
+        if (traffipaxAlert.currentState != TraffipaxAlert::INACTIVE) {
+            traffipaxAlert.currentState = TraffipaxAlert::INACTIVE;
+            traffipaxAlert.activeTraffipax = nullptr;
+            traffiAlarmActive = false; // Riasztás kikapcsolása
+
+            // Beállítjuk a kényszerített újrarajzolás flag-et
+            this->forceRedraw = true;
+
+            // a következő ciklusban kényszerítjük az újrarajzolást
+            markForRedraw(true); // a képernyőt és a gyerekeit  újrarajzolásra jelöljük        }
+            return;
+        }
+
+        // Van közeli traffipax - állapot meghatározása
+        // Stabil állapotváltás - csak 10m+ változásnál váltunk
+        bool isApproaching = minDistance < (traffipaxAlert.lastDistance - 10.0);
+        bool isDeparting = minDistance > (traffipaxAlert.lastDistance + 10.0);
+
+        // Ha még nincs beállítva állapot, akkor a távolság alapján indítjuk
+        TraffipaxAlert::State newState = traffipaxAlert.currentState;
+        if (traffipaxAlert.currentState == TraffipaxAlert::INACTIVE) {
+            newState = TraffipaxAlert::APPROACHING; // Kezdetben közeledés
+        } else if (isApproaching) {
+            newState = TraffipaxAlert::APPROACHING;
+        } else if (isDeparting) {
+            newState = TraffipaxAlert::DEPARTING;
+        }
+        // Ha nincs jelentős változás, akkor marad a jelenlegi állapot
+
+        // Állapotváltás detektálása
+        if (newState != traffipaxAlert.currentState) {
+            traffipaxAlert.currentState = newState;
+            traffipaxAlert.lastStateChange = currentTime;
+            traffipaxAlert.activeTraffipax = closestTraffipax;
+        }
+
+        // Figyelmeztető sáv megjelenítése
+        traffiAlarmActive = true;
+        traffipaxAlert.currentDistance = minDistance;
+
+        // Megjelenítés
+        displayTraffipaxAlert(closestTraffipax, minDistance);
+
+        // Szirénázás csak közeledés esetén, 10mp-enként
+        if (traffipaxAlert.currentState == TraffipaxAlert::APPROACHING) {
+            if (currentTime - traffipaxAlert.lastSirenTime >= TraffipaxAlert::SIREN_INTERVAL) {
+                Utils::beepSiren(2, 600, 1800, 20, 8, 100);
+                traffipaxAlert.lastSirenTime = currentTime;
+            }
+        }
+
+        // Távolság frissítése - csak 5m+ változásnál
+        if (abs(minDistance - traffipaxAlert.lastDistance) >= 5.0) {
+            traffipaxAlert.lastDistance = minDistance;
+        }
+    }
+}
+
+/**
  * Kezeli a képernyő saját ciklusát (dinamikus frissítés)
  */
 void ScreenMain::handleOwnLoop() {
@@ -454,6 +628,9 @@ void ScreenMain::handleOwnLoop() {
 
     // Adatok legyűjtése (demó vagy valós mód szerint)
     DisplayData data = demoMode ? collectDemoData() : collectRealData();
+
+    // Trafipax figyelmeztetés feldolgozása
+    processIntelligentTraffipaxAlert(data.latitude, data.longitude, data.positionValid);
 
     char buf[11];
 

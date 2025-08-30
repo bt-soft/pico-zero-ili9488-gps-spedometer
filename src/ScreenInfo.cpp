@@ -3,8 +3,8 @@
 #include "Utils.h"
 #include "defines.h"
 
-#include "TrafipaxManager.h"
-extern TrafipaxManager trafipaxManager;
+#include "TraffipaxManager.h"
+extern TraffipaxManager traffipaxManager;
 
 #include "GpsManager.h"
 extern GpsManager *gpsManager;
@@ -105,7 +105,7 @@ void ScreenInfo::drawContent() {
     tableY += lineHeight;
     tft.drawString(String(__DATE__) + " " + String(__TIME__), tableX, tableY);
     tableY += lineHeight;
-    tft.drawString(String(::trafipaxManager.count()), tableX, tableY);
+    tft.drawString(String(::traffipaxManager.count()), tableX, tableY);
 
     // 2. tábla prompt - Azért kell a 2. tábla promptjait előbb kiírni,
     // mert az MR_DATUM törli az előtte lévő teljes tartalmat, így az 1. tábla promptokat is
