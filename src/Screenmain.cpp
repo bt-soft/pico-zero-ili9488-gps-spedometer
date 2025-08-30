@@ -356,7 +356,7 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     }
 
     // Szenzorok
-    data.batteryVoltage = sensorUtils.readVBusExternal();
+    data.busVoltage = sensorUtils.readVBusExternal();
     if (externalTemperatureMode) {
         data.temperature = sensorUtils.readExternalTemperature();
     } else {
@@ -446,11 +446,8 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.speedValid = true;
 
     // Szenzorok - szimulált értékek
-    // batteryVoltage: 3.5 ... 15.5 V
-    data.batteryVoltage = 3.5 + (random(0, 1001) / 100.0); // 3.5 ... 13.5 V (1000 lépés, 0.01V)
-
     // Ha 15.5 a felső határ, akkor random(0, 1201) / 100.0 = 3.5 ... 15.5
-    data.batteryVoltage = 3.5 + (random(0, 1201) / 100.0); // 3.5 ... 15.5 V
+    data.busVoltage = 3.5 + (random(0, 1201) / 100.0); // 3.5 ... 15.5 V
 
     // temperature: -15.5 ... +65.5 °C
     data.temperature = -15.5 + (random(0, 811) / 10.0); // -15.5 ... +65.5 (811 lépés, 0.1°C)
@@ -846,8 +843,8 @@ void ScreenMain::handleOwnLoop() {
 
     // -- Vertikális bar komponensek  ------------------------------------
 
-    // // 5 másodperces frissítés
-    if (!Utils::timeHasPassed(lastVerticalLinearSpriteUpdate, 5000)) {
+    // 5 másodperces frissítés
+    if (lastVerticalLinearSpriteUpdate != 0 && !Utils::timeHasPassed(lastVerticalLinearSpriteUpdate, 5000)) {
         return;
     }
     lastVerticalLinearSpriteUpdate = millis();
@@ -857,29 +854,29 @@ void ScreenMain::handleOwnLoop() {
         spriteVerticalLinearMeter.createSprite(SPRITE_VERTICAL_LINEAR_METER_WIDTH, SPRITE_VERTICAL_LINEAR_METER_HEIGHT);
     }
 
-#define VERTICAL_BARS_Y 250
+#define VERTICAL_LINEAR_METER_BAR_Y 250
     // Vertical Line bar - Battery (sprite-os)
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        "Batt [V]",           // category
-                        data.batteryVoltage,  // val
-                        BATT_BARMETER_MIN,    // minVal
-                        BATT_BARMETER_MAX,    // maxVal
-                        0,                    // x
-                        VERTICAL_BARS_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
-                        30,                   // bar-w
-                        10,                   // bar-h
-                        2,                    // gap
-                        10,                   // n
-                        RED2GREEN);           // color
+                        "Vsys [V]",                       // category
+                        data.busVoltage,                  // value
+                        BATT_BARMETER_MIN,                // minVal
+                        BATT_BARMETER_MAX,                // maxVal
+                        0,                                // x
+                        VERTICAL_LINEAR_METER_BAR_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                               // bar-w
+                        10,                               // bar-h
+                        2,                                // gap
+                        10,                               // n
+                        RED2GREEN);                       // color
 
     // Vertical Line bar - Temperature
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
                         externalTemperatureMode ? "Ext [C]" : "CPU [C]",  // category
-                        data.temperature,                                 // val
+                        data.temperature,                                 // value
                         TEMP_BARMETER_MIN,                                // minVal
                         TEMP_BARMETER_MAX,                                // maxVal
                         tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH, // x: sprite szélesség beszámítva
-                        VERTICAL_BARS_Y + 10,                             // y: sprite alsó éle, +10 hogy ne lógjon le
+                        VERTICAL_LINEAR_METER_BAR_Y + 10,                 // y: sprite alsó éle, +10 hogy ne lógjon le
                         30,                                               // bar-w
                         10,                                               // bar-h
                         2,                                                // gap
@@ -903,22 +900,20 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
     }
 
     // Műhold ikon és szám területének ellenőrzése (bal felső sarok)
-    int16_t satIconX = 0;
-    int16_t satIconY = 0;
-    int16_t satIconWidth = 60;  // Ikon + szám területe
-    int16_t satIconHeight = 35; // Ikon magassága + felirat
-
+    constexpr uint16_t satIconX = 0;
+    constexpr uint16_t satIconY = 0;
+    constexpr uint16_t satIconWidth = 60;  // Ikon + szám területe
+    constexpr uint16_t satIconHeight = 35; // Ikon magassága + felirat
     if (event.x >= satIconX && event.x < satIconX + satIconWidth && event.y >= satIconY && event.y < satIconY + satIconHeight) {
         getScreenManager()->switchToScreen(SCREEN_NAME_SATS);
         return true; // Esemény kezelve
     }
 
     // Jobb oldali hőmérsékleti bar területének ellenőrzése
-    int16_t rightBarX = tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH;
-    int16_t rightBarY = VERTICAL_BARS_Y + 10 - SPRITE_VERTICAL_LINEAR_METER_HEIGHT; // y koordináta teteje
-    int16_t rightBarWidth = SPRITE_VERTICAL_LINEAR_METER_WIDTH;
-    int16_t rightBarHeight = SPRITE_VERTICAL_LINEAR_METER_HEIGHT;
-
+    uint16_t rightBarX = ::SCREEN_W - SPRITE_VERTICAL_LINEAR_METER_WIDTH;
+    constexpr uint16_t rightBarY = VERTICAL_LINEAR_METER_BAR_Y + 10 - SPRITE_VERTICAL_LINEAR_METER_HEIGHT; // y koordináta teteje
+    constexpr uint16_t rightBarWidth = SPRITE_VERTICAL_LINEAR_METER_WIDTH;
+    constexpr uint16_t rightBarHeight = SPRITE_VERTICAL_LINEAR_METER_HEIGHT;
     // Ellenőrizzük, hogy a touch a jobb oldali bar területén belül van-e
     if (event.x >= rightBarX && event.x < rightBarX + rightBarWidth && event.y >= rightBarY && event.y < rightBarY + rightBarHeight) {
 

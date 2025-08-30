@@ -52,7 +52,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
         bool speedValid = false;
 
         // Szenzorok
-        float batteryVoltage = 0.0;
+        float busVoltage = 0.0;
         float temperature = 0.0;
     };
 

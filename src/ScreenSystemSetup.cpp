@@ -3,6 +3,9 @@
 #include "Utils.h"
 #include "defines.h"
 
+// Demó mód
+extern bool demoMode;
+
 void ScreenSystemSetup::layoutComponents() {
 
     // Függőlegesen egymás alá
@@ -12,18 +15,33 @@ void ScreenSystemSetup::layoutComponents() {
     int btnY = 60;
     int btnGap = 20;
 
-    // Auto Brightness gomb
+    // Beeper gomb
     int row = 0;
     addChild(std::make_shared<UIButton>(                                                    //
         10,                                                                                 //
         Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH),                               //
-        "Beper",                                                                            //
+        "Beeper",                                                                           //
         UIButton::ButtonType::Toggleable,                                                   //
         config.data.beeperEnabled ? UIButton::ButtonState::On : UIButton::ButtonState::Off, //
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
                 config.data.beeperEnabled = event.state == UIButton::EventButtonState::On;
                 DEBUG("Beeper changed to: %s\n", config.data.beeperEnabled ? "ON" : "OFF");
+            }
+        }) //
+    );
+
+    // Demo mód
+    row++;
+    addChild(std::make_shared<UIButton>( //
+        11,                              // id
+        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH),
+        "Demo Mode",                                                         // label
+        UIButton::ButtonType::Toggleable,                                    // type
+        ::demoMode ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
+        [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
+                ::demoMode = event.state == UIButton::EventButtonState::On;
             }
         }) //
     );

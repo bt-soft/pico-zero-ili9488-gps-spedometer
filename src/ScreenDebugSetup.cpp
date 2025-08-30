@@ -6,25 +6,23 @@
 #include "GpsManager.h"
 extern GpsManager *gpsManager;
 
-// Demó mód
-extern bool demoMode;
-
 /**
  * UI komponensek elhelyezése
  */
 void ScreenDebugSetup::layoutComponents() {
 
+    // Függőlegesen egymás alá
     int btnW = 180;
     int btnH = 60;
-    int buttonXGap = 30;
-
-    // 1. sor
-    int buttonY = 80;
+    int btnX = (::SCREEN_W - btnW) / 2;
+    int btnY = 60;
+    int btnGap = 20;
 
     // LED gomb
+    int row = 0;
     addChild(std::make_shared<UIButton>(                                                                      //
         10,                                                                                                   // id
-        Rect(buttonXGap, buttonY, btnW, btnH),                                                                // rect
+        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH),                                                 // rect
         "Pico-Zero LED",                                                                                      // label
         UIButton::ButtonType::Toggleable,                                                                     // type
         config.data.debugGpsSerialOnInternalFastLed ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
@@ -36,29 +34,13 @@ void ScreenDebugSetup::layoutComponents() {
         }) //
     );
 
-    // Demo mód
-    addChild(std::make_shared<UIButton>(                                     //
-        10,                                                                  // id
-        Rect((::SCREEN_W - btnW) - buttonXGap, buttonY, btnW, btnH),         // rect
-        "Demo Mode",                                                         // label
-        UIButton::ButtonType::Toggleable,                                    // type
-        ::demoMode ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
-        [this](const UIButton::ButtonEvent &event) {
-            if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
-                ::demoMode = event.state == UIButton::EventButtonState::On;
-            }
-        }) //
-    );
-
-    // 2. sor
-    buttonY = 170;
-
-    // GPS Data on Serial
-    addChild(std::make_shared<UIButton>(       //
-        11,                                    // id
-        Rect(buttonXGap, buttonY, btnW, btnH), // rect
-        "GPS On Serial",                       // label
-        UIButton::ButtonType::Toggleable,      // type
+    // GPS On Serial
+    row++;
+    addChild(std::make_shared<UIButton>(                      //
+        11,                                                   // id
+        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH), // rect
+        "GPS On Serial",                                      // label
+        UIButton::ButtonType::Toggleable,                     // type
 #ifdef __DEBUG
         config.data.debugGpsSerialData ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
 #else
@@ -73,11 +55,12 @@ void ScreenDebugSetup::layoutComponents() {
     );
 
     // SatDB on Serial
-    addChild(std::make_shared<UIButton>(                             //
-        12,                                                          // id
-        Rect((::SCREEN_W - btnW) - buttonXGap, buttonY, btnW, btnH), // rect
-        "SatDB On Serial",                                           // label
-        UIButton::ButtonType::Toggleable,                            // type
+    row++;
+    addChild(std::make_shared<UIButton>(                      //
+        12,                                                   // id
+        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH), // rect
+        "SatDB On Serial",                                    // label
+        UIButton::ButtonType::Toggleable,                     // type
 #ifdef __DEBUG
         config.data.debugGpsSatellitesDatabase ? UIButton::ButtonState::On : UIButton::ButtonState::Off, // Kezdeti állapot
 #else
