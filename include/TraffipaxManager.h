@@ -65,13 +65,15 @@ class TraffipaxManager {
         static constexpr unsigned long PHASE_DEPART = 40;   // 20mp távolodás (20-40mp) - lassítva
         static constexpr unsigned long PHASE_END = 45;      // 5mp befejezés (40-45mp)
 
-        // Litéri trafipax koordinátái
+        // Demo Trafipax koordináták
+
         // Litér
-        // static constexpr double DEMO_TRAFFIPAX_LAT = 47.100934;  //Litér
+        // static constexpr double DEMO_TRAFFIPAX_LAT = 47.100934;
         // static constexpr double DEMO_TRAFFIPAX_LON = 18.011792;
+
         // Hódmezővásárhely
-        static constexpr double DEMO_TRAFFIPAX_LAT = 46.428704; // Hódmezővásárhely
-        static constexpr double DEMO_TRAFFIPAX_LON = 20.326282;
+        static double demoTraffipaxLat;
+        static double demoTraffipaxLon;
     };
 
     // Demo objektum
