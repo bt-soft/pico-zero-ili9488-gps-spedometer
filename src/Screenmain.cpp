@@ -11,11 +11,10 @@ constexpr uint16_t SPRITE_VERTICAL_LINEAR_METER_HEIGHT = 10 * (10 + 2) + 40; // 
 constexpr uint8_t SPRITE_VERTICAL_LINEAR_METER_WIDTH = 70;
 
 constexpr uint8_t ALERT_BAR_HEIGHT = 80;
-constexpr uint8_t ALERT_TEXT_PADDING = 20;
+constexpr uint8_t ALERT_TEXT_PADDING = 5;
 
 // Sprite a vertikális bar-oknak
 TFT_eSprite spriteVerticalLinearMeter(&tft);
-TFT_eSprite spriteAlertBar(&tft);
 
 // Demó mód
 extern bool demoMode;
@@ -460,24 +459,23 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
  * Alert bar törlése
  */
 void ScreenMain::clearTraffipaxAlert() {
-    spriteAlertBar.fillSprite(TFT_BLACK);
-    spriteAlertBar.pushSprite(0, 0);
-
-    spriteAlertBar.deleteSprite();
+    // Egyszerűen töröljük a riasztás sávját a tft-n
+    tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
 }
 
 /**
- * Traffipax figyelmeztető sáv megjelenítése sprite-tal és villogással
+ * Traffipax figyelmeztető sáv megjelenítése
  */
 void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *traffipax, double distance) {
 
+    static uint16_t lastBackgroundColor = 0xFFFF;
+    static const TraffipaxManager::TraffipaxRecord *lastTraffipaxPtr = nullptr;
+    static char lastCityText[MAX_CITY_LEN] = {0};
+    static char lastStreetText[MAX_STREET_LEN] = {0};
+    static int lastDistance = -1;
+
     if (traffipax == nullptr) {
         return;
-    }
-
-    // Alert bar sprite létrehozása
-    if (!spriteAlertBar.created()) {
-        spriteAlertBar.createSprite(tft.width(), ALERT_BAR_HEIGHT);
     }
 
     // Háttérszín meghatározása állapot szerint
@@ -498,31 +496,51 @@ void ScreenMain::displayTraffipaxAlert(const TraffipaxManager::TraffipaxRecord *
             return; // INACTIVE
     }
 
-    spriteAlertBar.fillSprite(backgroundColor);
-    spriteAlertBar.setTextColor(textColor, backgroundColor);
+    bool fullRedraw = false;
+    // Ha háttérszín vagy traffipax rekord változott, teljes újrarajzolás
+    if (backgroundColor != lastBackgroundColor || traffipax != lastTraffipaxPtr) {
+        fullRedraw = true;
+        lastBackgroundColor = backgroundColor;
+        lastTraffipaxPtr = traffipax;
 
-    // Város (első sor, balra igazítva)
-    spriteAlertBar.setTextDatum(TL_DATUM);
-    char cityText[MAX_CITY_LEN];
-    strncpy(cityText, traffipax->city, MAX_CITY_LEN);
-    spriteAlertBar.setFreeFont(&FreeSansBold18pt7b);
-    spriteAlertBar.drawString(cityText, ALERT_TEXT_PADDING, 10);
+        // Város és utca szöveg mentése
+        strncpy(lastCityText, traffipax->city, MAX_CITY_LEN);
+        strncpy(lastStreetText, traffipax->street_or_km, MAX_STREET_LEN);
+    }
 
-    // Utca/km (második sor, balra igazítva)
-    char streetText[MAX_STREET_LEN];
-    strncpy(streetText, traffipax->street_or_km, MAX_STREET_LEN);
-    spriteAlertBar.setFreeFont(&FreeSansBold12pt7b);
-    spriteAlertBar.drawString(streetText, ALERT_TEXT_PADDING, 45);
+    if (fullRedraw) {
+        // Háttér sáv
+        tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, backgroundColor);
 
-    // Távolság (jobbra, vertikálisan középre)
-    spriteAlertBar.setTextDatum(MR_DATUM);
-    char distanceText[16];
-    snprintf(distanceText, sizeof(distanceText), "%dm", (int)distance);
-    spriteAlertBar.setFreeFont(&FreeSansBold24pt7b);
-    spriteAlertBar.drawString(distanceText, tft.width() - ALERT_TEXT_PADDING, ALERT_BAR_HEIGHT / 2);
+        // Város (első sor, balra igazítva)
+        tft.setTextDatum(TL_DATUM);
+        tft.setTextColor(textColor, backgroundColor);
+        tft.setFreeFont(&FreeSans9pt7b);
+        tft.setTextSize(2);
+        tft.drawString(lastCityText, ALERT_TEXT_PADDING, 10);
 
-    spriteAlertBar.setFreeFont();
-    spriteAlertBar.pushSprite(0, 0);
+        // Utca/km (második sor, balra igazítva)
+        tft.setTextSize(1);
+        tft.drawString(lastStreetText, ALERT_TEXT_PADDING, 55);
+    }
+
+    // Távolság (jobbra, vertikálisan középre) csak akkor töröljük, ha változott
+    int intDistance = (int)distance;
+    if (intDistance != lastDistance || fullRedraw) {
+
+        char distanceText[16];
+        snprintf(distanceText, sizeof(distanceText), "%dm", intDistance);
+
+        tft.setTextDatum(MR_DATUM);
+        tft.setFreeFont(&FreeSerifBold24pt7b);
+        tft.setTextSize(1);
+        tft.setTextPadding(tft.textWidth("8888m"));
+        tft.setTextColor(textColor, backgroundColor);
+        tft.drawString(distanceText, ::SCREEN_W - ALERT_TEXT_PADDING, ALERT_BAR_HEIGHT / 2);
+        lastDistance = intDistance;
+    }
+
+    tft.setFreeFont();
 }
 
 /**
