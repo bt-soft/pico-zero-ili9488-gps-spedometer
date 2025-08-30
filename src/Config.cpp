@@ -20,7 +20,7 @@ const Config_t DEFAULT_CONFIG = {
     .gpsTraffiSirenAlarmEnabled = true, // GPS traffipax sziréna riasztás engedélyezése
 
     // GPS debug opciók
-    .debugGpsSerialOnInternalFastLed = false, // GPS érvényes NMEA mondatok esetén a belső LED villogtatása
+    .debugGpsSerialOnInternalFastLed = false, // GPS érvényes NMEA mondatok esetén a Zero belső LED villogtatása
     .debugGpsSerialData = false,              // GPS soros adat kiírása a soros portra
     .debugGpsSatellitesDatabase = false,
 
