@@ -857,7 +857,7 @@ void ScreenMain::handleOwnLoop() {
 #define VERTICAL_LINEAR_METER_BAR_Y 250
     // Vertical Line bar - Battery (sprite-os)
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        "Vsys [V]",                       // category
+                        "Vbus [V]",                       // category
                         data.busVoltage,                  // value
                         BATT_BARMETER_MIN,                // minVal
                         BATT_BARMETER_MAX,                // maxVal
