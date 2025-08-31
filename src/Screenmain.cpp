@@ -106,7 +106,7 @@ void ScreenMain::drawSatelliteIcon(int16_t x, int16_t y) {
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.setFreeFont();
     tft.setTextSize(1);
-    tft.drawString("sats", x, y + 27);
+    tft.drawString("sats", x, y + 28);
 }
 
 /**
@@ -262,7 +262,7 @@ void ScreenMain::drawSpeedometerIcon(int16_t x, int16_t y) {
     tft.setFreeFont();
     tft.setTextSize(1);
     tft.setTextPadding(0); // ne töröljön bele felesleges pixelbe
-    tft.drawString("max sp", x + 16, y + 20);
+    tft.drawString("max sp", x + 16, y + 22);
 }
 
 /**
