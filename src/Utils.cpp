@@ -231,9 +231,9 @@ void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int p
 }
 
 /**
- * Sziréna hangjelzés indítása
+ * Sziréna hangjelzés indítása - Nem blokkoló
  */
-void startSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs) {
+void startNonBlockingSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs) {
     if (sirenActive)
         return;
     siren_cycles = cycles;
@@ -252,17 +252,17 @@ void startSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int 
 }
 
 /**
- * Sziréna hangjelzés leállítása
+ * Sziréna hangjelzés leállítása - Nem blokkoló
  */
-void stopSiren() {
+void stopNonBlockingSiren() {
     sirenActive = false;
     noTone(PIN_BUZZER);
 }
 
 /**
- * Sziréna hangjelzés kezelése
+ * Sziréna hangjelzés kezelése  - Nem blokkoló
  */
-void handleSiren() {
+void handleNonBlockingSiren() {
     if (!sirenActive) {
         return;
     }
@@ -274,7 +274,7 @@ void handleSiren() {
             isPaused = false;
             cyclesDone++;
             if (cyclesDone >= siren_cycles) {
-                stopSiren();
+                stopNonBlockingSiren();
                 return;
             }
             sweepingUp = true;

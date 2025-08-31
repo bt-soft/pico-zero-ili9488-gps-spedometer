@@ -53,23 +53,25 @@ void beepAlert();
  * @param toneMs egy lépés hossza (ms)
  * @param pauseMs ciklusok közti szünet (ms)
  */
+void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs);
+
 /**
- * Sziréna hangjelzés (felfutó-lefutó)
- * @param cycles hány sziréna ciklus
- * @param minFreq kezdő frekvencia (Hz)
+ * @brief Nem-blokkoló sziréna vezérlése
+ *
  * @param maxFreq vég frekvencia (Hz)
  * @param step lépésköz (Hz)
  * @param toneMs egy lépés hossza (ms)
  * @param pauseMs ciklusok közti szünet (ms)
  */
-void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs);
-
+void startNonBlockingSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs);
 /**
- * @brief Nem-blokkoló sziréna vezérlése
+ * Nem-blokkoló sziréna kezelése
  */
-void startSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs);
-void handleSiren();
-void stopSiren();
+void handleNonBlockingSiren();
+/**
+ * Nem-blokkoló sziréna leállítása
+ */
+void stopNonBlockingSiren();
 
 /**
  * @brief CRC16 számítás (CCITT algoritmus)

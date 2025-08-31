@@ -472,7 +472,7 @@ void ScreenMain::clearTraffipaxAlert() {
     tft.fillRect(0, 0, tft.width(), ALERT_BAR_HEIGHT, TFT_BLACK);
 
     // Ha vansziréna, akkor azt most lelőjük
-    Utils::stopSiren();
+    Utils::stopNonBlockingSiren();
 }
 
 /**
@@ -651,7 +651,7 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
     if (config.data.gpsTraffiSirenAlarmEnabled) {
         if (traffipaxAlert.currentState == TraffipaxAlert::APPROACHING) {
             if (currentTime - traffipaxAlert.lastSirenTime >= TraffipaxAlert::SIREN_INTERVAL) {
-                Utils::startSiren(2, 600, 1800, 40, 4, 100);
+                Utils::startNonBlockingSiren(2, 600, 1800, 40, 4, 100);
                 traffipaxAlert.lastSirenTime = currentTime;
             }
         }
@@ -853,9 +853,6 @@ void ScreenMain::handleOwnLoop() {
     if (this->forceRedraw) {
         this->forceRedraw = false;
     }
-
-    // Handle non-blocking siren
-    Utils::handleSiren();
 }
 
 // Demó logika kiszervezése

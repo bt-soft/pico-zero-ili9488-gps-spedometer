@@ -189,7 +189,7 @@ void loop() {
     sensorUtils.loop();
 
     // Handle non-blocking siren
-    Utils::handleSiren();
+    Utils::handleNonBlockingSiren();
 
     //------------------- Touch esemény kezelése
     uint16_t touchX, touchY;
