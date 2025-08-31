@@ -26,7 +26,7 @@ extern bool demoMode;
 void ScreenMain::layoutComponents() {
     // Info gomb bal alsó sarokban
     addChild(std::make_shared<UIButton>(
-        1, //                                                                                                                         //
+        1,                                                                                                                          // Info gomb azonosítója
         Rect(0, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH - 8, UIButton::DEFAULT_BUTTON_HEIGHT), //
         "Info",                                                                                                                     //
         UIButton::ButtonType::Pushable,
@@ -40,7 +40,7 @@ void ScreenMain::layoutComponents() {
 
     // Setup gomb jobb alsó sarokban
     addChild(std::make_shared<UIButton>(
-        2,                                                                                                                                                                //
+        2,                                                                                                                                                                // Setup gomb azonosítója
         Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), //
         "Setup",                                                                                                                                                          //
         UIButton::ButtonType::Pushable,
