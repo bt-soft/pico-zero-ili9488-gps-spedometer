@@ -73,12 +73,15 @@ void ScreenInfo::drawContent() {
 
     // Táblázat prompt
     tft.setTextSize(1);
+    tft.setTextPadding(0);
     tft.setTextDatum(MR_DATUM);
     tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
 
+    constexpr uint8_t lineHeight = 10;
+
+    // 1. oszlop
     uint16_t tableX = 100;
     uint16_t tableY = 110;
-    constexpr uint8_t lineHeight = 10;
 
     tft.drawString("CPU", tableX, tableY);
     tableY += lineHeight;
@@ -92,10 +95,21 @@ void ScreenInfo::drawContent() {
     tableY += lineHeight;
     tft.drawString("Trafipax DB size", tableX, tableY);
 
+    // 2. oszlop
+    tableX = 330;
+    tableY = 110;
+    tft.drawString("Total Heap", tableX, tableY);
+    tableY += lineHeight;
+    tft.drawString("Free Heap", tableX, tableY);
+    tableY += lineHeight;
+    tft.drawString("Used Heap", tableX, tableY);
+    tableY += lineHeight;
+
     // Táblázat Értékek
     tft.setTextDatum(ML_DATUM);
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
+    // 1. oszlop értékek
     tableX = 120;
     tableY = 110;
     tft.drawString("Raspberry Pi Pico Zero", tableX, tableY);
@@ -109,6 +123,16 @@ void ScreenInfo::drawContent() {
     tft.drawString(String(__DATE__) + " " + String(__TIME__), tableX, tableY);
     tableY += lineHeight;
     tft.drawString(String(::traffipaxManager.count()), tableX, tableY);
+
+    // 2. oszlop értékek
+    tableX = 340;
+    tableY = 110;
+    tft.drawString(String(rp2040.getTotalHeap() / 1024.0f) + " kB", tableX, tableY);
+    tableY += lineHeight;
+    tft.drawString(String(rp2040.getFreeHeap() / 1024.0f) + "  kB", tableX, tableY);
+    tableY += lineHeight;
+    tft.drawString(String(rp2040.getUsedHeap() / 1024.0f) + " kB", tableX, tableY);
+    tableY += lineHeight;
 
     // 2. tábla prompt - Azért kell a 2. tábla promptjait előbb kiírni,
     // mert az MR_DATUM törli az előtte lévő teljes tartalmat, így az 1. tábla promptokat is
