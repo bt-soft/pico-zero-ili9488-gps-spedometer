@@ -219,7 +219,7 @@ void GpsManager::loop() {
         processGSVMessages();
 
         // GPS boot idő számítása (első érvényes műholdadat)
-        if (gpsBootTime == 0 && gps.satellites.isValid() && gps.satellites.value() > 0) {
+        if (gpsBootTime == 0 && gps.satellites.isValid() && gps.satellites.age() < GPS_DATA_MAX_AGE && gps.satellites.value() > 0) {
             gpsBootTime = (millis() - bootStartTime) / 1000;
         }
 

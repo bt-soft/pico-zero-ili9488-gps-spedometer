@@ -180,6 +180,23 @@ void ScreenSats::drawSatelliteTable() {
     // Üres sorok törlése a lista végén
     if (itemCount < MAX_SATS_TABLE_ITEMS) {
         tft.fillRect(TABLE_X, currentY, TABLE_WIDTH, (MAX_SATS_TABLE_ITEMS - itemCount) * lineHeight, TFT_BLACK);
+        currentY += (MAX_SATS_TABLE_ITEMS - itemCount) * lineHeight;
+    }
+
+    // Ha több műhold van, mint amit megjelenítünk, írjuk ki a végére, különben töröljük a felirat helyét
+    currentY += 10;
+    if (satellites.size() > MAX_SATS_TABLE_ITEMS) {
+        uint8_t remaining = satellites.size() - MAX_SATS_TABLE_ITEMS;
+        tft.setTextColor(TFT_BROWN, TFT_BLACK);
+        tft.setTextDatum(TL_DATUM);
+        tft.setFreeFont();
+        tft.setTextSize(1);
+        char msg[16];
+        sprintf(msg, "and %u more...", remaining);
+        tft.drawString(msg, TABLE_X, currentY);
+    } else {
+        // töröljük a felirat helyét, ha korábban ott volt
+        tft.fillRect(TABLE_X, currentY, TABLE_WIDTH, 28, TFT_BLACK);
     }
 
     tft.setFreeFont();
@@ -276,28 +293,44 @@ uint32_t ScreenSats::getColorBySnr(uint8_t snr) {
         return TFT_YELLOW;
     if (snr > 10)
         return TFT_GOLD;
-    return TFT_ORANGE;
+
+    return TFT_BROWN;
 }
 
 /**
  * @brief Érintés kezelése
  */
 bool ScreenSats::handleTouch(const TouchEvent &event) {
+
     if (UIScreen::handleTouch(event)) {
         return true;
     }
+
     if (!event.pressed) {
         int16_t x = event.x;
         int16_t y = event.y;
+
+        // PRN touch?
         if (x >= TABLE_X && x <= TABLE_X + 40 && y >= TABLE_Y + 25 && y <= TABLE_Y + 45) {
             handlePrnHeaderClick();
+            // Pittyentünk, ha az engedélyezve van
+            if (config.data.beeperEnabled) {
+                Utils::beepTick();
+            }
             return true;
-        }
-        if (x >= TABLE_X + 120 && x <= TABLE_X + TABLE_WIDTH && y >= TABLE_Y + 25 && y <= TABLE_Y + 45) {
+
+        } // SNR touch?
+        else if (x >= TABLE_X + 120 && x <= TABLE_X + TABLE_WIDTH && y >= TABLE_Y + 25 && y <= TABLE_Y + 45) {
             handleSnrHeaderClick();
+            // Pittyentünk, ha az engedélyezve van
+            if (config.data.beeperEnabled) {
+                Utils::beepTick();
+            }
+
             return true;
         }
     }
+
     return false;
 }
 
