@@ -681,12 +681,14 @@ void ScreenMain::handleOwnLoop() {
 
     // Ha nincs traffipax riasztás, akkor mehet a felső részek rajzolása is
     if (!this->traffiAlarmActive) {
+
         // Műholdak száma + GPS működési mód
         if (this->forceRedraw) {
             lastSatCount = 255;
             lastGpsMode = "";
         }
-        updateUIValue<uint8_t>(
+        // Műholdak száma
+        UIScreen::updateUIValue<uint8_t>(
             lastSatCount, data.satelliteCount,
             [&]() {
                 tft.setTextDatum(ML_DATUM);
@@ -699,11 +701,16 @@ void ScreenMain::handleOwnLoop() {
             },
             0, this->forceRedraw);
 
-        updateUIValue<String>(
+        // GPS működési mód
+        UIScreen::updateUIValue<String>(
             lastGpsMode, data.gpsMode,
             [&]() {
+                tft.setTextDatum(ML_DATUM);
+                tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                tft.setFreeFont();
                 tft.setTextSize(1);
-                gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? tft.setTextColor(TFT_ORANGE, TFT_BLACK) : tft.setTextColor(TFT_GREEN, TFT_BLACK);
+                uint16_t fgcolor = gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? TFT_ORANGE : TFT_GREEN;
+                tft.setTextColor(fgcolor, TFT_BLACK);
                 tft.setTextPadding(tft.textWidth("Differential"));
                 tft.drawString(data.gpsMode, 65, 15, 1);
                 tft.setFreeFont();
@@ -712,7 +719,7 @@ void ScreenMain::handleOwnLoop() {
 
         // Dátum és idő
         String currentDateTime = data.dateString + data.timeString;
-        updateUIValue<String>(
+        UIScreen::updateUIValue<String>(
             lastDateTime, currentDateTime,
             [&]() {
                 tft.setTextSize(2);
@@ -730,7 +737,7 @@ void ScreenMain::handleOwnLoop() {
             0, this->forceRedraw);
 
         // Magasság
-        updateUIValue<double>(
+        UIScreen::updateUIValue<double>(
             lastAltitude, data.altitudeValid ? data.altitude : -9999.0,
             [&]() {
                 tft.setTextDatum(ML_DATUM);
@@ -745,7 +752,7 @@ void ScreenMain::handleOwnLoop() {
             1.0, this->forceRedraw);
 
         // GPS HDOP
-        updateUIValue<double>(
+        UIScreen::updateUIValue<double>(
             lastHdop, data.hdopValid ? data.hdop : -1.0,
             [&]() {
                 tft.setTextDatum(ML_DATUM);
@@ -760,7 +767,7 @@ void ScreenMain::handleOwnLoop() {
             0.1, this->forceRedraw);
 
         // Maximum sebesség
-        updateUIValue<double>(
+        UIScreen::updateUIValue<double>(
             maxSpeed, data.currentSpeed,
             [&]() {
                 tft.setTextDatum(ML_DATUM);
@@ -775,7 +782,7 @@ void ScreenMain::handleOwnLoop() {
     }
 
     // Aktuális sebesség
-    updateUIValue<double>(
+    UIScreen::updateUIValue<double>(
         lastSpeed, data.speedValid ? data.currentSpeed : -1.0,
         [&]() {
             tft.loadFont(Arial_Narrow_Bold120);
