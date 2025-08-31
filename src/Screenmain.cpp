@@ -651,7 +651,7 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
     if (config.data.gpsTraffiSirenAlarmEnabled) {
         if (traffipaxAlert.currentState == TraffipaxAlert::APPROACHING) {
             if (currentTime - traffipaxAlert.lastSirenTime >= TraffipaxAlert::SIREN_INTERVAL) {
-                Utils::startSiren(2, 600, 1800, 20, 4, 100);
+                Utils::startSiren(2, 600, 1800, 40, 4, 100);
                 traffipaxAlert.lastSirenTime = currentTime;
             }
         }

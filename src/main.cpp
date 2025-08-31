@@ -188,6 +188,9 @@ void loop() {
     // Szenzorok karbantartása
     sensorUtils.loop();
 
+    // Handle non-blocking siren
+    Utils::handleSiren();
+
     //------------------- Touch esemény kezelése
     uint16_t touchX, touchY;
     bool touchedRaw = tft.getTouch(&touchX, &touchY);

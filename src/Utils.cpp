@@ -263,8 +263,9 @@ void stopSiren() {
  * Sziréna hangjelzés kezelése
  */
 void handleSiren() {
-    if (!sirenActive)
+    if (!sirenActive) {
         return;
+    }
 
     unsigned long currentTime = millis();
 
