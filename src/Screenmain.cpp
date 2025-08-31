@@ -858,21 +858,30 @@ void ScreenMain::handleOwnLoop() {
     }
 }
 
-// Demó logika kiszervezése
+/**
+ * Demó logika kiszervezése
+ */
 void ScreenMain::handleDemoMode(DisplayData &data) {
     bool isTraffipaxManagerDemoActive = traffipaxManager.isDemoActive();
+
+    // Ha a demó aktív volt és most nem az, rögzítjük a befejezési időt.
     if (wasDemoActive && !isTraffipaxManagerDemoActive) {
         lastDemoEndTime = millis();
         DEBUG("Traffi Demo Fázis: 2 perc várakozás\n");
     }
     wasDemoActive = isTraffipaxManagerDemoActive;
-    if (!isTraffipaxManagerDemoActive && lastDemoEndTime != 0 && Utils::timeHasPassed(lastDemoEndTime, 2 * 60 * 1000)) {
-        traffipaxManager.startDemo();
-        lastDemoEndTime = 0;
+
+    // Ha a demó nem aktív:
+    if (!isTraffipaxManagerDemoActive) {
+        // Ha ez az első futás (lastDemoEndTime 0 és wasDemoActive kezdetben hamis)
+        // VAGY ha a várakozási időszak letelt az utolsó demó befejezése óta.
+        if (lastDemoEndTime == 0 || Utils::timeHasPassed(lastDemoEndTime, 2 * 60 * 1000)) {
+            traffipaxManager.startDemo();
+            lastDemoEndTime = 0; // Visszaállítás a következő várakozási időszakra
+        }
     }
-    if (!isTraffipaxManagerDemoActive && lastDemoEndTime == 0) {
-        traffipaxManager.startDemo();
-    }
+
+    // Ha a demó aktív, dolgozzuk fel.
     if (isTraffipaxManagerDemoActive) {
         traffipaxManager.processDemo();
         traffipaxManager.getDemoCoords(data.latitude, data.longitude);
@@ -884,9 +893,10 @@ void ScreenMain::handleDemoMode(DisplayData &data) {
  * @brief Touch esemény kezelése - hőmérsékleti mód váltás
  */
 bool ScreenMain::handleTouch(const TouchEvent &event) {
+
     // Csak lenyomás eseményre reagálunk
     if (!event.pressed) {
-        return UIScreen::handleTouch(event); // Továbbítjuk az alaposztálynak
+        return UIScreen::handleTouch(event); // Továbbítjuk az ősosztálynak
     }
 
     // Műhold ikon és szám területének ellenőrzése (bal felső sarok)
