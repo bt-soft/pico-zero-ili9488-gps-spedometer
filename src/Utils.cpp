@@ -4,6 +4,23 @@
 
 namespace Utils {
 
+// Nem-blokkoló sziréna állapotváltozói
+namespace {
+bool sirenActive = false;
+int siren_cycles;
+int siren_minFreq;
+int siren_maxFreq;
+int siren_step;
+int siren_toneMs;
+int siren_pauseMs;
+
+unsigned long lastSirenActionTime = 0;
+int currentFreq;
+bool sweepingUp = true;
+int cyclesDone = 0;
+bool isPaused = false;
+} // namespace
+
 /**
  * @brief Átalakít egy milliszekundum értéket "perc:mp:ms" formátumú szöveggé
  * @param msec Időérték milliszekundumban
@@ -53,7 +70,7 @@ void tftTouchCalibrate(TFT_eSPI &tft, uint16_t (&calData)[5]) {
     tft.fillScreen(TFT_BLACK);
     tft.setTextFont(2);
     tft.setTextSize(2);
-    const char *txt = "TFT touch kalibrácio kell!\n";
+    const char *txt = "TFT touch kalibracio kell!\n";
     tft.setCursor((tft.width() - tft.textWidth(txt)) / 2, tft.height() / 2 - 60);
     tft.setTextColor(TFT_ORANGE, TFT_BLACK);
     tft.println(txt);
@@ -158,9 +175,6 @@ void removeAccents(char *text) {
  *  Pitty hangjelzés
  */
 void beepTick() {
-    // Csak akkor csipogunk, ha a beeper engedélyezve van
-    // if (!config.data.beeperEnabled)
-    //    return;
     tone(PIN_BUZZER, 800);
     delay(10);
     noTone(PIN_BUZZER);
@@ -170,9 +184,6 @@ void beepTick() {
  * Hiba jelzés
  */
 void beepError() {
-    // Csak akkor csipogunk, ha a beeper engedélyezve van
-    // if (!config.data.beeperEnabled)
-    //    return;
     tone(PIN_BUZZER, 500);
     delay(100);
     tone(PIN_BUZZER, 500);
@@ -186,9 +197,6 @@ void beepError() {
  * Trafipax riasztó hangjelzés
  */
 void beepAlert() {
-    // Csak akkor csipogunk, ha a beeper engedélyezve van
-    // if (!config.data.beeperEnabled)
-    //    return;
     for (int i = 0; i < 3; i++) {
         tone(PIN_BUZZER, 1200);
         delay(60);
@@ -205,16 +213,14 @@ void beepAlert() {
 }
 
 /**
- * Sziréna hangjelzés (felfutó-lefutó)
+ * Sziréna hangjelzés (felfutó-lefutó) - BLOKKOLÓ
  */
 void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs) {
     for (int c = 0; c < cycles; c++) {
-        // Felfutó
         for (int f = minFreq; f <= maxFreq; f += step) {
             tone(PIN_BUZZER, f);
             delay(toneMs);
         }
-        // Lefutó
         for (int f = maxFreq; f >= minFreq; f -= step) {
             tone(PIN_BUZZER, f);
             delay(toneMs);
@@ -225,12 +231,83 @@ void beepSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int p
 }
 
 /**
+ * Sziréna hangjelzés indítása
+ */
+void startSiren(int cycles, int minFreq, int maxFreq, int step, int toneMs, int pauseMs) {
+    if (sirenActive)
+        return;
+    siren_cycles = cycles;
+    siren_minFreq = minFreq;
+    siren_maxFreq = maxFreq;
+    siren_step = step;
+    siren_toneMs = toneMs;
+    siren_pauseMs = pauseMs;
+    sirenActive = true;
+    isPaused = false;
+    cyclesDone = 0;
+    currentFreq = siren_minFreq;
+    sweepingUp = true;
+    lastSirenActionTime = millis();
+    tone(PIN_BUZZER, currentFreq);
+}
+
+/**
+ * Sziréna hangjelzés leállítása
+ */
+void stopSiren() {
+    sirenActive = false;
+    noTone(PIN_BUZZER);
+}
+
+/**
+ * Sziréna hangjelzés kezelése
+ */
+void handleSiren() {
+    if (!sirenActive)
+        return;
+
+    unsigned long currentTime = millis();
+
+    if (isPaused) {
+        if (currentTime - lastSirenActionTime >= (unsigned long)siren_pauseMs) {
+            isPaused = false;
+            cyclesDone++;
+            if (cyclesDone >= siren_cycles) {
+                stopSiren();
+                return;
+            }
+            sweepingUp = true;
+            currentFreq = siren_minFreq;
+            tone(PIN_BUZZER, currentFreq);
+            lastSirenActionTime = currentTime;
+        }
+        return;
+    }
+
+    if (currentTime - lastSirenActionTime >= (unsigned long)siren_toneMs) {
+        lastSirenActionTime = currentTime;
+
+        if (sweepingUp) {
+            currentFreq += siren_step;
+            if (currentFreq > siren_maxFreq) {
+                currentFreq = siren_maxFreq;
+                sweepingUp = false;
+            }
+        } else {
+            currentFreq -= siren_step;
+            if (currentFreq < siren_minFreq) {
+                currentFreq = siren_minFreq;
+                noTone(PIN_BUZZER);
+                isPaused = true;
+                return;
+            }
+        }
+        tone(PIN_BUZZER, currentFreq);
+    }
+}
+
+/**
  * @brief CRC16 számítás (CCITT algoritmus)
- * Használhatnánk a CRC könyvtárat is, de itt saját implementációt adunk
- *
- * @param data Adat pointer
- * @param length Adat hossza bájtokban
- * @return Számított CRC16 érték
  */
 uint16_t calcCRC16(const uint8_t *data, size_t length) {
     uint16_t crc = 0xFFFF;
