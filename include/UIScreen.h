@@ -1,5 +1,10 @@
 #pragma once
 
+#include <functional>
+#include <type_traits>
+#include <cmath>
+#include <Arduino.h>
+
 #include "IScreenManager.h"
 #include "UIContainerComponent.h"
 #include "UIDialogBase.h"
@@ -224,6 +229,40 @@ class UIScreen : public UIContainerComponent {
     inline bool isDialogActive() const { return !dialogStack.empty(); }
 
   protected:
+
+    /**
+     * @brief Helper function to update a UI value only if it has changed.
+     *
+     * This template function compares a new value with a last known value.
+     * If the value has changed (or if forceRedraw is true), it executes the provided
+     * drawing lambda function and updates the last known value.
+     *
+     * It has specialized handling for:
+     * - String: Compares for exact inequality.
+     * - Numeric types: Compares if the absolute difference exceeds a threshold.
+     *
+     * @tparam T The type of the value to compare.
+     * @param lastValue Reference to the variable holding the last value.
+     * @param newValue The new value to compare.
+     * @param drawFunc A lambda function that contains the drawing code to execute on change.
+     * @param threshold The threshold for numeric comparisons.
+     * @param forceRedraw If true, forces the update regardless of change.
+     */
+    template <typename T>
+    static void updateUIValue(T &lastValue, T newValue, std::function<void()> drawFunc, double threshold = 0.1, bool forceRedraw = false) {
+        if constexpr (std::is_same_v<T, String>) {
+            if (forceRedraw || newValue != lastValue) {
+                drawFunc();
+                lastValue = newValue;
+            }
+        } else {
+            if (forceRedraw || std::abs(static_cast<double>(newValue) - static_cast<double>(lastValue)) > threshold) {
+                drawFunc();
+                lastValue = newValue;
+            }
+        }
+    }
+
     // ===================================================================
     // Dialog cleanup helper methods
     // ===================================================================

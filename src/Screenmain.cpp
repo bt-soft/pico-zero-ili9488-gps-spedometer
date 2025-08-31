@@ -4,6 +4,7 @@
 #include "UIButton.h"
 #include "Utils.h"
 #include "defines.h"
+#include <Arduino.h>
 
 extern TraffipaxManager traffipaxManager;
 
@@ -654,10 +655,9 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
 /**
  * Kezeli a képernyő saját ciklusát (dinamikus frissítés)
  */
-void ScreenMain::handleOwnLoop() {
 
+void ScreenMain::handleOwnLoop() {
     // 1 másodperces frissítés
-    static long lastUpdate = 0;
     if (!Utils::timeHasPassed(lastUpdate, 1000)) {
         return;
     }
@@ -666,40 +666,9 @@ void ScreenMain::handleOwnLoop() {
     // Adatok legyűjtése (demó vagy valós mód szerint)
     DisplayData data = demoMode ? collectDemoData() : collectRealData();
 
-    // Ha demó módban vagyunk és a traffipaxManager demója nem aktív, akkor :
-    // - ha most indulunk, azonnal elinditjuk,
-    // - ha mar egyszer lefutott, akkor 2 perc(120000 ms) elteltével újra elinditjuk.
-    static unsigned long lastDemoEndTime = 0;
-    static bool wasDemoActive = false;
+    // Demó logika kiszervezése
     if (demoMode) {
-
-        // Fut a TraffipaxManager demója?
-        bool isTraffipaxManagerDemoActive = traffipaxManager.isDemoActive();
-
-        // Ha a demo éppen most fejeződött be (aktívból inaktívba vált)
-        if (wasDemoActive && !isTraffipaxManagerDemoActive) {
-            lastDemoEndTime = millis();
-            DEBUG("Traffi Demo Fázis: 2 perc várakozás\n");
-        }
-        wasDemoActive = isTraffipaxManagerDemoActive;
-
-        // Ha nem fut a demo, és eltelt 2 perc a befejezés óta, indítsuk újra
-        if (!isTraffipaxManagerDemoActive && lastDemoEndTime != 0 && Utils::timeHasPassed(lastDemoEndTime, 2 * 60 * 1000)) {
-            traffipaxManager.startDemo();
-            lastDemoEndTime = 0; // nullázzuk, hogy ne induljon újra folyamatosan
-        }
-
-        // Ha még sosem futott, indítsuk el azonnal
-        if (!isTraffipaxManagerDemoActive && lastDemoEndTime == 0) {
-            traffipaxManager.startDemo();
-        }
-
-        // Demó módban a közelítés/tavolodás adatokat is frissítjük
-        if (isTraffipaxManagerDemoActive) {
-            traffipaxManager.processDemo();
-            traffipaxManager.getDemoCoords(data.latitude, data.longitude);
-            data.positionValid = true;
-        }
+        handleDemoMode(data);
     }
 
     // Trafipax figyelmeztetés feldolgozása, ha engedélyezve van
@@ -712,138 +681,114 @@ void ScreenMain::handleOwnLoop() {
 
     // Ha nincs traffipax riasztás, akkor mehet a felső részek rajzolása is
     if (!this->traffiAlarmActive) {
-
         // Műholdak száma + GPS működési mód
-        static uint8_t lastSatCount = 255; // Kényszerített első frissítés
-        static String lastGpsMode = "";
         if (this->forceRedraw) {
-            // Kényszerített újrarajzolás esetén reseteljük a statikus változókat
             lastSatCount = 255;
             lastGpsMode = "";
         }
-        if (data.satelliteCount != lastSatCount || data.gpsMode != lastGpsMode) {
-            tft.setTextDatum(ML_DATUM);
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
-            tft.setFreeFont();
-            tft.setTextSize(2);
-            tft.setTextPadding(tft.textWidth("88") + 10);
-            tft.drawString(String(data.satelliteCount), 30, 15, 2);
+        updateUIValue<uint8_t>(
+            lastSatCount, data.satelliteCount,
+            [&]() {
+                tft.setTextDatum(ML_DATUM);
+                tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                tft.setFreeFont();
+                tft.setTextSize(2);
+                tft.setTextPadding(tft.textWidth("88") + 10);
+                tft.drawString(String(data.satelliteCount), 30, 15, 2);
+                tft.setFreeFont();
+            },
+            0, this->forceRedraw);
 
-            // GPS működési mód
-            tft.setTextSize(1);
-            gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? tft.setTextColor(TFT_ORANGE, TFT_BLACK) : tft.setTextColor(TFT_GREEN, TFT_BLACK);
-            tft.setTextPadding(tft.textWidth("Differential"));
-            tft.drawString(data.gpsMode, 65, 15, 1);
-
-            lastSatCount = data.satelliteCount;
-            lastGpsMode = data.gpsMode;
-            tft.setFreeFont();
-        }
+        updateUIValue<String>(
+            lastGpsMode, data.gpsMode,
+            [&]() {
+                tft.setTextSize(1);
+                gpsManager->getLocation().FixMode() == TinyGPSLocation::N ? tft.setTextColor(TFT_ORANGE, TFT_BLACK) : tft.setTextColor(TFT_GREEN, TFT_BLACK);
+                tft.setTextPadding(tft.textWidth("Differential"));
+                tft.drawString(data.gpsMode, 65, 15, 1);
+                tft.setFreeFont();
+            },
+            0, this->forceRedraw);
 
         // Dátum és idő
-        static String lastDateTime = "";
         String currentDateTime = data.dateString + data.timeString;
-        if (this->forceRedraw) {
-            // Kényszerített újrarajzolás esetén reseteljük a statikus változót
-            lastDateTime = "?";
-        }
-        if (currentDateTime != lastDateTime) {
-            tft.setTextSize(2);
-            tft.setFreeFont();
-            tft.setTextDatum(ML_DATUM);
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
-            tft.setTextPadding(tft.textWidth("8888-88-88") + 10);
-            tft.drawString(data.dateString, ::SCREEN_W / 2 - 60, 12, 1);
-
-            tft.setTextSize(1);
-            tft.setFreeFont(&FreeSansBold18pt7b);
-            tft.setTextPadding(tft.textWidth("88:88:88") + 10);
-            tft.drawString(data.timeString, ::SCREEN_W / 2 - 80, 40);
-
-            lastDateTime = currentDateTime;
-            tft.setFreeFont();
-        }
+        updateUIValue<String>(
+            lastDateTime, currentDateTime,
+            [&]() {
+                tft.setTextSize(2);
+                tft.setFreeFont();
+                tft.setTextDatum(ML_DATUM);
+                tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                tft.setTextPadding(tft.textWidth("8888-88-88") + 10);
+                tft.drawString(data.dateString, ::SCREEN_W / 2 - 60, 12, 1);
+                tft.setTextSize(1);
+                tft.setFreeFont(&FreeSansBold18pt7b);
+                tft.setTextPadding(tft.textWidth("88:88:88") + 10);
+                tft.drawString(data.timeString, ::SCREEN_W / 2 - 80, 40);
+                tft.setFreeFont();
+            },
+            0, this->forceRedraw);
 
         // Magasság
-        static double lastAltitude = -9999.0;
-        if (this->forceRedraw) {
-            // Kényszerített újrarajzolás esetén reseteljük a statikus változót
-            lastAltitude = -9999.0;
-        }
-        if (abs(data.altitude - lastAltitude) > 1.0 || (data.altitudeValid != (lastAltitude != -9999.0))) {
-            tft.setTextDatum(ML_DATUM);
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
-            tft.setFreeFont();
-            tft.setTextSize(2);
-
-            int paddingWidth = tft.textWidth("8888", 2) + 10;
-            tft.setTextPadding(paddingWidth);
-
-            String altText = (data.altitudeValid ? String((int)data.altitude) : "-- ");
-            tft.drawString(altText, ::SCREEN_W - 90, 13, 2);
-            lastAltitude = data.altitudeValid ? data.altitude : -9999.0;
-        }
+        updateUIValue<double>(
+            lastAltitude, data.altitudeValid ? data.altitude : -9999.0,
+            [&]() {
+                tft.setTextDatum(ML_DATUM);
+                tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                tft.setFreeFont();
+                tft.setTextSize(2);
+                int paddingWidth = tft.textWidth("8888", 2) + 10;
+                tft.setTextPadding(paddingWidth);
+                String altText = (data.altitudeValid ? String((int)data.altitude) : "-- ");
+                tft.drawString(altText, ::SCREEN_W - 90, 13, 2);
+            },
+            1.0, this->forceRedraw);
 
         // GPS HDOP
-        static double lastHdop = -1.0;
-        if (this->forceRedraw) {
-            // Kényszerített újrarajzolás esetén reseteljük a statikus változót
-            lastHdop = -1.0;
-        }
-        if (abs(data.hdop - lastHdop) > 0.1 || (data.hdopValid != (lastHdop >= 0))) {
-            tft.setTextDatum(ML_DATUM);
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
-            tft.setFreeFont();
-            tft.setTextSize(2);
-            tft.setTextPadding(tft.textWidth("88.88") + 15);
+        updateUIValue<double>(
+            lastHdop, data.hdopValid ? data.hdop : -1.0,
+            [&]() {
+                tft.setTextDatum(ML_DATUM);
+                tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                tft.setFreeFont();
+                tft.setTextSize(2);
+                tft.setTextPadding(tft.textWidth("88.88") + 15);
+                dtostrf(data.hdop, 0, 2, buf);
+                tft.drawString(data.hdopValid ? String(buf) : "--", 35, 63, 2);
+                tft.setFreeFont();
+            },
+            0.1, this->forceRedraw);
 
-            dtostrf(data.hdop, 0, 2, buf);
-            tft.drawString(data.hdopValid ? String(buf) : "--", 35, 63, 2);
-            lastHdop = data.hdopValid ? data.hdop : -1.0;
-            tft.setFreeFont();
-        }
-
-        // Maximum sebesség, ez statikus változó
-        static double maxSpeed = -1.0;
-        if (this->forceRedraw) {
-            // Kényszerített újrarajzolás esetén reseteljük a statikus változót
-            maxSpeed = -1.0;
-        }
-        if (data.currentSpeed > maxSpeed) {
-            // Ha változik a max speed
-            maxSpeed = data.currentSpeed;
-
-            tft.setTextDatum(ML_DATUM);
-            tft.setTextColor(TFT_WHITE, TFT_BLACK);
-            tft.setFreeFont();
-            tft.setTextSize(2);
-            tft.setTextPadding(tft.textWidth("888") + 10);
-            tft.drawString(String((int)maxSpeed), ::SCREEN_W - 90, 60, 2);
-            tft.setFreeFont();
-        }
+        // Maximum sebesség
+        updateUIValue<double>(
+            maxSpeed, data.currentSpeed,
+            [&]() {
+                tft.setTextDatum(ML_DATUM);
+                tft.setTextColor(TFT_WHITE, TFT_BLACK);
+                tft.setFreeFont();
+                tft.setTextSize(2);
+                tft.setTextPadding(tft.textWidth("888") + 10);
+                tft.drawString(String((int)maxSpeed), ::SCREEN_W - 90, 60, 2);
+                tft.setFreeFont();
+            },
+            0.1, this->forceRedraw);
     }
 
     // Aktuális sebesség
-    static double lastSpeed = -1.0;
-    if (this->forceRedraw) {
-        // Kényszerített újrarajzolás esetén reseteljük a statikus változót
-        lastSpeed = -1.0;
-    }
-    if (abs(data.currentSpeed - lastSpeed) > 0.1 || (data.speedValid != (lastSpeed >= 0))) {
-        tft.loadFont(Arial_Narrow_Bold120);
-        tft.setTextDatum(MC_DATUM);
-        tft.setTextPadding(tft.textWidth("888") + 10);
-
-        dtostrf(data.speedValid ? data.currentSpeed : 0, 0, 0, buf);
-        tft.setTextColor(data.speedValid ? TFT_WHITE : TFT_RED, TFT_BLACK);
-        tft.drawString(buf, ::SCREEN_W / 2 - 11, 240);
-        tft.unloadFont();
-        lastSpeed = data.speedValid ? data.currentSpeed : -1.0;
-    }
+    updateUIValue<double>(
+        lastSpeed, data.speedValid ? data.currentSpeed : -1.0,
+        [&]() {
+            tft.loadFont(Arial_Narrow_Bold120);
+            tft.setTextDatum(MC_DATUM);
+            tft.setTextPadding(tft.textWidth("888") + 10);
+            dtostrf(data.speedValid ? data.currentSpeed : 0, 0, 0, buf);
+            tft.setTextColor(data.speedValid ? TFT_WHITE : TFT_RED, TFT_BLACK);
+            tft.drawString(buf, ::SCREEN_W / 2 - 11, 240);
+            tft.unloadFont();
+        },
+        0.1, this->forceRedraw);
 
     // -- Vertikális bar komponensek  ------------------------------------
-
-    // 5 másodperces frissítés
     if (lastVerticalLinearSpriteUpdate != 0 && !Utils::timeHasPassed(lastVerticalLinearSpriteUpdate, 5000)) {
         return;
     }
@@ -887,6 +832,28 @@ void ScreenMain::handleOwnLoop() {
     // Ha kényszerített újrarajzolás volt, akkor reseteljük a flag-et
     if (this->forceRedraw) {
         this->forceRedraw = false;
+    }
+}
+
+// Demó logika kiszervezése
+void ScreenMain::handleDemoMode(DisplayData &data) {
+    bool isTraffipaxManagerDemoActive = traffipaxManager.isDemoActive();
+    if (wasDemoActive && !isTraffipaxManagerDemoActive) {
+        lastDemoEndTime = millis();
+        DEBUG("Traffi Demo Fázis: 2 perc várakozás\n");
+    }
+    wasDemoActive = isTraffipaxManagerDemoActive;
+    if (!isTraffipaxManagerDemoActive && lastDemoEndTime != 0 && Utils::timeHasPassed(lastDemoEndTime, 2 * 60 * 1000)) {
+        traffipaxManager.startDemo();
+        lastDemoEndTime = 0;
+    }
+    if (!isTraffipaxManagerDemoActive && lastDemoEndTime == 0) {
+        traffipaxManager.startDemo();
+    }
+    if (isTraffipaxManagerDemoActive) {
+        traffipaxManager.processDemo();
+        traffipaxManager.getDemoCoords(data.latitude, data.longitude);
+        data.positionValid = true;
     }
 }
 

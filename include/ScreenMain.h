@@ -98,6 +98,22 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      */
     bool externalTemperatureMode = true; // true = external, false = CPU
 
+    // Optimalizált, duplikációmentes állapotváltozók
+    double maxSpeed = -1.0;
+    double lastSpeed = -1.0;
+    long lastUpdate = 0;
+    unsigned long lastDemoEndTime = 0;
+    bool wasDemoActive = false;
+    uint8_t lastSatCount = 255;
+    String lastGpsMode = "";
+    String lastDateTime = "?";
+    double lastAltitude = -9999.0;
+    double lastHdop = -1.0;
+    unsigned long lastVerticalLinearSpriteUpdate = 0;
+
+    // Demó logika kiszervezése
+    void handleDemoMode(DisplayData &data);
+
     /**
      * @brief Kényszerített újrarajzolás flag - amikor visszatérünk más képernyőről
      */
@@ -105,7 +121,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
 
     bool traffiAlarmActive = false;
 
-    uint32_t lastVerticalLinearSpriteUpdate = 0;
+    // ...existing code...
 
     // Intelligens traffipax figyelmeztető rendszer
     struct TraffipaxAlert {

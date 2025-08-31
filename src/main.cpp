@@ -31,8 +31,8 @@ IScreenManager **iScreenManager = (IScreenManager **)&screenManager; // A UIComp
 GpsManager *gpsManager = nullptr;
 
 //-------------------- Global Runtime variables
-bool demoMode = false; // Demó mód
-
+bool demoMode = false;              // Demó mód
+volatile bool configLoaded = false; // Jelezzük, hogy a config betöltődött
 // ------------------------------------------------------------------------------------------------------------------------------
 // Core0
 // ------------------------------------------------------------------------------------------------------------------------------
@@ -148,6 +148,9 @@ void setup() {
         config.load();
     }
 
+    // A konfiguráció betöltődött
+    configLoaded = true;
+
     // TFT háttérvilágítás beállítása
     tftBackLightAdjuster.begin(config.data.tftAutoBrightnessActive, config.data.tftManualBrightnessValue);
 
@@ -239,7 +242,12 @@ void setup1() {
     Serial1.setTX(PIN_SERIAL1_TX_NEW);
     Serial1.begin(9600);
 
-    // Init + konfiguráció
+    // Várakozás a konfiguráció betöltésére, hogy a GPS-t be tudjuk állítani
+    while (!configLoaded) {
+        delay(100);
+    }
+
+    // GPS Init + konfiguráció
     gpsManager = new GpsManager(&Serial1);
     gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
     gpsManager->setSerialDebug(config.data.debugGpsSerialData);
