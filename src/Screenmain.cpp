@@ -905,7 +905,15 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
     constexpr uint16_t satIconWidth = 60;  // Ikon + szám területe
     constexpr uint16_t satIconHeight = 35; // Ikon magassága + felirat
     if (event.x >= satIconX && event.x < satIconX + satIconWidth && event.y >= satIconY && event.y < satIconY + satIconHeight) {
+
+        // Átkapcsolás a műhold képernyőre
         getScreenManager()->switchToScreen(SCREEN_NAME_SATS);
+
+        // Pittyentünk, ha az engedélyezve van
+        if (config.data.beeperEnabled) {
+            Utils::beepTick();
+        }
+
         return true; // Esemény kezelve
     }
 
@@ -922,6 +930,11 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
 
         // Sprite azonnal frissüljön a következő draw()-nál
         lastVerticalLinearSpriteUpdate = 0;
+
+        // Pittyentünk, ha az engedélyezve van
+        if (config.data.beeperEnabled) {
+            Utils::beepTick();
+        }
 
         return true; // Esemény kezelve
     }
