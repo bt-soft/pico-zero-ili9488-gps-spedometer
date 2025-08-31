@@ -258,12 +258,12 @@ void ScreenSats::drawSatelliteOnCircle(int16_t centerX, int16_t centerY, int16_t
     uint16_t color = getColorBySnr(sat.snr);
     int radius = (sat.snr > 30) ? 4 : 3;
 
-    tft.fillCircle(satX, satY, radius, color);
-    tft.drawCircle(satX, satY, radius, TFT_WHITE);
+    tft.fillCircle(satX, satY, radius, color);      // Műhold kitöltése az SNR értéknek megfelelően
+    tft.drawCircle(satX, satY, radius, TFT_PURPLE); // Műhold körvonalának rajzolása
 
     tft.setTextDatum(MC_DATUM);
     tft.setTextSize(1);
-    tft.setTextPadding(0);
+    tft.setTextPadding(0); // Ne töröljön bele semmibe
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString(String(sat.prn), satX, satY + radius + 8);
 }
