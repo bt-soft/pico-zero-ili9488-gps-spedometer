@@ -98,6 +98,8 @@ void ScreenInfo::drawContent() {
     // 2. oszlop
     tableX = 330;
     tableY = 110;
+    tft.drawString("CPU Clock", tableX, tableY);
+    tableY += lineHeight;
     tft.drawString("Total Heap", tableX, tableY);
     tableY += lineHeight;
     tft.drawString("Free Heap", tableX, tableY);
@@ -127,6 +129,8 @@ void ScreenInfo::drawContent() {
     // 2. oszlop értékek
     tableX = 340;
     tableY = 110;
+    tft.drawString(String(rp2040.f_cpu() / 1000000.0f) + " MHz", tableX, tableY);
+    tableY += lineHeight;
     tft.drawString(String(rp2040.getTotalHeap() / 1024.0f) + " kB", tableX, tableY);
     tableY += lineHeight;
     tft.drawString(String(rp2040.getFreeHeap() / 1024.0f) + "  kB", tableX, tableY);
