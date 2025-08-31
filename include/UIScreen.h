@@ -1,10 +1,5 @@
 #pragma once
 
-#include <functional>
-#include <type_traits>
-#include <cmath>
-#include <Arduino.h>
-
 #include "IScreenManager.h"
 #include "UIContainerComponent.h"
 #include "UIDialogBase.h"
@@ -229,27 +224,25 @@ class UIScreen : public UIContainerComponent {
     inline bool isDialogActive() const { return !dialogStack.empty(); }
 
   protected:
-
     /**
-     * @brief Helper function to update a UI value only if it has changed.
+     * @brief Segédfüggvény egy UI érték frissítésére, csak ha az megváltozott.
      *
-     * This template function compares a new value with a last known value.
-     * If the value has changed (or if forceRedraw is true), it executes the provided
-     * drawing lambda function and updates the last known value.
+     * Ez a sablonfüggvény összehasonlít egy új értéket egy utoljára ismert értékkel.
+     * Ha az érték megváltozott (vagy ha a forceRedraw igaz), végrehajtja a megadott
+     * rajzoló lambda függvényt, és frissíti az utoljára ismert értéket.
      *
-     * It has specialized handling for:
-     * - String: Compares for exact inequality.
-     * - Numeric types: Compares if the absolute difference exceeds a threshold.
+     * Speciális kezelést alkalmaz a következőkre:
+     * - String: Pontos egyenlőtlenséget vizsgál.
+     * - Numerikus típusok: Azt vizsgálja, hogy az abszolút különbség meghalad-e egy küszöbértéket.
      *
-     * @tparam T The type of the value to compare.
-     * @param lastValue Reference to the variable holding the last value.
-     * @param newValue The new value to compare.
-     * @param drawFunc A lambda function that contains the drawing code to execute on change.
-     * @param threshold The threshold for numeric comparisons.
-     * @param forceRedraw If true, forces the update regardless of change.
+     * @tparam T Az összehasonlítandó érték típusa.
+     * @param lastValue Referencia a legutóbbi értéket tároló változóra.
+     * @param newValue Az új, összehasonlítandó érték.
+     * @param drawFunc Egy lambda függvény, amely a változáskor végrehajtandó rajzolási kódot tartalmazza.
+     * @param threshold A numerikus összehasonlítások küszöbértéke.
+     * @param forceRedraw Ha igaz, a változástól függetlenül kényszeríti a frissítést.
      */
-    template <typename T>
-    static void updateUIValue(T &lastValue, T newValue, std::function<void()> drawFunc, double threshold = 0.1, bool forceRedraw = false) {
+    template <typename T> static void updateUIValue(T &lastValue, T newValue, std::function<void()> drawFunc, double threshold = 0.1, bool forceRedraw = false) {
         if constexpr (std::is_same_v<T, String>) {
             if (forceRedraw || newValue != lastValue) {
                 drawFunc();
