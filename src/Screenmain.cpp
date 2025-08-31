@@ -351,10 +351,11 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     data.currentSpeed = data.speedValid ? gpsManager->getSpeed().kmph() : 0.0;
 
     // Maximum sebesség (statikus változó)
-    static double maxSpeed = 0.0;
-    if (data.speedValid && data.currentSpeed > maxSpeed) {
-        maxSpeed = data.currentSpeed;
+    static double maxSpeedValue = 0.0;
+    if (data.speedValid && data.currentSpeed > maxSpeedValue) {
+        maxSpeedValue = data.currentSpeed;
     }
+    data.maxSpeed = maxSpeedValue;
 
     // Szenzorok
     data.busVoltage = sensorUtils.readVBusExternal();
@@ -445,6 +446,13 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     }
     data.currentSpeed = demoSpeed;
     data.speedValid = true;
+
+    // Maximális sebesség szimulációja
+    static double demoMaxSpeed = 0.0;
+    if (data.currentSpeed > demoMaxSpeed) {
+        demoMaxSpeed = data.currentSpeed;
+    }
+    data.maxSpeed = demoMaxSpeed;
 
     // Szenzorok - szimulált értékek
     // Ha 15.5 a felső határ, akkor random(0, 1201) / 100.0 = 3.5 ... 15.5
@@ -768,14 +776,16 @@ void ScreenMain::handleOwnLoop() {
 
         // Maximum sebesség
         UIScreen::updateUIValue<double>(
-            maxSpeed, data.currentSpeed,
+            lastMaxSpeed, data.maxSpeed,
             [&]() {
                 tft.setTextDatum(ML_DATUM);
                 tft.setTextColor(TFT_WHITE, TFT_BLACK);
                 tft.setFreeFont();
                 tft.setTextSize(2);
                 tft.setTextPadding(tft.textWidth("888") + 10);
-                tft.drawString(String((int)maxSpeed), ::SCREEN_W - 90, 60, 2);
+                // Ha a maxSpeed > 0, kiírjuk, egyébként "--"
+                String maxSpeedStr = (data.maxSpeed > 0) ? String((int)data.maxSpeed) : "--";
+                tft.drawString(maxSpeedStr, ::SCREEN_W - 90, 60, 2);
                 tft.setFreeFont();
             },
             0.1, this->forceRedraw);

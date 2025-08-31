@@ -49,6 +49,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
 
         // Sebesség
         double currentSpeed = 0.0;
+        double maxSpeed = 0.0;
         bool speedValid = false;
 
         // Szenzorok
@@ -99,7 +100,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     bool externalTemperatureMode = true; // true = external, false = CPU
 
     // Optimalizált, duplikációmentes állapotváltozók
-    double maxSpeed = -1.0;
+    double lastMaxSpeed = -1.0;
     double lastSpeed = -1.0;
     long lastUpdate = 0;
     unsigned long lastDemoEndTime = 0;

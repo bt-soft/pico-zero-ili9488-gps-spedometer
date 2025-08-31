@@ -11,7 +11,6 @@
  * @brief Műholdak képernyő
  *
  * Megjeleníti a GPS műholdak részletes információit táblázatosan és vizuálisan.
- * Optimalizált frissítéssel sprites használatával.
  */
 class ScreenSats : public UIScreen {
   public:
@@ -37,10 +36,6 @@ class ScreenSats : public UIScreen {
     void handleOwnLoop() override;
 
   private:
-    // Sprite-ok a gyors frissítéshez
-    TFT_eSprite *tableSprite;
-    TFT_eSprite *circleSprite;
-
     // Korábbi adatok tárolása a változások detektálásához
     std::vector<SatelliteDb::SatelliteData> lastSatellites;
     uint8_t lastSatCount;
@@ -73,22 +68,12 @@ class ScreenSats : public UIScreen {
     /**
      * @brief Egy műhold rajzolása a körön
      */
-    void drawSatelliteOnCircle(TFT_eSprite *sprite, int16_t centerX, int16_t centerY, int16_t maxRadius, const SatelliteDb::SatelliteData &sat);
+    void drawSatelliteOnCircle(int16_t centerX, int16_t centerY, int16_t maxRadius, const SatelliteDb::SatelliteData &sat);
 
     /**
      * @brief Ellenőrzi, hogy változtak-e a műhold adatok
      */
     bool satelliteDataChanged(const std::vector<SatelliteDb::SatelliteData> &currentSats, uint8_t currentSatCount);
-
-    /**
-     * @brief Sprite-ok inicializálása
-     */
-    void initSprites();
-
-    /**
-     * @brief Sprite-ok felszabadítása
-     */
-    void freeSprites();
 
     /**
      * @brief Visszaadja a SNR értékhez tartozó színt
@@ -109,14 +94,4 @@ class ScreenSats : public UIScreen {
      * @brief SNR oszlop fejléc kattintásának kezelése
      */
     void handleSnrHeaderClick();
-
-    /**
-     * @brief Műhold táblázat rajzolása közvetlenül a képernyőre (fallback)
-     */
-    void drawSatelliteTableDirect();
-
-    /**
-     * @brief Műhold kör rajzolása közvetlenül a képernyőre (fallback)
-     */
-    void drawSatelliteCircleDirect();
 };

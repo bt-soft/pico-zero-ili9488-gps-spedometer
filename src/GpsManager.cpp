@@ -66,26 +66,29 @@ GpsManager::LocalDateTime GpsManager::getLocalDateTime() {
     LocalDateTime result = {0, 0, 0, false, 0, 0, 0, false};
 
     // Érvényes GPS időadatok másolása
-    if (gps.time.isValid()) {
-
-        result.hour = gps.time.hour();
-        result.minute = gps.time.minute();
-        result.second = gps.time.second();
-
-        result.timeValid = true;
+    if (gps.time.isValid() && gps.time.age() < GPS_DATA_MAX_AGE) {
+        // Sanity check the values
+        if (gps.time.hour() <= 23 && gps.time.minute() <= 59 && gps.time.second() <= 59) {
+            result.hour = gps.time.hour();
+            result.minute = gps.time.minute();
+            result.second = gps.time.second();
+            result.timeValid = true;
+        }
     }
 
     // Érvényes GPS dátumok másolása
-    if (gps.date.isValid()) {
-        result.day = gps.date.day();
-        result.month = gps.date.month();
-        result.year = gps.date.year();
-
-        result.dateValid = true;
+    if (gps.date.isValid() && gps.date.age() < GPS_DATA_MAX_AGE) {
+        // Sanity check the values
+        if (gps.date.year() > 2020 && gps.date.year() < 2100 && gps.date.month() >= 1 && gps.date.month() <= 12 && gps.date.day() >= 1 && gps.date.day() <= 31) {
+            result.day = gps.date.day();
+            result.month = gps.date.month();
+            result.year = gps.date.year();
+            result.dateValid = true;
+        }
     }
 
     // Ha érvényesek a GPS adatok, akkor nyári/téli időszámítás korrekciót is végrehajtunk
-    if (gps.date.isValid() && gps.time.isValid()) {
+    if (result.dateValid && result.timeValid) {
 
         // Nyári/téli időszámítás korrekció
         DaylightSaving::correctTime(result.minute, result.hour, result.day, result.month, result.year);
