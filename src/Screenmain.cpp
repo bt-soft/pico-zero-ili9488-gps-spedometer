@@ -293,7 +293,7 @@ void ScreenMain::drawContent() {
     drawSatelliteIcon(0, 0);
 
     // Naptár ikon fent középen
-    drawCalendarIcon(::SCREEN_W / 2 - 100, 0);
+    drawCalendarIcon(::SCREEN_W / 2 - 90, 0);
 
     // Magasság ikon jobb oldalon
     drawAltitudeIcon(::SCREEN_W - 135, 0);
@@ -741,11 +741,11 @@ void ScreenMain::handleOwnLoop() {
                 tft.setTextDatum(ML_DATUM);
                 tft.setTextColor(TFT_WHITE, TFT_BLACK);
                 tft.setTextPadding(tft.textWidth("8888-88-88") + 10);
-                tft.drawString(data.dateString, ::SCREEN_W / 2 - 60, 12, 1);
+                tft.drawString(data.dateString, ::SCREEN_W / 2 - 50, 12, 1);
                 tft.setTextSize(1);
                 tft.setFreeFont(&FreeSansBold18pt7b);
                 tft.setTextPadding(tft.textWidth("88:88:88") + 10);
-                tft.drawString(data.timeString, ::SCREEN_W / 2 - 80, 40);
+                tft.drawString(data.timeString, ::SCREEN_W / 2 - 70, 40);
                 tft.setFreeFont();
             },
             0, this->forceRedraw);
