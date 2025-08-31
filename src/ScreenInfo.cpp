@@ -26,6 +26,8 @@ ScreenInfo::ScreenInfo() : UIScreen(SCREEN_NAME_INFO) {
     textPadding = tft.textWidth("8888-88-88");
     bootTextPadding = tft.textWidth("88 mins, 88 sec, 888 msec");
 
+    lastUpdated = 0;
+
     // Komponensek elrendezése
     layoutComponents();
 }
@@ -190,11 +192,10 @@ void ScreenInfo::drawContent() {
 void ScreenInfo::handleOwnLoop() {
 
     // 5 másodperces frissítés
-    static long lastUpdate = millis() - 5000;
-    if (!Utils::timeHasPassed(lastUpdate, 5000)) {
+    if (!Utils::timeHasPassed(lastUpdated, 5000)) {
         return;
     }
-    lastUpdate = millis();
+    lastUpdated = millis();
 
     tft.setFreeFont();
     tft.setTextSize(1);

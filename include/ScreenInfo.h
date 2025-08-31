@@ -31,6 +31,7 @@ class ScreenInfo : public UIScreen {
   private:
     uint16_t textPadding;
     uint16_t bootTextPadding;
+    unsigned long lastUpdated;
 
     /**
      * @brief UI komponensek létrehozása és elhelyezése
