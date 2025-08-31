@@ -164,9 +164,32 @@ class UIColorPalette {
         colors.background = TFT_DARKGREEN;
         colors.foreground = TFT_NAVY;
         colors.border = TFT_DARKGREEN;
-        //---Letiltott default állapot        colors.disabledBackground = TFT_DARKGREEN;
+        //---Letiltott default állapot
+        colors.disabledBackground = TFT_DARKGREEN;
         colors.disabledForeground = TFT_BROWN;
         colors.disabledBorder = TFT_GREENYELLOW;
         return colors;
+    }
+
+    /**
+     * Sötét színséma gombokhoz
+     */
+    static ButtonColorScheme createDarkButtonScheme() {
+        ButtonColorScheme scheme;
+        scheme.background = TFT_COLOR(40, 40, 60);        // sötétkék-lila háttér
+        scheme.foreground = TFT_COLOR(180, 140, 30);      // sötétebb arany szöveg
+        scheme.border = TFT_BROWN;                        // barna keret
+        scheme.pressedBackground = TFT_COLOR(60, 0, 120); // élénkebb lila lenyomott
+        scheme.pressedForeground = TFT_WHITE;
+        scheme.pressedBorder = TFT_COLOR(255, 220, 80); // aranysárga keret lenyomva
+        scheme.disabledBackground = TFT_COLOR(30, 30, 30);
+        scheme.disabledForeground = TFT_COLOR(120, 120, 120);
+        scheme.disabledBorder = TFT_COLOR(60, 60, 60);
+        scheme.activeBackground = TFT_COLOR(60, 0, 120); // aktív: élénk lila
+        scheme.activeForeground = TFT_COLOR(255, 220, 80);
+        scheme.activeBorder = TFT_COLOR(255, 220, 80);
+        scheme.ledOnColor = TFT_COLOR(0, 255, 180); // türkiz LED
+        scheme.ledOffColor = TFT_COLOR(80, 0, 160);
+        return scheme;
     }
 };

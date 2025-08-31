@@ -25,29 +25,31 @@ extern bool demoMode;
  */
 void ScreenMain::layoutComponents() {
     // Info gomb bal alsó sarokban
-    addChild(std::make_shared<UIButton>(                                                                                            //
-        1,                                                                                                                          // id
-        Rect(0, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH - 8, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (bal alsó sarok)
-        "Info",                                                                                                                     // label
-        UIButton::ButtonType::Pushable,                                                                                             // type
+    addChild(std::make_shared<UIButton>(
+        1, //                                                                                                                         //
+        Rect(0, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH - 8, UIButton::DEFAULT_BUTTON_HEIGHT), //
+        "Info",                                                                                                                     //
+        UIButton::ButtonType::Pushable,
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_INFO);
             }
-        }) //
+        },
+        UIColorPalette::createDarkButtonScheme()) // sötét gomb színséma
     );
 
     // Setup gomb jobb alsó sarokban
-    addChild(std::make_shared<UIButton>(                                                                                                                                  //
-        2,                                                                                                                                                                // id
-        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (jobb alsó sarok)
-        "Setup",                                                                                                                                                          // label
-        UIButton::ButtonType::Pushable,                                                                                                                                   // type
+    addChild(std::make_shared<UIButton>(
+        2,                                                                                                                                                                //
+        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), //
+        "Setup",                                                                                                                                                          //
+        UIButton::ButtonType::Pushable,
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_SETUP);
             }
-        }) //
+        },
+        UIColorPalette::createDarkButtonScheme()) // sötét gomb színséma
     );
 }
 
