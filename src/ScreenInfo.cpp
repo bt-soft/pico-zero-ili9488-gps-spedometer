@@ -68,10 +68,10 @@ void ScreenInfo::drawContent() {
     // Információs szöveg
     tft.setFreeFont();
     tft.setTextSize(2);
-    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-    tft.drawString(String("GPS Speedometer ") + PROGRAM_VERSION, ::SCREEN_W / 2, 60);
+    tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
+    tft.drawString(String("GPS Speedometer ") + PROGRAM_VERSION, ::SCREEN_W / 2, 50);
     tft.setTextColor(TFT_CYAN, TFT_BLACK);
-    tft.drawString(PROGRAM_AUTHOR, ::SCREEN_W / 2, 80);
+    tft.drawString(PROGRAM_AUTHOR, ::SCREEN_W / 2, 70);
 
     // Táblázat prompt
     tft.setTextSize(1);

@@ -195,7 +195,7 @@ void ScreenSats::drawSatelliteTable() {
         sprintf(msg, "and %u more...", remaining);
         tft.drawString(msg, TABLE_X, currentY);
     } else {
-        // töröljük a felirat helyét, ha korábban ott volt
+        // töröljük a felirat helyét
         tft.fillRect(TABLE_X, currentY, TABLE_WIDTH, 28, TFT_BLACK);
     }
 
@@ -313,20 +313,11 @@ bool ScreenSats::handleTouch(const TouchEvent &event) {
         // PRN touch?
         if (x >= TABLE_X && x <= TABLE_X + 40 && y >= TABLE_Y + 25 && y <= TABLE_Y + 45) {
             handlePrnHeaderClick();
-            // Pittyentünk, ha az engedélyezve van
-            if (config.data.beeperEnabled) {
-                Utils::beepTick();
-            }
             return true;
 
         } // SNR touch?
         else if (x >= TABLE_X + 120 && x <= TABLE_X + TABLE_WIDTH && y >= TABLE_Y + 25 && y <= TABLE_Y + 45) {
             handleSnrHeaderClick();
-            // Pittyentünk, ha az engedélyezve van
-            if (config.data.beeperEnabled) {
-                Utils::beepTick();
-            }
-
             return true;
         }
     }
@@ -340,6 +331,11 @@ bool ScreenSats::handleTouch(const TouchEvent &event) {
 void ScreenSats::handlePrnHeaderClick() {
     currentSortType = SatelliteDb::BY_PRN;
     sortOrderChanged = true;
+
+    // Pittyentünk, ha az engedélyezve van
+    if (config.data.beeperEnabled) {
+        Utils::beepTick();
+    }
 }
 
 /**
@@ -348,4 +344,9 @@ void ScreenSats::handlePrnHeaderClick() {
 void ScreenSats::handleSnrHeaderClick() {
     currentSortType = SatelliteDb::BY_SNR;
     sortOrderChanged = true;
+
+    // Pittyentünk, ha az engedélyezve van
+    if (config.data.beeperEnabled) {
+        Utils::beepTick();
+    }
 }
