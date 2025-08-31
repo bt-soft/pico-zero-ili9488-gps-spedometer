@@ -25,7 +25,7 @@ extern bool demoMode;
  */
 void ScreenMain::layoutComponents() {
     // Info gomb bal alsó sarokban
-    auto infoButton = std::make_shared<UIButton>(                                                                                   //
+    addChild(std::make_shared<UIButton>(                                                                                            //
         1,                                                                                                                          // id
         Rect(0, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH - 8, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (bal alsó sarok)
         "Info",                                                                                                                     // label
@@ -34,10 +34,11 @@ void ScreenMain::layoutComponents() {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_INFO);
             }
-        });
+        }) //
+    );
 
     // Setup gomb jobb alsó sarokban
-    auto setupButton = std::make_shared<UIButton>(                                                                                                                        //
+    addChild(std::make_shared<UIButton>(                                                                                                                                  //
         2,                                                                                                                                                                // id
         Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), // bounds (jobb alsó sarok)
         "Setup",                                                                                                                                                          // label
@@ -46,10 +47,8 @@ void ScreenMain::layoutComponents() {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->switchToScreen(SCREEN_NAME_SETUP);
             }
-        });
-
-    addChild(infoButton);
-    addChild(setupButton);
+        }) //
+    );
 }
 
 /**
@@ -158,11 +157,11 @@ void ScreenMain::drawAltitudeIcon(int16_t x, int16_t y) {
     tft.drawLine(x + 2, y + 2, x - 1, y + 5, TFT_WHITE);
 
     // Felirat
-    tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+    tft.setTextDatum(MC_DATUM); // Middle Center - középre igazítva
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.setFreeFont();
     tft.setTextSize(1);
-    tft.drawString("altit", x + 5, y + 27);
+    tft.drawString("altit", x + 20, y + 27);
 }
 
 /**
@@ -192,6 +191,7 @@ void ScreenMain::drawGpsAccuracyIcon(int16_t x, int16_t y) {
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.setFreeFont();
     tft.setTextSize(1);
+    tft.setTextPadding(0); // ne töröljön bele felesleges pixelbe
     tft.drawString("hdop", x + 5, y + 27);
 }
 
@@ -257,11 +257,12 @@ void ScreenMain::drawSpeedometerIcon(int16_t x, int16_t y) {
     tft.drawPixel(x + 21, y + 12, TFT_RED);   // nagy sebesség
 
     // Felirat
-    tft.setTextDatum(ML_DATUM); // Middle Left - bal oldal, középre igazítva
+    tft.setTextDatum(MC_DATUM); // Middle Center - középre igazítva
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
     tft.setFreeFont();
     tft.setTextSize(1);
-    tft.drawString("max sp", x - 2, y + 20);
+    tft.setTextPadding(0); // ne töröljön bele felesleges pixelbe
+    tft.drawString("max sp", x + 16, y + 20);
 }
 
 /**
@@ -270,21 +271,23 @@ void ScreenMain::drawSpeedometerIcon(int16_t x, int16_t y) {
 void ScreenMain::drawContent() {
 
     // Szöveges feliratok
-    tft.setTextDatum(MC_DATUM);
     tft.setFreeFont(); // Alapértelmezett font
     tft.setTextSize(1);
+    tft.setTextPadding(0); // ne töröljön bele felesleges pixelbe
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.setTextDatum(MR_DATUM);
 
     // Magasság mértékegység felirat
-    tft.drawString("m", ::SCREEN_W - 8, 18, 1);
+    tft.drawString("m", ::SCREEN_W - 2, 18);
 
     // Maxspeed km/h felirat
-    tft.drawString("km/h", ::SCREEN_W - 14, 65, 1);
+    tft.drawString("km/h", ::SCREEN_W - 2, 60);
 
     // Sebesség mértékegység felirat
+    tft.setTextDatum(MC_DATUM);
     tft.setTextSize(2);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("km/h", ::SCREEN_W / 2 + 10, 105, 2);
+    tft.drawString("km/h", ::SCREEN_W / 2, 105);
 
     // Műhold ikon bal oldalon
     drawSatelliteIcon(0, 0);

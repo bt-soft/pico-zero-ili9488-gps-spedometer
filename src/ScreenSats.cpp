@@ -87,13 +87,17 @@ void ScreenSats::handleOwnLoop() {
  */
 void ScreenSats::layoutComponents() {
     // Back gomb jobb alsó sarokban
-    auto backButton = std::make_shared<UIButton>( //
-        1, Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), "Back", UIButton::ButtonType::Pushable,
+    auto backButton = std::make_shared<UIButton>(                                                                                                                         //
+        1,                                                                                                                                                                //
+        Rect(::SCREEN_W - UIButton::DEFAULT_BUTTON_WIDTH, ::SCREEN_H - UIButton::DEFAULT_BUTTON_HEIGHT, UIButton::DEFAULT_BUTTON_WIDTH, UIButton::DEFAULT_BUTTON_HEIGHT), //
+        "Back",                                                                                                                                                           //
+        UIButton::ButtonType::Pushable,                                                                                                                                   //
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
                 getScreenManager()->goBack();
             }
-        });
+        } //
+    );
 
     addChild(backButton);
 }
@@ -124,7 +128,8 @@ void ScreenSats::drawSatelliteTable() {
     tft.setFreeFont();
     tft.setTextSize(1);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    // Clear the background for the status text before drawing
+
+    // A háttér törlése a státusz szöveg előtt
     tft.fillRect(TABLE_X, TABLE_Y, TABLE_WIDTH, 24, TFT_BLACK);
     tft.drawString("In view: " + String(satCount), TABLE_X, TABLE_Y);
     tft.drawString("In DB:   " + String(satellites.size()), TABLE_X, TABLE_Y + 12);
@@ -132,7 +137,7 @@ void ScreenSats::drawSatelliteTable() {
     // Táblázat fejléc
     int16_t headerTextY = TABLE_Y + 28;
     if (firstDraw || sortOrderChanged) {
-        // Clear header area
+        // A fejléc területének törlése
         tft.fillRect(TABLE_X, headerTextY, TABLE_WIDTH, 12, TFT_BLACK);
         uint16_t prnColor = (currentSortType == SatelliteDb::BY_PRN) ? TFT_CYAN : TFT_YELLOW;
         tft.setTextColor(prnColor, TFT_BLACK);
@@ -164,7 +169,7 @@ void ScreenSats::drawSatelliteTable() {
         char line[20];
         sprintf(line, "%2d %3d %3d %2d", sat.prn, sat.elevation, sat.azimuth, sat.snr);
 
-        // Clear the line before drawing
+        // A sor törlése a rajzolás előtt
         tft.fillRect(TABLE_X, currentY, TABLE_WIDTH, lineHeight, TFT_BLACK);
         tft.drawString(line, TABLE_X, currentY);
 
