@@ -5,11 +5,11 @@
 //--- Utils ---
 namespace Utils {
 /**
- * @brief Átalakít egy milliszekundum értéket "perc:mp:ms" formátumú szöveggé
- * @param msec Időérték milliszekundumban
- * @return Formázott string (pl. "2:05:123")
+ * @brief Átalakít egy másodperc értéket "perc:mp" formátumú szöveggé
+ * @param sec Időérték másodpercben
+ * @return Formázott string (pl. "02:05")
  */
-String msecToString(uint32_t msec);
+String secToMinSecString(uint32_t sec);
 
 /**
  * @brief  Formáz egy lebegőpontos számot stringgé, a tizedesjegyek számát paraméterként adva meg.

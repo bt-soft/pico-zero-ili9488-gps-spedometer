@@ -22,21 +22,20 @@ bool isPaused = false;
 } // namespace
 
 /**
- * @brief Átalakít egy milliszekundum értéket "perc:mp:ms" formátumú szöveggé
- * @param msec Időérték milliszekundumban
- * @return Formázott string (pl. "2:05:123")
+ * @brief Átalakít egy másodperc értéket "perc:mp" formátumú szöveggé
+ * @param sec Időérték másodpercben
+ * @return Formázott string (pl. "02:05")
  */
-String msecToString(uint32_t msec) {
-    uint32_t minutes = msec / 60000;
-    uint32_t seconds = (msec % 60000) / 1000;
-    uint32_t millis = msec % 1000;
-    char buf[16];
-    snprintf(buf, sizeof(buf), "%02u mins, %02u sec, %03u msec", minutes, seconds, millis);
+String secToMinSecString(uint32_t sec) {
+    uint32_t minutes = sec / 60;
+    uint32_t seconds = sec % 60;
+    char buf[8];
+    snprintf(buf, sizeof(buf), "%02u:%02u", minutes, seconds);
     return String(buf);
 }
 
 /**
- * @brief  Formáz egy lebegőpontos számot stringgé, a tizedesjegyek számát paraméterként adva meg.
+ * @brief Egy lebegőpontos számot formáz stringgé, a tizedesjegyek számát paraméterként adva meg.
  * @param value A lebegőpontos szám értéke
  * @param decimalPlaces A tizedesjegyek száma (alapértelmezett: 2)
  */
@@ -53,6 +52,7 @@ void debugWaitForSerial(TFT_eSPI &tft) {
 #ifdef __DEBUG
     beepError();
     tft.setTextColor(TFT_WHITE);
+    tft.setTextSize(2);
     tft.drawString("Nyisd meg a soros portot!", 0, 0);
     while (!Serial) {
     }

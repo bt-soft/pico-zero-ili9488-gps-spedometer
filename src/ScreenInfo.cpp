@@ -217,7 +217,7 @@ void ScreenInfo::handleOwnLoop() {
 
     // Nagyobb padding
     tft.setTextPadding(bootTextPadding);
-    tft.drawString(Utils::msecToString(gpsManager->getGpsBootTime()), x, y);
+    tft.drawString(Utils::secToMinSecString(gpsManager->getGpsBootTime()), x, y);
     y += lineHeight;
 
     // Padding vissza
