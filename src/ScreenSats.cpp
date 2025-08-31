@@ -1,16 +1,16 @@
 #include <algorithm>
 
-#include "GpsManager.h"
 #include "ScreenSats.h"
 #include "Utils.h"
 
+#include "GpsManager.h"
 extern GpsManager *gpsManager;
 
 // A táblázatban Maximum megjelenítendő elemek száma
 constexpr uint8_t MAX_SATS_TABLE_ITEMS = 9;
 
 // Területek méretei
-constexpr int16_t TABLE_WIDTH = 160; // +20 pixel szélesebb
+constexpr int16_t TABLE_WIDTH = 160;
 constexpr int16_t TABLE_HEIGHT = 220;
 constexpr int16_t CIRCLE_WIDTH = 200;
 constexpr int16_t CIRCLE_HEIGHT = 200;
