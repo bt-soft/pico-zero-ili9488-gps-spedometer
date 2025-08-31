@@ -4,7 +4,8 @@
 #include "SatelliteDb.h"
 #include "defines.h"
 
-#define SAT_MAX_AGE_MSEC (20 * 1000) /* 20mp után töröljük a sat-ot ha nem frissült */
+// 30mp után töröljük a sat-ot ha nem frissült ez idő alatt
+#define SAT_MAX_AGE_MSEC (30 * 1000)
 
 /**
  * Konstruktor
@@ -130,8 +131,9 @@ void SatelliteDb::debugSatDb(uint8_t num_sats_in_view) {
         long timeToLive = (SAT_MAX_AGE_MSEC - age) / 1000; // másodpercben
 
         // Ha negatív, akkor már lejárt (de még nem lett törölve)
-        if (timeToLive < 0)
+        if (timeToLive < 0) {
             timeToLive = 0;
+        }
 
         DEBUG("%2d  | %2d   | %3d  | %2d  | %2ld\n", sat.prn, sat.elevation, sat.azimuth, sat.snr, timeToLive);
     }
