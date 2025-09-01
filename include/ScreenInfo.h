@@ -33,6 +33,9 @@ class ScreenInfo : public UIScreen {
     uint16_t bootTextPadding;
     unsigned long lastUpdated;
 
+    // String optimalizálás: egyetlen buffer az értékek formázásához
+    char valueBuffer[64];
+
     /**
      * @brief UI komponensek létrehozása és elhelyezése
      */

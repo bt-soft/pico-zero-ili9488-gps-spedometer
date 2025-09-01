@@ -69,7 +69,8 @@ void ScreenInfo::drawContent() {
     tft.setFreeFont();
     tft.setTextSize(2);
     tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
-    tft.drawString(String("GPS Speedometer ") + PROGRAM_VERSION, ::SCREEN_W / 2, 50);
+    snprintf(valueBuffer, sizeof(valueBuffer), "GPS Speedometer %s", PROGRAM_VERSION);
+    tft.drawString(valueBuffer, ::SCREEN_W / 2, 50);
     tft.setTextColor(TFT_CYAN, TFT_BLACK);
     tft.drawString(PROGRAM_AUTHOR, ::SCREEN_W / 2, 70);
 
@@ -124,20 +125,26 @@ void ScreenInfo::drawContent() {
     tableY += lineHeight;
     tft.drawString("uBlox Neo-6M/8M", tableX, tableY);
     tableY += lineHeight;
-    tft.drawString(String(__DATE__) + " " + String(__TIME__), tableX, tableY);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%s %s", __DATE__, __TIME__);
+    tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    tft.drawString(String(::traffipaxManager.count()), tableX, tableY);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%d", ::traffipaxManager.count());
+    tft.drawString(valueBuffer, tableX, tableY);
 
     // 2. oszlop értékek
     tableX = 340;
     tableY = 110;
-    tft.drawString(String(rp2040.f_cpu() / 1000000.0f) + " MHz", tableX, tableY);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f MHz", rp2040.f_cpu() / 1000000.0f);
+    tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    tft.drawString(String(rp2040.getTotalHeap() / 1024.0f) + " kB", tableX, tableY);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getTotalHeap() / 1024.0f);
+    tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    tft.drawString(String(rp2040.getFreeHeap() / 1024.0f) + "  kB", tableX, tableY);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f  kB", rp2040.getFreeHeap() / 1024.0f);
+    tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    tft.drawString(String(rp2040.getUsedHeap() / 1024.0f) + " kB", tableX, tableY);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getUsedHeap() / 1024.0f);
+    tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
 
     // 2. tábla prompt - Azért kell a 2. tábla promptjait előbb kiírni,
@@ -208,16 +215,20 @@ void ScreenInfo::handleOwnLoop() {
     uint16_t y = 190;
     constexpr uint8_t lineHeight = 10;
 
-    tft.drawString(String(sensorUtils.readVBusExternal(), 2) + "V", x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fV", sensorUtils.readVBusExternal());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(sensorUtils.readExternalTemperature(), 2) + "C", x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fC", sensorUtils.readExternalTemperature());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(sensorUtils.readCoreTemperature(), 2) + "C", x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fC", sensorUtils.readCoreTemperature());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 
     // Nagyobb padding
     tft.setTextPadding(bootTextPadding);
-    tft.drawString(Utils::secToMinSecString(gpsManager->getGpsBootTime()), x, y);
+    Utils::secToMinSecString(gpsManager->getGpsBootTime(), valueBuffer, sizeof(valueBuffer));
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 
     // Padding vissza
@@ -229,23 +240,30 @@ void ScreenInfo::handleOwnLoop() {
     x = 120;
     y = 190;
 
-    tft.drawString(String(gpsManager->getSatellites().value()), x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%u", gpsManager->getSatellites().value());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getSatelliteCountForUI()), x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%u", gpsManager->getSatelliteCountForUI());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getLocation().lat(), 6), x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.6f", gpsManager->getLocation().lat());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getLocation().lng(), 6), x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.6f", gpsManager->getLocation().lng());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getAltitude().meters(), 1) + "m", x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.1fm", gpsManager->getAltitude().meters());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getGpsQualityString()), x, y);
+    tft.drawString(gpsManager->getGpsQualityString(), x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getGpsModeToString()), x, y);
+    tft.drawString(gpsManager->getGpsModeToString(), x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getSpeed().kmph(), 1) + "km/h", x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.1fkm/h", gpsManager->getSpeed().kmph());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    tft.drawString(String(gpsManager->getHdop().hdop(), 2), x, y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.2f", gpsManager->getHdop().hdop());
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 
     char tmpBuf[20];

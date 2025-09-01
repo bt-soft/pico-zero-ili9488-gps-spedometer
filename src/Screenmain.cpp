@@ -712,7 +712,8 @@ void ScreenMain::handleOwnLoop() {
                 tft.setFreeFont();
                 tft.setTextSize(2);
                 tft.setTextPadding(tft.textWidth("88") + 10);
-                tft.drawString(String(data.satelliteCount), 30, 15, 2);
+                snprintf(valueBuffer, sizeof(valueBuffer), "%u", data.satelliteCount);
+                tft.drawString(valueBuffer, 30, 15, 2);
                 tft.setFreeFont();
             },
             0, this->forceRedraw);
@@ -734,9 +735,9 @@ void ScreenMain::handleOwnLoop() {
             0, this->forceRedraw);
 
         // Dátum és idő
-        String currentDateTime = data.dateString + data.timeString;
+        snprintf(valueBuffer, sizeof(valueBuffer), "%s%s", data.dateString.c_str(), data.timeString.c_str());
         UIScreen::updateUIValue<String>(
-            lastDateTime, currentDateTime,
+            lastDateTime, String(valueBuffer),
             [&]() {
                 tft.setTextSize(2);
                 tft.setFreeFont();
@@ -762,8 +763,12 @@ void ScreenMain::handleOwnLoop() {
                 tft.setTextSize(2);
                 int paddingWidth = tft.textWidth("8888", 2) + 10;
                 tft.setTextPadding(paddingWidth);
-                String altText = (data.altitudeValid ? String((int)data.altitude) : "-- ");
-                tft.drawString(altText, ::SCREEN_W - 90, 13, 2);
+                if (data.altitudeValid) {
+                    snprintf(valueBuffer, sizeof(valueBuffer), "%d", (int)data.altitude);
+                } else {
+                    strcpy(valueBuffer, "-- ");
+                }
+                tft.drawString(valueBuffer, ::SCREEN_W - 90, 13, 2);
             },
             1.0, this->forceRedraw);
 
@@ -776,8 +781,12 @@ void ScreenMain::handleOwnLoop() {
                 tft.setFreeFont();
                 tft.setTextSize(2);
                 tft.setTextPadding(tft.textWidth("88.88") + 15);
-                dtostrf(data.hdop, 0, 2, buf);
-                tft.drawString(data.hdopValid ? String(buf) : "--", 35, 63, 2);
+                if (data.hdopValid) {
+                    dtostrf(data.hdop, 0, 2, valueBuffer);
+                    tft.drawString(valueBuffer, 35, 63, 2);
+                } else {
+                    tft.drawString("--", 35, 63, 2);
+                }
                 tft.setFreeFont();
             },
             0.1, this->forceRedraw);
@@ -792,8 +801,12 @@ void ScreenMain::handleOwnLoop() {
                 tft.setTextSize(2);
                 tft.setTextPadding(tft.textWidth("888") + 10);
                 // Ha a maxSpeed > 0, kiírjuk, egyébként "--"
-                String maxSpeedStr = (data.maxSpeed > 0) ? String((int)data.maxSpeed) : "--";
-                tft.drawString(maxSpeedStr, ::SCREEN_W - 90, 60, 2);
+                if (data.maxSpeed > 0) {
+                    snprintf(valueBuffer, sizeof(valueBuffer), "%d", (int)data.maxSpeed);
+                } else {
+                    strcpy(valueBuffer, "--");
+                }
+                tft.drawString(valueBuffer, ::SCREEN_W - 90, 60, 2);
                 tft.setFreeFont();
             },
             0.1, this->forceRedraw);

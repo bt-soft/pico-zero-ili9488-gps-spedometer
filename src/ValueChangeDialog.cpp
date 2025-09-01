@@ -329,7 +329,7 @@ void ValueChangeDialog::drawSelf() {
     const int16_t valueY = valueAreaY + BUTTON_HEIGHT / 2;                                                // Gomb közepén
 
     // Érték háttér nélküli megjelenítés - csak nagy szöveg
-    String valueStr = getCurrentValueAsString(); // Színválasztás: teal ha eredeti érték, különben fehér
+    getCurrentValueAsString(_valueStringBuffer, sizeof(_valueStringBuffer)); // Színválasztás: teal ha eredeti érték, különben fehér
     uint16_t textColor = UIColorPalette::SCREEN_TEXT;
     if (isCurrentValueOriginal()) {
         textColor = TFT_CYAN; // Teal színű az eredeti érték
@@ -339,17 +339,29 @@ void ValueChangeDialog::drawSelf() {
     tft.setTextDatum(MC_DATUM);
     tft.setTextColor(textColor, colors.background); // A dialógus hátterét használjuk
     tft.setTextSize(VALUE_TEXT_FONT_SIZE);
-    tft.drawString(valueStr, centerX, valueY);
+    tft.drawString(_valueStringBuffer, centerX, valueY);
 }
 
 /**
  * @brief Aktuális érték szöveges formában
  * @return Az aktuális érték string reprezentációja
  */
-String ValueChangeDialog::getCurrentValueAsString() const {
+/**
+ * @brief Aktuális érték char bufferbe
+ * @param buffer A kimeneti buffer
+ * @param bufferSize A buffer mérete
+ * @return A buffer pointere
+ */
+char *ValueChangeDialog::getCurrentValueAsString(char *buffer, size_t bufferSize) const {
     switch (_valueType) {
         case ValueType::Integer:
-            return _intPtr ? String(*_intPtr) : "N/A";
+            if (_intPtr) {
+                snprintf(buffer, bufferSize, "%d", *_intPtr);
+            } else {
+                strncpy(buffer, "N/A", bufferSize - 1);
+                buffer[bufferSize - 1] = '\0';
+            }
+            break;
         case ValueType::Float:
             if (_floatPtr) {
                 // Intelligens formázás: ha step 0.1, akkor 1 tizedesjegy, ha 0.01, akkor 2, stb.
@@ -363,16 +375,34 @@ String ValueChangeDialog::getCurrentValueAsString() const {
                 } else {
                     decimalPlaces = 3;
                 }
-                return String(*_floatPtr, decimalPlaces);
+                dtostrf(*_floatPtr, 0, decimalPlaces, buffer);
+            } else {
+                strncpy(buffer, "N/A", bufferSize - 1);
+                buffer[bufferSize - 1] = '\0';
             }
-            return "N/A";
+            break;
         case ValueType::Boolean:
-            return _boolPtr ? (*_boolPtr ? "True" : "False") : "N/A";
+            if (_boolPtr) {
+                strncpy(buffer, *_boolPtr ? "True" : "False", bufferSize - 1);
+            } else {
+                strncpy(buffer, "N/A", bufferSize - 1);
+            }
+            buffer[bufferSize - 1] = '\0';
+            break;
         case ValueType::UInt8:
-            return _uint8Ptr ? String(*_uint8Ptr) : "N/A";
+            if (_uint8Ptr) {
+                snprintf(buffer, bufferSize, "%u", *_uint8Ptr);
+            } else {
+                strncpy(buffer, "N/A", bufferSize - 1);
+                buffer[bufferSize - 1] = '\0';
+            }
+            break;
         default:
-            return "Error";
+            strncpy(buffer, "Error", bufferSize - 1);
+            buffer[bufferSize - 1] = '\0';
+            break;
     }
+    return buffer;
 }
 
 /**
@@ -583,7 +613,7 @@ void ValueChangeDialog::redrawValueArea() {
     tft.fillRect(clearX, clearY, clearWidth, clearHeight, colors.background);
 
     // Érték szöveg - nagyobb fonttal, színkóddal
-    String valueStr = getCurrentValueAsString();
+    getCurrentValueAsString(_valueStringBuffer, sizeof(_valueStringBuffer));
 
     // Színválasztás: teal ha eredeti érték, különben fehér
     uint16_t textColor = UIColorPalette::SCREEN_TEXT;
@@ -594,7 +624,7 @@ void ValueChangeDialog::redrawValueArea() {
     tft.setTextDatum(MC_DATUM);
     tft.setTextColor(textColor, colors.background);
     tft.setTextSize(VALUE_TEXT_FONT_SIZE);
-    tft.drawString(valueStr, centerX, valueY);
+    tft.drawString(_valueStringBuffer, centerX, valueY);
 
     // Gombok állapotának frissítése típus alapján
     if (_decreaseButton) {
@@ -714,13 +744,13 @@ void ValueChangeDialog::redrawValueTextOnly() {
     const int16_t clearX = centerX - clearWidth / 2;
     const int16_t clearY = valueY - clearHeight / 2;
     tft.fillRect(clearX, clearY, clearWidth, clearHeight, colors.background);
-    String valueStr = getCurrentValueAsString();
+    getCurrentValueAsString(_valueStringBuffer, sizeof(_valueStringBuffer));
     uint16_t textColor = isCurrentValueOriginal() ? TFT_CYAN : UIColorPalette::SCREEN_TEXT;
     tft.setFreeFont(&FreeSansBold9pt7b); // Biztosítjuk a helyes betűtípust
     tft.setTextDatum(MC_DATUM);
     tft.setTextColor(textColor, colors.background);
     tft.setTextSize(VALUE_TEXT_FONT_SIZE);
-    tft.drawString(valueStr, centerX, valueY);
+    tft.drawString(_valueStringBuffer, centerX, valueY);
 
     // Gombok állapotának frissítése
     if (_decreaseButton) {
