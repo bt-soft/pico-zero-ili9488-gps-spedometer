@@ -48,6 +48,9 @@ class TraffipaxManager {
     int lastClosestTraffipaxIdx = -1;
     double lastDistance = 999999.0;
 
+    // String optimalizálás: buffer a koordináták formázásához
+    char coordBuffer[32];
+
     // Demo traffipax közeledés/távolodás szimulálása működés közben
     struct TraffipaxDemo {
         bool isActive = false;

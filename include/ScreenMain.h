@@ -112,6 +112,9 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     double lastHdop = -1.0;
     unsigned long lastVerticalLinearSpriteUpdate = 0;
 
+    // String optimalizálás: egyetlen buffer a szöveges értékekhez
+    char valueBuffer[64]; // Elég nagy az összes értékhez
+
     // Demó logika kiszervezése
     void handleDemoMode(DisplayData &data);
 

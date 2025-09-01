@@ -85,7 +85,7 @@
 	(net 0 "")
 	(net 1 "Net-(BT1-1)")
 	(net 2 "Net-(BT1-2)")
-	(net 3 "+5VBATT")
+	(net 3 "+BATT")
 	(net 4 "Net-(BZ1--)")
 	(net 5 "+5V")
 	(net 6 "GND")
@@ -2109,65 +2109,6 @@
 			(drill 2.2)
 			(layers "*.Cu" "*.Mask")
 			(uuid "19e72042-ec30-4a70-8331-c852cbe8fc4e")
-		)
-		(embedded_fonts no)
-	)
-	(footprint ""
-		(layer "F.Cu")
-		(uuid "45868e17-7d16-4147-ab8a-3cbc03a90700")
-		(at 99.5 86.4025)
-		(property "Reference" ""
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(uuid "a6a85c55-35a8-4a7d-b8be-4709eb89414d")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(uuid "f7e3452d-1e38-43b6-a162-d57b953d6038")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "0a1956ad-60bb-4f13-8038-9df7e8a8c5c3")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "b5ef128e-b5db-4138-9adb-7ae349f146ce")
-			(effects
-				(font
-					(size 1.27 1.27)
-					(thickness 0.15)
-				)
-			)
-		)
-		(pad "" np_thru_hole circle
-			(at 0 0 180)
-			(size 3.2 3.2)
-			(drill 3.2)
-			(layers "*.Cu" "*.Mask")
-			(uuid "b6dd817c-5b5a-4b0b-80dd-b71fe8e8086f")
 		)
 		(embedded_fonts no)
 	)
@@ -4934,7 +4875,7 @@
 			(drill 0.7)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 3 "+5VBATT")
+			(net 3 "+BATT")
 			(pintype "passive")
 			(uuid "61beb340-f067-4b0d-b775-2f6171d94e93")
 		)
@@ -8197,7 +8138,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 3 "+5VBATT")
+			(net 3 "+BATT")
 			(pinfunction "+")
 			(pintype "passive")
 			(uuid "47bd69f7-b7d5-44a8-9a8e-394bb75f5ae7")
@@ -8986,7 +8927,7 @@
 			(drill 1)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 3 "+5VBATT")
+			(net 3 "+BATT")
 			(pinfunction "5V")
 			(pintype "power_in")
 			(solder_mask_margin 0.102)
@@ -9348,7 +9289,7 @@
 			(drill 1.54)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 3 "+5VBATT")
+			(net 3 "+BATT")
 			(pinfunction "Pin_3")
 			(pintype "passive")
 			(uuid "c1824245-95eb-4a52-9074-aa42550f93d9")
@@ -9579,7 +9520,7 @@
 				)
 			)
 		)
-		(property "Value" "22k"
+		(property "Value" "15k"
 			(at 3.81 1.92 90)
 			(layer "F.Fab")
 			(uuid "13b0249f-cf07-4081-84f0-ceb1f4a57154")
@@ -10084,7 +10025,7 @@
 		(layer "Edge.Cuts")
 		(uuid "dbeb1cfe-fc79-4257-a698-a1a316c5785e")
 	)
-	(gr_text "Pico GPS Spedometer"
+	(gr_text "Pico GPS Speedometer"
 		(at 103.18 91.4025 0)
 		(layer "B.Cu")
 		(uuid "4a0a971d-7e3a-4d1b-b04b-34bb7bc71832")

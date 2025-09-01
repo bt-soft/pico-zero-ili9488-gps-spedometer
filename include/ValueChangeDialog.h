@@ -51,9 +51,12 @@ class ValueChangeDialog : public MessageDialog {
     float _minFloat = 0.0f, _maxFloat = 100.0f, _stepFloat = 1.0f;
     uint8_t _minUint8 = 0, _maxUint8 = 255, _stepUint8 = 1;
 
-    // Callback
+    // Callbacks
     ValueChangeCallback _valueCallback = nullptr;
     DialogCallback _userDialogCallback = nullptr; // Új: Felhasználó által megadott DialogCallback
+
+    // Optimalizálás: egyetlen buffer az értékek szöveges megjelenítéséhez
+    mutable char _valueStringBuffer[32]; // Elég 32 karakter az összes típushoz
 
     // UI komponensek
     // Az _okButton és _cancelButton a MessageDialog által biztosított.
@@ -87,9 +90,12 @@ class ValueChangeDialog : public MessageDialog {
 
   private:
     /**
-     * @brief Aktuális érték lekérése string formátumban
+     * @brief Aktuális érték lekérése char bufferbe
+     * @param buffer A kimeneti buffer
+     * @param bufferSize A buffer mérete
+     * @return A buffer pointere
      */
-    String getCurrentValueAsString() const;
+    char *getCurrentValueAsString(char *buffer, size_t bufferSize) const;
 
     /**
      * @brief Érték növelése

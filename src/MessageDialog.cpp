@@ -313,26 +313,31 @@ void MessageDialog::drawSelf() {
 
         if (textArea.width > 0 && textArea.height > 0) {
             // Többsoros szöveg kezelése - sorok felosztása \n karakterek alapján
-            String messageStr = String(message);
+            // Egyszerű char* feldolgozás String helyett
             std::vector<String> lines;
-            int start = 0;
-            int lineEnd = messageStr.indexOf('\n');
 
-            // Sorok felosztása
-            while (lineEnd != -1) {
-                lines.push_back(messageStr.substring(start, lineEnd));
-                start = lineEnd + 1;
-                lineEnd = messageStr.indexOf('\n', start);
-            }
-            // Utolsó sor hozzáadása
-            if (start < messageStr.length()) {
-                lines.push_back(messageStr.substring(start));
+            // Másolatot készítünk a message-ről, hogy módosíthatóvá tegyük
+            size_t messageLen = strlen(message);
+            char *messageCopy = new char[messageLen + 1];
+            strcpy(messageCopy, message);
+
+            // Sorok felosztása \n karakterek alapján
+            char *lineStart = messageCopy;
+            char *lineEnd = strchr(lineStart, '\n');
+
+            while (lineEnd != nullptr) {
+                *lineEnd = '\0'; // Null terminátor a sor végére
+                lines.push_back(String(lineStart));
+                lineStart = lineEnd + 1;
+                lineEnd = strchr(lineStart, '\n');
             }
 
-            // Ha nincs \n karakter, az egész szöveget egy sorként kezeljük
-            if (lines.empty()) {
-                lines.push_back(messageStr);
+            // Utolsó sor hozzáadása (vagy az egyetlen sor, ha nincs \n)
+            if (*lineStart != '\0') {
+                lines.push_back(String(lineStart));
             }
+
+            delete[] messageCopy;
 
             // Sorok renderelése
             int16_t lineHeight = tft.fontHeight();
