@@ -131,8 +131,10 @@ void ScreenSats::drawSatelliteTable() {
 
     // A háttér törlése a státusz szöveg előtt
     tft.fillRect(TABLE_X, TABLE_Y, TABLE_WIDTH, 24, TFT_BLACK);
-    tft.drawString("In view: " + String(satCount), TABLE_X, TABLE_Y);
-    tft.drawString("In DB:   " + String(satellites.size()), TABLE_X, TABLE_Y + 12);
+    snprintf(valueBuffer, sizeof(valueBuffer), "In view: %u", satCount);
+    tft.drawString(valueBuffer, TABLE_X, TABLE_Y);
+    snprintf(valueBuffer, sizeof(valueBuffer), "In DB:   %zu", satellites.size());
+    tft.drawString(valueBuffer, TABLE_X, TABLE_Y + 12);
 
     // Táblázat fejléc
     int16_t headerTextY = TABLE_Y + 28;
@@ -265,7 +267,8 @@ void ScreenSats::drawSatelliteOnCircle(int16_t centerX, int16_t centerY, int16_t
     tft.setTextSize(1);
     tft.setTextPadding(0); // Ne töröljön bele semmibe
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString(String(sat.prn), satX, satY + radius + 8);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%u", sat.prn);
+    tft.drawString(valueBuffer, satX, satY + radius + 8);
 }
 
 /**

@@ -24,24 +24,28 @@ bool isPaused = false;
 /**
  * @brief Átalakít egy másodperc értéket "perc:mp" formátumú szöveggé
  * @param sec Időérték másodpercben
- * @return Formázott string (pl. "02:05")
+ * @param buffer A kimeneti buffer (min. 8 karakter)
+ * @param bufferSize A buffer mérete
+ * @return A buffer pointere a kényelmesebb használatért
  */
-String secToMinSecString(uint32_t sec) {
+char *secToMinSecString(uint32_t sec, char *buffer, size_t bufferSize) {
     uint32_t minutes = sec / 60;
     uint32_t seconds = sec % 60;
-    char buf[8];
-    snprintf(buf, sizeof(buf), "%02u:%02u", minutes, seconds);
-    return String(buf);
+    snprintf(buffer, bufferSize, "%02u:%02u", minutes, seconds);
+    return buffer;
 }
 
 /**
- * @brief Egy lebegőpontos számot formáz stringgé, a tizedesjegyek számát paraméterként adva meg.
+ * @brief Egy lebegőpontos számot formáz char bufferbe, a tizedesjegyek számát paraméterként adva meg.
  * @param value A lebegőpontos szám értéke
- * @param decimalPlaces A tizedesjegyek száma (alapértelmezett: 2)
+ * @param decimalPlaces A tizedesjegyek száma
+ * @param buffer A kimeneti buffer (min. 16 karakter ajánlott)
+ * @param bufferSize A buffer mérete
+ * @return A buffer pointere a kényelmesebb használatért
  */
-String floatToString(float value, int decimalPlaces) {
-    String result = String(value, decimalPlaces);
-    return result;
+char *floatToString(float value, int decimalPlaces, char *buffer, size_t bufferSize) {
+    dtostrf(value, 0, decimalPlaces, buffer);
+    return buffer;
 }
 
 /**

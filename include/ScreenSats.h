@@ -45,6 +45,9 @@ class ScreenSats : public UIScreen {
     SatelliteDb::SortType_t currentSortType;
     bool sortOrderChanged;
 
+    // String optimalizálás: buffer az értékek megjelenítéséhez
+    char valueBuffer[32];
+
     /**
      * @brief UI komponensek elhelyezése
      */

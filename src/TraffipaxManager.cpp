@@ -126,7 +126,7 @@ void TraffipaxManager::loadFromCSV(const char *filename) {
         t.lat = atof(latstr);
         t.lon = atof(lonstr);
 
-        // DEBUG("Loaded Tafipax: %s, %s, %s, %s\n", t.city, t.street_or_km, Utils::floatToString(t.lat, 6).c_str(), Utils::floatToString(t.lon, 6).c_str());
+        // DEBUG("Loaded Tafipax: %s, %s, %s, %s\n", t.city, t.street_or_km, Utils::floatToString(t.lat, 6, coordBuffer, sizeof(coordBuffer)), Utils::floatToString(t.lon, 6, coordBuffer, sizeof(coordBuffer)));
     }
 
     file.close();
@@ -246,10 +246,12 @@ void TraffipaxManager::startDemo() {
         const TraffipaxRecord &selected = traffipaxList[random(traffipaxCount)];
         TraffipaxDemo::demoTraffipaxLat = selected.lat;
         TraffipaxDemo::demoTraffipaxLon = selected.lon;
+        char latBuffer[16], lonBuffer[16];
+        Utils::floatToString(selected.lat, 6, latBuffer, sizeof(latBuffer));
+        Utils::floatToString(selected.lon, 6, lonBuffer, sizeof(lonBuffer));
         DEBUG("Demo trafipax kiválasztva: %s - %s, lat: %s, lon: %s\n", //
               selected.city, selected.street_or_km,                     //
-              Utils::floatToString(selected.lat, 6).c_str(),            //
-              Utils::floatToString(selected.lon, 6).c_str()             //
+              latBuffer, lonBuffer                                      //
         );
     } else {
         // Ha nincs trafipax, akkor a litéri VÉDA koordináták

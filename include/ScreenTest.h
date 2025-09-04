@@ -184,7 +184,9 @@ class ScreenTest : public UIScreen, public ButtonsGroupManager<ScreenTest> {
                                  this, "Float Test", "Change float value:", &_testFloat, 0.0f, 50.0f, 0.5f,
                                  [this](const std::variant<int, float, bool> &newValue) {
                                      if (std::holds_alternative<float>(newValue)) {
-                                         DEBUG("ScreenTest: Float value changed to: %s\n", Utils::floatToString(std::get<float>(newValue)).c_str());
+                                         char tempBuffer[16];
+                                         Utils::floatToString(std::get<float>(newValue), 2, tempBuffer, sizeof(tempBuffer));
+                                         DEBUG("ScreenTest: Float value changed to: %s\n", tempBuffer);
                                      } // ValueChangeCallback
                                  },       // ValueChangeCallback
                                  nullptr, // Explicitly passing nullptr for userDialogCb

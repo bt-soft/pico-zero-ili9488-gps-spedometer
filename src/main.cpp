@@ -71,12 +71,16 @@ void drawSplashScreen() {
 
     // Build
     tft.setTextColor(TFT_CYAN);
-    tft.drawString(String(__DATE__) + " " + String(__TIME__), tft.width() / 2, 210, 1);
+    char buildBuffer[64];
+    snprintf(buildBuffer, sizeof(buildBuffer), "%s %s", __DATE__, __TIME__);
+    tft.drawString(buildBuffer, tft.width() / 2, 210, 1);
 
     // Trafipaxok száma
     tft.setFreeFont(&FreeSansBold18pt7b);
     tft.setTextSize(1);
-    tft.drawString("Traffipax count: " + String(traffipaxManager.count()), tft.width() / 2, 272, 1);
+    char countBuffer[64];
+    snprintf(countBuffer, sizeof(countBuffer), "Traffipax count: %d", traffipaxManager.count());
+    tft.drawString(countBuffer, tft.width() / 2, 272, 1);
 }
 
 /**

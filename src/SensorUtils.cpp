@@ -62,7 +62,9 @@ void SensorUtils::init() {
  */
 void SensorUtils::handleTemperatureChange(int deviceIndex, int32_t temperatureRAW) {
     externalTemperatureValue = nonBlockingDallasTemp.rawToCelsius(temperatureRAW);
-    // DEBUG("SensorUtils::handleTemperatureChange -> temperature: %s °C\n", Utils::floatToString(externalTemperatureValue, 2).c_str());
+    // char tempBuffer[16];
+    // Utils::floatToString(externalTemperatureValue, 2, tempBuffer, sizeof(tempBuffer));
+    // DEBUG("SensorUtils::handleTemperatureChange -> temperature: %s °C\n", tempBuffer);
 }
 
 /**

@@ -7,16 +7,21 @@ namespace Utils {
 /**
  * @brief Átalakít egy másodperc értéket "perc:mp" formátumú szöveggé
  * @param sec Időérték másodpercben
- * @return Formázott string (pl. "02:05")
+ * @param buffer A kimeneti buffer (min. 8 karakter)
+ * @param bufferSize A buffer mérete
+ * @return A buffer pointere a kényelmesebb használatért
  */
-String secToMinSecString(uint32_t sec);
+char *secToMinSecString(uint32_t sec, char *buffer, size_t bufferSize);
 
 /**
- * @brief  Formáz egy lebegőpontos számot stringgé, a tizedesjegyek számát paraméterként adva meg.
+ * @brief  Formáz egy lebegőpontos számot char bufferbe, a tizedesjegyek számát paraméterként adva meg.
  * @param value A lebegőpontos szám értéke
  * @param decimalPlaces A tizedesjegyek száma (alapértelmezett: 2)
+ * @param buffer A kimeneti buffer (min. 16 karakter ajánlott)
+ * @param bufferSize A buffer mérete
+ * @return A buffer pointere a kényelmesebb használatért
  */
-String floatToString(float value, int decimalPlaces = 2);
+char *floatToString(float value, int decimalPlaces, char *buffer, size_t bufferSize);
 
 /**
  * Várakozás a soros port megnyitására DEBUG esetén

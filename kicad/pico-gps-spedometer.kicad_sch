@@ -4259,7 +4259,7 @@
 	)
 	(wire
 		(pts
-			(xy 43.18 68.58) (xy 43.18 78.74)
+			(xy 43.18 68.58) (xy 43.18 82.55)
 		)
 		(stroke
 			(width 0)
@@ -6388,12 +6388,13 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+5VBATT"
-			(at 87.63 26.67 0)
+		(property "Value" "+BATT"
+			(at 90.17 30.4799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left)
 			)
 		)
 		(property "Footprint" ""
@@ -7371,7 +7372,7 @@
 		(dnp no)
 		(uuid "8e5b374d-38b4-4af3-82a9-258e140f6197")
 		(property "Reference" "J2"
-			(at 149.86 34.2899 0)
+			(at 149.86 36.068 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7380,7 +7381,7 @@
 			)
 		)
 		(property "Value" "TP4056-18650-Charger"
-			(at 152.654 38.354 0)
+			(at 144.78 44.958 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7797,7 +7798,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 43.18 78.74 0)
+		(at 43.18 82.55 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7806,7 +7807,7 @@
 		(fields_autoplaced yes)
 		(uuid "a29e3fb3-8210-4b77-aee6-62ab7a579776")
 		(property "Reference" "#PWR04"
-			(at 43.18 85.09 0)
+			(at 43.18 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7815,7 +7816,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 43.18 83.82 0)
+			(at 43.18 87.63 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7823,7 +7824,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 43.18 78.74 0)
+			(at 43.18 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7832,7 +7833,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 43.18 78.74 0)
+			(at 43.18 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7841,7 +7842,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 43.18 78.74 0)
+			(at 43.18 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8491,7 +8492,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+5VBATT"
+		(property "Value" "+BATT"
 			(at 132.08 67.31 0)
 			(effects
 				(font
@@ -8699,7 +8700,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+5VBATT"
+		(property "Value" "+BATT"
 			(at 127 20.32 0)
 			(effects
 				(font
@@ -9038,7 +9039,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+5VBATT"
+		(property "Value" "+BATT"
 			(at 46.99 130.81 0)
 			(effects
 				(font
