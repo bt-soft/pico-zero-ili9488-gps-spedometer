@@ -39,6 +39,8 @@ void TftBackLightAdjuster::loop(void) {
                 brightness--;
             }
 
+            // DEBUG("Backlight adjust to %d\n", brightness);
+
             // A setBacklightLevel már kezeli a 0 és 255 speciális esetet, de PWM-mel.
             // A direkt digitalWrite hatékonyabb lehet, de a sima analogWrite is megteszi.
             setBacklightLevel(brightness);

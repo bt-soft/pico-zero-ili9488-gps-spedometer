@@ -3434,211 +3434,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Transistor_BJT:BC212"
-			(pin_names
-				(offset 0)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "Q"
-				(at 5.08 1.905 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Value" "BC212"
-				(at 5.08 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
-				(at 5.08 -1.905 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-						(italic yes)
-					)
-					(justify left)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "https://media.digikey.com/pdf/Data%20Sheets/Fairchild%20PDFs/BC212.pdf"
-				(at 5.08 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-					(hide yes)
-				)
-			)
-			(property "Description" "0.3A Ic, 50V Vce, PNP Transistor, TO-92"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "PNP Transistor"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "TO?92*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "BC212_0_1"
-				(polyline
-					(pts
-						(xy -2.54 0) (xy 0.635 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.635 1.905) (xy 0.635 -1.905)
-					)
-					(stroke
-						(width 0.508)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.635 0.635) (xy 2.54 2.54)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.635 -0.635) (xy 2.54 -2.54)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 1.27 0)
-					(radius 2.8194)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.286 -1.778) (xy 1.778 -2.286) (xy 1.27 -1.27) (xy 2.286 -1.778)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-			)
-			(symbol "BC212_1_1"
-				(pin input line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 2.54 5.08 270)
-					(length 2.54)
-					(name "C"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 2.54 -5.08 90)
-					(length 2.54)
-					(name "E"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Transistor_BJT:PN2222A"
 			(pin_names
 				(offset 0)
@@ -4275,6 +4070,10 @@
 		(uuid "5d067d70-24ea-4fc0-a832-7bd43ea95731")
 	)
 	(no_connect
+		(at 60.96 68.58)
+		(uuid "65425cc7-7fac-46fe-a904-cc1d42ab482e")
+	)
+	(no_connect
 		(at 132.08 88.9)
 		(uuid "959e12e6-3e15-4835-8254-0d340b3aa644")
 	)
@@ -4347,15 +4146,6 @@
 			(type default)
 		)
 		(uuid "5b30ca4c-fa21-47ca-a410-ff04cd1d3ab3")
-	)
-	(bus_entry
-		(at 60.96 80.01)
-		(size 2.54 2.54)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6aed8616-45ce-48cf-be27-446404548610")
 	)
 	(bus_entry
 		(at 83.82 96.52)
@@ -4469,16 +4259,6 @@
 	)
 	(wire
 		(pts
-			(xy 60.96 68.58) (xy 60.96 80.01)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0569024c-6f20-458c-9c11-a9dbf7f26ea6")
-	)
-	(wire
-		(pts
 			(xy 43.18 68.58) (xy 43.18 78.74)
 		)
 		(stroke
@@ -4539,7 +4319,7 @@
 	)
 	(bus
 		(pts
-			(xy 58.42 82.55) (xy 63.5 82.55)
+			(xy 58.42 82.55) (xy 66.04 82.55)
 		)
 		(stroke
 			(width 0)
@@ -4696,16 +4476,6 @@
 			(type default)
 		)
 		(uuid "56cc1427-e89c-4039-ab24-b9fbfb5bea5c")
-	)
-	(bus
-		(pts
-			(xy 63.5 82.55) (xy 66.04 82.55)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5755d604-66e3-4f6d-a65d-5f0e137f86d1")
 	)
 	(wire
 		(pts
@@ -5686,16 +5456,6 @@
 			(justify left bottom)
 		)
 		(uuid "38f8b7a9-2489-4d09-bc19-714b32cc59fd")
-	)
-	(label "MISO"
-		(at 60.96 80.01 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "4153b0ae-0f5d-4bdc-bae3-ece98f1e1e40")
 	)
 	(label "CS"
 		(at 86.36 104.14 0)
@@ -7030,7 +6790,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "390"
+		(property "Value" "510"
 			(at 90.17 43.1799 0)
 			(effects
 				(font
@@ -7281,82 +7041,6 @@
 			(project ""
 				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
 					(reference "C1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Transistor_BJT:BC212")
-		(at 90.17 57.15 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "7e908c30-2b48-4e82-8679-fc31c2dfe7f7")
-		(property "Reference" "Q2"
-			(at 85.09 55.8799 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "BC212"
-			(at 85.09 58.4199 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
-			(at 85.09 55.245 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "https://media.digikey.com/pdf/Data%20Sheets/Fairchild%20PDFs/BC212.pdf"
-			(at 85.09 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-		(property "Description" "0.3A Ic, 50V Vce, PNP Transistor, TO-92"
-			(at 90.17 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "d250d0c3-f46d-47db-83eb-3f5d9ae74b34")
-		)
-		(pin "3"
-			(uuid "ec937d74-3295-4fa4-9327-887062fa123a")
-		)
-		(pin "2"
-			(uuid "0dbb536f-8680-4e5b-bfc5-e79f50f222dc")
-		)
-		(instances
-			(project ""
-				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
-					(reference "Q2")
 					(unit 1)
 				)
 			)
@@ -8849,6 +8533,82 @@
 			(project ""
 				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
 					(reference "#PWR013")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Transistor_BJT:PN2222A")
+		(at 90.17 57.15 0)
+		(mirror y)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b63824a9-6dcf-48a4-acf6-8e57cf612a9a")
+		(property "Reference" "Q2"
+			(at 85.09 55.8799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "PN2222A"
+			(at 97.028 51.562 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
+			(at 85.09 59.055 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.onsemi.com/pub/Collateral/PN2222-D.PDF"
+			(at 90.17 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Description" "1A Ic, 40V Vce, NPN Transistor, General Purpose Transistor, TO-92"
+			(at 90.17 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "021718e4-20c0-4bf9-bbd3-1e2a34402925")
+		)
+		(pin "3"
+			(uuid "e0303cc8-d293-4b54-9eeb-a6e47e640812")
+		)
+		(pin "1"
+			(uuid "a20a2edb-f979-4618-a919-4ec8d1b48705")
+		)
+		(instances
+			(project "pico-gps-spedometer"
+				(path "/33c280c0-d5d0-4346-a42c-293ed40465e2"
+					(reference "Q2")
 					(unit 1)
 				)
 			)
