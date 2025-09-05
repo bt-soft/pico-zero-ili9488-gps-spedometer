@@ -50,9 +50,12 @@
 #define SATS_RINGETER_MIN 0
 #define SATS_RINGETER_MAX 15
 
-// Akkumulátor
-#define BATT_BARMETER_MIN 3.0f
-#define BATT_BARMETER_MAX 15.0f
+// Betáp feszültség
+#define VBUS_BARMETER_MIN 3.0f
+#define VBUS_BARMETER_MAX 15.0f
+// 18650  lítium akkumulátor feszültségei
+#define VSYS_BARMETER_MIN 2.7f
+#define VSYS_BARMETER_MAX 5.5f
 
 // Hőmérséklet
 #define TEMP_BARMETER_MIN -20.0f

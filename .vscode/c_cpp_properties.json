@@ -338,8 +338,6 @@
                 "ARDUINO_ARCH_RP2040",
                 "USBD_MAX_POWER_MA=500",
                 "ARDUINO_MALLOC_CAP=MALLOC_CAP_SPIRAM",
-                "TFT_SPI_FREQUENCY=40000000",
-                "SPI_FREQUENCY=40000000",
                 "USE_CORE1_FOR_DISPLAY=1",
                 "CORE_DEBUG_LEVEL=0",
                 "NDEBUG",

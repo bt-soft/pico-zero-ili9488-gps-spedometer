@@ -18,6 +18,10 @@ class SensorUtils {
     unsigned long vBusExtLastRead; // VBUS utolsó mérésének időpontja (ms)
     bool vBusExtValid;             // VBUS cache érvényessége
 
+    float vSysExtValue;            // VSYS KÜLSŐ feszültség utolsó mért értéke (Volt)
+    unsigned long vSysExtLastRead; // VSYS utolsó mérésének időpontja (ms)
+    bool vSysExtValid;             // VSYS cache érvényessége
+
     float coreTemperatureValue;            // Hőmérséklet utolsó mért értéke (Celsius)
     unsigned long coreTemperatureLastRead; // Hőmérséklet utolsó mérésének időpontja (ms)
     bool coreTemperatureValid;             // Hőmérséklet cache érvényessége
@@ -39,6 +43,12 @@ class SensorUtils {
      * @return A VBUS mért feszültsége Voltban.
      */
     float readVBusExternal();
+
+    /**
+     * ADC olvasás és VSYS feszültség kiszámítása KÜLSŐ osztóval
+     * @return A VSYS mért feszültsége Voltban.
+     */
+    float readVSysExternal();
 
     /**
      * Kiolvassa a processzor hőmérsékletét

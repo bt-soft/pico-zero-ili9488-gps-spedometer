@@ -53,7 +53,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
         bool speedValid = false;
 
         // Szenzorok
-        float busVoltage = 0.0;
+        float voltage = 0.0;
         float temperature = 0.0;
     };
 
@@ -98,6 +98,11 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @brief Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet
      */
     bool externalTemperatureMode = true; // true = external, false = CPU
+
+    /**
+     * @brief Feszmérő mód: true = VBus, false = VSys
+     */
+    bool externalVoltageMode = true; // true = external, false = CPU
 
     // Optimalizált, duplikációmentes állapotváltozók
     double lastMaxSpeed = -1.0;

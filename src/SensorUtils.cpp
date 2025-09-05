@@ -17,6 +17,11 @@
 #define VBUS_DIVIDER_R2 4.7f
 #define EXTERNAL_VBUSDIVIDER_RATIO ((VBUS_DIVIDER_R1 + VBUS_DIVIDER_R2) / VBUS_DIVIDER_R2) // Feszültségosztó aránya
 
+// Külső feszültségosztó ellenállásai a VBUS méréshez
+#define VSYS_DIVIDER_R1 4.7f
+#define VSYS_DIVIDER_R2 10.0f
+#define EXTERNAL_VSYS_DIVIDER_RATIO ((VSYS_DIVIDER_R1 + VSYS_DIVIDER_R2) / VSYS_DIVIDER_R2) // Feszültségosztó aránya
+
 // Dallas DS18B20 hőmérséklet szenzor - STATIKUS OBJEKTUMOK (memóriafragmentáció elkerülése)
 static OneWire oneWire(PIN_DS18B20_TEMP_SENSOR);
 static DallasTemperature dallasTemp(&oneWire);
@@ -28,7 +33,10 @@ volatile float SensorUtils::externalTemperatureValue = 0.0f;
 /**
  * Konstruktor
  */
-SensorUtils::SensorUtils() : vBusExtValue(0.0f), vBusExtLastRead(0), vBusExtValid(false), coreTemperatureValue(0.0f), coreTemperatureLastRead(0), coreTemperatureValid(false) {
+SensorUtils::SensorUtils()
+    : vBusExtValue(0.0f), vBusExtLastRead(0), vBusExtValid(false),                          //
+      vSysExtValue(0.0f), vSysExtLastRead(0), vSysExtValid(false),                          //
+      coreTemperatureValue(0.0f), coreTemperatureLastRead(0), coreTemperatureValid(false) { //
     // Belső AD felbontás beállítása a feszültségméréshez
     analogReadResolution(AD_RESOLUTION);
 }
@@ -89,6 +97,30 @@ float SensorUtils::readVBusExternal() {
     vBusExtValid = true;
 
     return vBusExtVoltage;
+}
+
+/**
+ * ADC olvasás és VSYS feszültség kiszámítása KÜLSŐ osztóval
+ * @return A VSYS mért feszültsége Voltban.
+ */
+float SensorUtils::readVSysExternal() {
+    unsigned long currentTime = millis();
+
+    // Ellenőrizzük, hogy a cache még érvényes-e
+    if (vSysExtValid && (currentTime - vSysExtLastRead < SENSORS_CACHE_TIMEOUT_MS)) {
+        return vSysExtValue;
+    }
+
+    // Cache lejárt vagy nem érvényes, új mérés
+    float voltageOut = (analogRead(PIN_VSYS_EXTERNAL_MEASURE_INPUT) * V_REFERENCE) / CONVERSION_FACTOR;
+    float vSysExtVoltage = voltageOut * EXTERNAL_VSYS_DIVIDER_RATIO + 0.6f; // A D1 védő dióda nyitási feszültségével kompenzálva a mért feszültséget
+
+    // Cache frissítése
+    vSysExtValue = vSysExtVoltage;
+    vSysExtLastRead = currentTime;
+    vSysExtValid = true;
+
+    return vSysExtVoltage;
 }
 
 /**

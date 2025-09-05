@@ -363,7 +363,12 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     data.maxSpeed = maxSpeedValue;
 
     // Szenzorok
-    data.busVoltage = sensorUtils.readVBusExternal();
+    if (externalVoltageMode) { // Feszmérő mód: true = VBus, false = VSys
+        data.voltage = sensorUtils.readVBusExternal();
+    } else {
+        data.voltage = sensorUtils.readVSysExternal();
+    }
+
     if (externalTemperatureMode) {
         data.temperature = sensorUtils.readExternalTemperature();
     } else {
@@ -460,8 +465,11 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.maxSpeed = demoMaxSpeed;
 
     // Szenzorok - szimulált értékek
-    // Ha 15.5 a felső határ, akkor random(0, 1201) / 100.0 = 3.5 ... 15.5
-    data.busVoltage = 3.5 + (random(0, 1201) / 100.0); // 3.5 ... 15.5 V
+    if (externalVoltageMode) {                          // Feszmérő mód: true = VBus, false = VSys
+        data.voltage = 3.5 + (random(0, 1201) / 100.0); // 3.5 ... 15.5 V
+    } else {
+        data.voltage = 2.7 + (random(0, 231) / 100.0); // 2.7 ... 5.0 V
+    }
 
     // temperature: -15.5 ... +65.5 °C
     data.temperature = -15.5 + (random(0, 811) / 10.0); // -15.5 ... +65.5 (811 lépés, 0.1°C)
@@ -840,17 +848,17 @@ void ScreenMain::handleOwnLoop() {
 #define VERTICAL_LINEAR_METER_BAR_Y 250
     // Vertical Line bar - Battery (sprite-os)
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        "Vbus [V]",                       // category
-                        data.busVoltage,                  // value
-                        BATT_BARMETER_MIN,                // minVal
-                        BATT_BARMETER_MAX,                // maxVal
-                        0,                                // x
-                        VERTICAL_LINEAR_METER_BAR_Y + 10, // y: sprite alsó éle, +10 hogy ne lógjon le
-                        30,                               // bar-w
-                        10,                               // bar-h
-                        2,                                // gap
-                        10,                               // n
-                        RED2GREEN);                       // color
+                        externalVoltageMode ? "Vbus [V]" : "Vsys [V]",               // Feszmérő mód: true = VBus, false = VSys
+                        data.voltage,                                                // value
+                        externalVoltageMode ? VBUS_BARMETER_MIN : VSYS_BARMETER_MIN, // maxVal
+                        externalVoltageMode ? VBUS_BARMETER_MAX : VSYS_BARMETER_MAX, // minVal
+                        0,                                                           // x
+                        VERTICAL_LINEAR_METER_BAR_Y + 10,                            // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                                                          // bar-w
+                        10,                                                          // bar-h
+                        2,                                                           // gap
+                        10,                                                          // n
+                        RED2GREEN);                                                  // color
 
     // Vertical Line bar - Temperature
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
@@ -932,6 +940,21 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
         return true; // Esemény kezelve
     }
 
+    // Bal oldali feszültség bar területének ellenőrzése
+    uint16_t leftBarX = 0;
+    constexpr uint16_t leftBarY = VERTICAL_LINEAR_METER_BAR_Y + 10 - SPRITE_VERTICAL_LINEAR_METER_HEIGHT;
+    constexpr uint16_t leftBarWidth = SPRITE_VERTICAL_LINEAR_METER_WIDTH;
+    constexpr uint16_t leftBarHeight = SPRITE_VERTICAL_LINEAR_METER_HEIGHT;
+    if (event.x >= leftBarX && event.x < leftBarX + leftBarWidth && event.y >= leftBarY && event.y < leftBarY + leftBarHeight) {
+        // Váltás a feszültség módok között
+        externalVoltageMode = !externalVoltageMode;
+        lastVerticalLinearSpriteUpdate = 0;
+        if (config.data.beeperEnabled) {
+            Utils::beepTick();
+        }
+        return true;
+    }
+
     // Jobb oldali hőmérsékleti bar területének ellenőrzése
     uint16_t rightBarX = ::SCREEN_W - SPRITE_VERTICAL_LINEAR_METER_WIDTH;
     constexpr uint16_t rightBarY = VERTICAL_LINEAR_METER_BAR_Y + 10 - SPRITE_VERTICAL_LINEAR_METER_HEIGHT; // y koordináta teteje
@@ -939,18 +962,12 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
     constexpr uint16_t rightBarHeight = SPRITE_VERTICAL_LINEAR_METER_HEIGHT;
     // Ellenőrizzük, hogy a touch a jobb oldali bar területén belül van-e
     if (event.x >= rightBarX && event.x < rightBarX + rightBarWidth && event.y >= rightBarY && event.y < rightBarY + rightBarHeight) {
-
         // Váltás a hőmérsékleti módok között
         externalTemperatureMode = !externalTemperatureMode;
-
-        // Sprite azonnal frissüljön a következő draw()-nál
         lastVerticalLinearSpriteUpdate = 0;
-
-        // Pittyentünk, ha az engedélyezve van
         if (config.data.beeperEnabled) {
             Utils::beepTick();
         }
-
         return true; // Esemény kezelve
     }
 
