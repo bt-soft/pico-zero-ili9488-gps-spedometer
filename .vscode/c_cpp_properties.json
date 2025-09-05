@@ -345,7 +345,7 @@
                 "USE_HSPI_FOR_EPD",
                 "ARDUINO=10810",
                 "ARDUINO_ARCH_RP2040",
-                "F_CPU=250000000L",
+                "F_CPU=133000000L",
                 "BOARD_NAME=\"pico\"",
                 "ARM_MATH_CM0_FAMILY",
                 "ARM_MATH_CM0_PLUS",
