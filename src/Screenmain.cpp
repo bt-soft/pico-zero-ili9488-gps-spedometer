@@ -850,8 +850,8 @@ void ScreenMain::handleOwnLoop() {
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
                         externalVoltageMode ? "Vbus [V]" : "Vsys [V]",               // Feszmérő mód: true = VBus, false = VSys
                         data.voltage,                                                // value
-                        externalVoltageMode ? VBUS_BARMETER_MIN : VSYS_BARMETER_MIN, // maxVal
-                        externalVoltageMode ? VBUS_BARMETER_MAX : VSYS_BARMETER_MAX, // minVal
+                        externalVoltageMode ? VBUS_BARMETER_MIN : VSYS_BARMETER_MIN, // minVal
+                        externalVoltageMode ? VBUS_BARMETER_MAX : VSYS_BARMETER_MAX, // maxVal
                         0,                                                           // x
                         VERTICAL_LINEAR_METER_BAR_Y + 10,                            // y: sprite alsó éle, +10 hogy ne lógjon le
                         30,                                                          // bar-w
