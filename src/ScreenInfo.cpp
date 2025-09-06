@@ -286,7 +286,6 @@ void ScreenInfo::handleOwnLoop() {
     y += lineHeight;
 
     GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
-
     sprintf(valueBuffer, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;

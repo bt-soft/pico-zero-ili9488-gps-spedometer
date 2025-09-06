@@ -94,16 +94,6 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     virtual bool handleTouch(const TouchEvent &event) override;
 
   private:
-    /**
-     * @brief Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet
-     */
-    bool externalTemperatureMode = true; // true = external, false = CPU
-
-    /**
-     * @brief Feszmérő mód: true = VBus, false = VSys
-     */
-    bool externalVoltageMode = true; // true = external, false = CPU
-
     // Optimalizált, duplikációmentes állapotváltozók
     double lastMaxSpeed = -1.0;
     double lastSpeed = -1.0;

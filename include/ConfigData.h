@@ -23,4 +23,8 @@ struct Config_t {
     bool debugGpsSerialOnInternalFastLed; //  Az RGB LED villogtatása, ha van GPS soros adat
     bool debugGpsSerialData;              //  GPS adatok kiírása a Soros portra
     bool debugGpsSatellitesDatabase;      //  GPS műhold adatbázis debug logolása
+
+    //--- Nem állítható de perszisztens adatok ->  MainScreen
+    bool externalTemperatureMode = true; // Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet, true = external, false = CPU
+    bool externalVoltageMode = true;     // Feszültségmérő mód: true = VBus, false = VSys, true = external, false = CPU
 };

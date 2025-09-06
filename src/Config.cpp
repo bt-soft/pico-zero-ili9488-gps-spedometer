@@ -25,6 +25,9 @@ const Config_t DEFAULT_CONFIG = {
     .debugGpsSerialData = false,              // GPS soros adat kiírása a soros portra
     .debugGpsSatellitesDatabase = false,
 
+    //--- Nem állítható de perszisztens adatok ->  MainScreen
+    .externalTemperatureMode = true, // Hőmérsékleti mód: true = külső hőmérséklet, false = CPU hőmérséklet, true = external, false = CPU
+    .externalVoltageMode = true,     // Feszültségmérő mód: true = VBus, false = VSys, true = external, false = CPU
 };
 
 // Globális konfiguráció példány
