@@ -15,6 +15,7 @@ void DebugDataInspector::printConfigData(const Config_t &configData) {
     DEBUG("  tftManualBrightnessValue: %u\n", configData.tftManualBrightnessValue);
     DEBUG("  tftAutoBrightnessActive: %s\n", configData.tftAutoBrightnessActive ? "true" : "false");
     DEBUG("  beeperEnabled: %s\n", configData.beeperEnabled ? "true" : "false");
+    DEBUG("  screenSaverTimeout: %u\n", configData.screenSaverTimeout);
     DEBUG("  gpsTraffiAlarmEnabled: %s\n", configData.gpsTraffiAlarmEnabled ? "true" : "false");
     DEBUG("  gpsTraffiAlarmDistance: %u\n", configData.gpsTraffiAlarmDistance);
     DEBUG("  gpsTraffiSirenAlarmEnabled: %s\n", configData.gpsTraffiSirenAlarmEnabled ? "true" : "false");

@@ -11,7 +11,8 @@ struct Config_t {
     uint8_t tftManualBrightnessValue; // TFT Háttérvilágítás értéke kézi fényerő szabályozás esetén
 
     //--- System
-    bool beeperEnabled; // Hangjelzés engedélyezése
+    bool beeperEnabled;         // Hangjelzés engedélyezése
+    uint8_t screenSaverTimeout; // Képernyőkímélő időtúllépés percben
 
     // GPS traffipax riasztási beállítások
     uint16_t gpsTraffiAlarmDistance; // GPS traffipax riasztási távolság méterben

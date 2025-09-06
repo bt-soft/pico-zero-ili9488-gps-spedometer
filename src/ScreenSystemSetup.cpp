@@ -1,6 +1,7 @@
 #include "ScreenSystemSetup.h"
 #include "Config.h"
 #include "Utils.h"
+#include "ValueChangeDialog.h"
 #include "defines.h"
 
 // Demó mód
@@ -42,6 +43,40 @@ void ScreenSystemSetup::layoutComponents() {
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
                 ::demoMode = event.state == UIButton::EventButtonState::On;
+            }
+        }) //
+    );
+
+    // Screen Saver gomb
+    row++;
+    addChild(std::make_shared<UIButton>(                      //
+        12,                                                   //
+        Rect(btnX, btnY + row * (btnH + btnGap), btnW, btnH), //
+        "Screen Saver",                                       //
+        UIButton::ButtonType::Pushable,                       //
+        UIButton::ButtonState::Off,                           //
+        [this](const UIButton::ButtonEvent &event) {
+            if (event.state == UIButton::EventButtonState::Clicked) {
+                static int screenSaverTimeout = static_cast<int>(config.data.screenSaverTimeout);
+
+                auto dialog = std::make_shared<ValueChangeDialog>(
+                    this, "Screen Saver Timeout", "Set timeout (0-60 minutes, 0->off)", //
+                    &screenSaverTimeout, 0, 60, 1,
+                    [this](const std::variant<int, float, bool> &newValue) {
+                        if (std::holds_alternative<int>(newValue)) {
+                            int screenSaverTimeout = std::get<int>(newValue);
+                            screenSaverTimeout = constrain(screenSaverTimeout, 0, 60);
+                            config.data.screenSaverTimeout = static_cast<uint8_t>(screenSaverTimeout);
+                        }
+                    },
+                    [this](UIDialogBase *dialog, UIDialogBase::DialogResult result) {
+                        if (result == UIDialogBase::DialogResult::Accepted) {
+                        } else if (result == UIDialogBase::DialogResult::Rejected) {
+                            screenSaverTimeout = static_cast<int>(config.data.screenSaverTimeout);
+                        }
+                    });
+
+                showDialog(dialog);
             }
         }) //
     );

@@ -53,11 +53,11 @@ void ScreenGPSSetup::layoutComponents() {
         UIButton::ButtonState::Off,                           //
         [this, MIN_DISTANCE, MAX_DISTANCE, STEP_DISTANCE](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::Clicked) {
-                // ... itt már elérhetőek a konstansok!
                 static int gpsTraffiAlarmDistance = static_cast<int>(config.data.gpsTraffiAlarmDistance);
 
                 auto dialog = std::make_shared<ValueChangeDialog>(
-                    this, "Trafi Alarm Distance", "Set distance level (100-1500 meters)", &gpsTraffiAlarmDistance, MIN_DISTANCE, MAX_DISTANCE, STEP_DISTANCE,
+                    this, "Trafi Alarm Distance", "Set distance level (100-1500 meters)", //
+                    &gpsTraffiAlarmDistance, MIN_DISTANCE, MAX_DISTANCE, STEP_DISTANCE,   //
                     [this, MIN_DISTANCE, MAX_DISTANCE](const std::variant<int, float, bool> &newValue) {
                         if (std::holds_alternative<int>(newValue)) {
                             int gpsTraffiAlarmDistance = std::get<int>(newValue);
@@ -67,7 +67,6 @@ void ScreenGPSSetup::layoutComponents() {
                     },
                     [this](UIDialogBase *dialog, UIDialogBase::DialogResult result) {
                         if (result == UIDialogBase::DialogResult::Accepted) {
-                            // config.checkSave();
                         } else if (result == UIDialogBase::DialogResult::Rejected) {
                             gpsTraffiAlarmDistance = static_cast<int>(config.data.gpsTraffiAlarmDistance);
                         }

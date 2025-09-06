@@ -12,7 +12,8 @@ const Config_t DEFAULT_CONFIG = {
     .tftManualBrightnessValue = TFT_BACKGROUND_LED_MAX_BRIGHTNESS, // TFT Háttérvilágítás értéke kézi fényerő szabályozás esetén
 
     //--- System
-    .beeperEnabled = true, // Hangjelzés engedélyezése
+    .beeperEnabled = true,   // Hangjelzés engedélyezése
+    .screenSaverTimeout = 5, // Képernyőkímélő időtúllépés percben
 
     // GPS traffipax beállítások
     .gpsTraffiAlarmDistance = 800,      // GPS traffipax riasztási távolság méterben
