@@ -16,6 +16,7 @@
 #define SCREEN_NAME_SYSTEM_SETUP "ScreenSystemSetup"
 #define SCREEN_NAME_GPS_SETUP "ScreenGPSSetup"
 #define SCREEN_NAME_DEBUG_SETUP "ScreenDebugSetup"
+#define SCREEN_NAME_SCREENSAVER "ScreenScreenSaver"
 
 //---
 #define SCREEN_NAME_EMPTY "Empty"
