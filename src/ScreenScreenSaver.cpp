@@ -90,14 +90,14 @@ void ScreenScreenSaver::handleOwnLoop() {
     tft.setFreeFont();
     tft.setTextSize(fontSize);
 
-    static int lastX = 0, lastY = 0;
-    constexpr int margin = 20;
-    constexpr int fontHeight = 32;
-     int fontWidth = tft.textWidth("88:88", fontSize); // Szélesség fix, mert mindig ugyanaz a karakterkészlet
+    static uint32_t lastX = 0, lastY = 0;
+    constexpr uint8_t margin = 20;
+    constexpr uint8_t fontHeight = 48;
+    uint8_t fontWidth = tft.textWidth("88:88", fontSize); // Szélesség fix, mert mindig ugyanaz a karakterkészlet
 
     // Véletlenszerű pozíció generálása a képernyőn belül
-    int maxX = ::SCREEN_W - fontWidth - margin;
-    int maxY = ::SCREEN_H - fontHeight - margin;
+    uint32_t maxX = ::SCREEN_W - fontWidth - margin;
+    uint32_t maxY = ::SCREEN_H - fontHeight - margin;
     lastX = random(margin, maxX);
     lastY = random(margin, maxY);
 
