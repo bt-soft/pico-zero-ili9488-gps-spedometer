@@ -237,6 +237,11 @@ void ScreenInfo::handleOwnLoop() {
 
     // Nagyobb padding
     tft.setTextPadding(bootTextPadding);
+    if (gpsManager->getGpsBootTime() == 0) {
+        snprintf(valueBuffer, sizeof(valueBuffer), "--:--");
+    } else {
+        Utils::secToMinSecString(gpsManager->getGpsBootTime(), valueBuffer, sizeof(valueBuffer));
+    }
     Utils::secToMinSecString(gpsManager->getGpsBootTime(), valueBuffer, sizeof(valueBuffer));
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
