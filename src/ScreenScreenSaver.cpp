@@ -3,6 +3,9 @@
 #include "TftBackLightAdjuster.h"
 extern TftBackLightAdjuster tftBackLightAdjuster;
 
+#include "GpsManager.h"
+extern GpsManager *gpsManager;
+
 /**
  * @brief Konstruktor
  */
@@ -17,9 +20,22 @@ ScreenScreenSaver::ScreenScreenSaver() : UIScreen(SCREEN_NAME_SCREENSAVER) {
 ScreenScreenSaver::~ScreenScreenSaver() = default;
 
 /**
- * @brief Loop hívás felülírása
+ * @brief Képernyő komponensek elrendezése
  */
-void ScreenScreenSaver::handleOwnLoop() {}
+void ScreenScreenSaver::layoutComponents() {}
+
+/**
+ * @brief Képernyő aktiválása
+ *
+ * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
+ */
+void ScreenScreenSaver::activate() {
+
+    tft.fillScreen(TFT_BLACK);
+
+    // Kényszeríti a háttérvilágítást a minimum szintre
+    tftBackLightAdjuster.setBacklightLevel(NIGHTLY_BRIGHTNESS);
+}
 
 /**
  * @brief Érintés esemény kezelése
@@ -38,26 +54,56 @@ bool ScreenScreenSaver::handleTouch(const TouchEvent &event) {
  * @brief Képernyő saját tartalmának kirajzolása
  */
 void ScreenScreenSaver::drawContent() {
-    tft.setTextDatum(MC_DATUM);
-    tft.setTextColor(TFT_WHITE, TFT_COLOR_BACKGROUND);
-    tft.setFreeFont();
-    tft.setTextSize(3);
-    tft.drawString(SCREEN_NAME_SCREENSAVER, ::SCREEN_W / 2, ::SCREEN_H / 2 - 20);
-    tft.setTextSize(1);
-    tft.drawString("ScreenSaver", ::SCREEN_W / 2, ::SCREEN_H / 2 + 20);
+    // tft.setTextDatum(MC_DATUM);
+    //  tft.setTextColor(TFT_WHITE, TFT_COLOR_BACKGROUND);
+    //  tft.setFreeFont();
+    //  tft.setTextSize(3);
+    //  tft.drawString(SCREEN_NAME_SCREENSAVER, ::SCREEN_W / 2, ::SCREEN_H / 2 - 20);
+    //  tft.setTextSize(1);
+    //  tft.drawString("ScreenSaver", ::SCREEN_W / 2, ::SCREEN_H / 2 + 20);
 }
 
 /**
- * @brief Képernyő komponensek elrendezése
+ * @brief Loop hívás felülírása
  */
-void ScreenScreenSaver::layoutComponents() {}
+void ScreenScreenSaver::handleOwnLoop() {
 
-/**
- * @brief Képernyő aktiválása
- *
- * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
- */
-void ScreenScreenSaver::activate() {
-    // Kényszeríti a háttérvilágítást a minimum szintre
-    tftBackLightAdjuster.setBacklightLevel(NIGHTLY_BRIGHTNESS);
+    // 15 másodpercenként frissítünk
+    static uint32_t lastUpdate = 0;
+    if (!Utils::timeHasPassed(lastUpdate, 15000)) {
+        return;
+    }
+    lastUpdate = millis();
+
+    // GPS idő lekérése
+    GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
+
+    // Idő
+    char timeStr[9] = "--:--";
+
+    if (localDateTime.timeValid) {
+        snprintf(timeStr, sizeof(timeStr), "%02d:%02d", localDateTime.hour, localDateTime.minute);
+    }
+
+    constexpr uint8_t fontSize = 6;
+
+    tft.setFreeFont();
+    tft.setTextSize(fontSize);
+
+    static int lastX = 0, lastY = 0;
+    constexpr int margin = 20;
+    constexpr int fontHeight = 32;
+     int fontWidth = tft.textWidth("88:88", fontSize); // Szélesség fix, mert mindig ugyanaz a karakterkészlet
+
+    // Véletlenszerű pozíció generálása a képernyőn belül
+    int maxX = ::SCREEN_W - fontWidth - margin;
+    int maxY = ::SCREEN_H - fontHeight - margin;
+    lastX = random(margin, maxX);
+    lastY = random(margin, maxY);
+
+    // Kirajzolás
+    tft.fillScreen(TFT_BLACK);
+    tft.setTextDatum(TL_DATUM);
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.drawString(timeStr, lastX, lastY);
 }
