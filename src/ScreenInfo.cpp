@@ -140,20 +140,22 @@ void ScreenInfo::drawContent() {
     snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getTotalHeap() / 1024.0f);
     tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f  kB", rp2040.getFreeHeap() / 1024.0f);
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getFreeHeap() / 1024.0f);
     tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
     snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getUsedHeap() / 1024.0f);
     tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
 
-    // 2. tábla prompt - Azért kell a 2. tábla promptjait előbb kiírni,
+    // 2. tábla 2 oszlop prompt
     // mert az MR_DATUM törli az előtte lévő teljes tartalmat, így az 1. tábla promptokat is
     tableX = 330;
     tableY = 190;
     tft.setTextDatum(MR_DATUM);
     tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
 
+    tft.drawString("Accumulator", tableX, tableY);
+    tableY += lineHeight;
     tft.drawString("Battery", tableX, tableY);
     tableY += lineHeight;
     tft.drawString("Temp External", tableX, tableY);
@@ -165,7 +167,7 @@ void ScreenInfo::drawContent() {
     tft.drawString("Mode", tableX, tableY);
     tableY += lineHeight;
 
-    // 1. tábla prompt
+    // 2. tábla 1 oszlop prompt
     tableX = 100;
     tableY = 190;
 
@@ -218,6 +220,9 @@ void ScreenInfo::handleOwnLoop() {
     snprintf(valueBuffer, sizeof(valueBuffer), "%.2fV", sensorUtils.readVBusExternal());
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
+    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fV", sensorUtils.readVSysExternal());
+    tft.drawString(valueBuffer, x, y);
+    y += lineHeight;
     snprintf(valueBuffer, sizeof(valueBuffer), "%.2fC", sensorUtils.readExternalTemperature());
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
@@ -266,14 +271,13 @@ void ScreenInfo::handleOwnLoop() {
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 
-    char tmpBuf[20];
     GpsManager::LocalDateTime localDateTime = gpsManager->getLocalDateTime();
 
-    sprintf(tmpBuf, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
-    tft.drawString(tmpBuf, x, y);
+    sprintf(valueBuffer, "%04d-%02d-%02d", localDateTime.year, localDateTime.month, localDateTime.day);
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 
-    sprintf(tmpBuf, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
-    tft.drawString(tmpBuf, x, y);
+    sprintf(valueBuffer, "%02d:%02d:%02d", localDateTime.hour, localDateTime.minute, localDateTime.second);
+    tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 }
