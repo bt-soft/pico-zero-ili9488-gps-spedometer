@@ -19,10 +19,7 @@
 
 extern GpsManager *gpsManager;
 
-ScreenManager::ScreenManager() {
-    DEBUG("ScreenManager: Constructor called\n");
-    registerDefaultScreenFactories();
-}
+ScreenManager::ScreenManager() { registerDefaultScreenFactories(); }
 
 /**
  * @brief Regisztrálja az alapértelmezett képernyőgyárakat
@@ -68,15 +65,9 @@ void ScreenManager::registerScreenFactory(const char *screenName, ScreenFactory 
 /**
  * @brief Képernyőkezelő fő loop függvénye
  */
-void ScreenManager::deferSwitchToScreen(const char *screenName, void *params) {
-    DEBUG("ScreenManager: Deferring switch to screen '%s'\n", screenName);
-    deferredActions.push(DeferredAction(DeferredAction::SwitchScreen, screenName, params));
-}
+void ScreenManager::deferSwitchToScreen(const char *screenName, void *params) { deferredActions.push(DeferredAction(DeferredAction::SwitchScreen, screenName, params)); }
 
-void ScreenManager::deferGoBack() {
-    DEBUG("ScreenManager: Deferring go back\n");
-    deferredActions.push(DeferredAction(DeferredAction::GoBack));
-}
+void ScreenManager::deferGoBack() { deferredActions.push(DeferredAction(DeferredAction::GoBack)); }
 
 /**
  * @brief Függvény a Deferred Action Queue feldolgozására (képernyőváltások biztonságos kezelése)
@@ -84,7 +75,6 @@ void ScreenManager::deferGoBack() {
 void ScreenManager::processDeferredActions() {
     while (!deferredActions.empty()) {
         const DeferredAction &action = deferredActions.front();
-        DEBUG("ScreenManager: Processing deferred action type=%d\n", static_cast<int>(action.type));
         if (action.type == DeferredAction::SwitchScreen) {
             immediateSwitch(action.screenName, action.params);
         } else if (action.type == DeferredAction::GoBack) {
@@ -125,13 +115,9 @@ bool ScreenManager::immediateSwitch(const char *screenName, void *params, bool i
         const char *currentName = currentScreen->getName();
         if (STREQ(screenName, SCREEN_NAME_SCREENSAVER)) {
             screenBeforeScreenSaver = String(currentName);
-            DEBUG("ScreenManager: Screensaver activated from '%s'\n", currentName);
         } else if (!STREQ(currentName, SCREEN_NAME_SCREENSAVER)) {
             navigationStack.push_back(String(currentName));
-            DEBUG("ScreenManager: Added '%s' to navigation stack (size: %d)\n", currentName, navigationStack.size());
         }
-    } else if (isBackNavigation) {
-        DEBUG("ScreenManager: Back navigation - not adding to stack\n");
     }
 
     if (currentScreen) {
@@ -141,11 +127,9 @@ bool ScreenManager::immediateSwitch(const char *screenName, void *params, bool i
         }
         currentScreen->deactivate();
         currentScreen.reset();
-        DEBUG("ScreenManager: Destroyed screen '%s'\n", currentName);
     }
 
     ::tft.fillScreen(TFT_BLACK);
-    DEBUG("ScreenManager: Display cleared for screen switch\n");
     currentScreen = it->second();
     if (currentScreen) {
         currentScreen->setScreenManager(this);
@@ -156,7 +140,6 @@ bool ScreenManager::immediateSwitch(const char *screenName, void *params, bool i
             lastActivityTime = millis();
         }
         currentScreen->activate();
-        DEBUG("ScreenManager: Created and activated screen '%s'\n", screenName);
         return true;
     } else {
         DEBUG("ScreenManager: Failed to create screen '%s'\n", screenName);
@@ -184,7 +167,6 @@ bool ScreenManager::immediateGoBack() {
 
     if (currentScreen && STREQ(currentScreen->getName(), SCREEN_NAME_SCREENSAVER)) {
         if (!screenBeforeScreenSaver.isEmpty()) {
-            DEBUG("ScreenManager: Going back from screensaver to '%s'\n", screenBeforeScreenSaver.c_str());
             String targetScreen = screenBeforeScreenSaver;
             screenBeforeScreenSaver = String();
             return immediateSwitch(targetScreen.c_str(), nullptr, true);
@@ -194,15 +176,12 @@ bool ScreenManager::immediateGoBack() {
     if (!navigationStack.empty()) {
         String previousScreen = navigationStack.back();
         navigationStack.pop_back();
-        DEBUG("ScreenManager: Going back to '%s' from stack (remaining: %d)\n", previousScreen.c_str(), navigationStack.size());
         return immediateSwitch(previousScreen.c_str(), nullptr, true);
     }
 
     if (previousScreenName != nullptr) {
-        DEBUG("ScreenManager: Fallback to old previousScreenName: '%s'\n", previousScreenName);
         return immediateSwitch(previousScreenName, nullptr, true);
     }
-    DEBUG("ScreenManager: No screen to go back to\n");
     return false;
 }
 

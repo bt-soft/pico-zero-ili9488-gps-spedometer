@@ -17,9 +17,7 @@ class UIContainerComponent : public UIComponent {
      * @param bounds A konténer határai (alapértelmezett: {0, 0, 0, 0})
      * @param colors A konténer színpalettája (alapértelmezett: ColorScheme::defaultScheme())
      */
-    UIContainerComponent(const Rect &bounds = {0, 0, 0, 0}, const ColorScheme &colors = ColorScheme::defaultScheme()) : UIComponent(bounds, colors) {
-        DEBUG("UIContainerComponent: Constructor called\n"); //
-    }
+    UIContainerComponent(const Rect &bounds = {0, 0, 0, 0}, const ColorScheme &colors = ColorScheme::defaultScheme()) : UIComponent(bounds, colors) {}
 
     /**
      *  @brief UIContainerComponent destruktor
@@ -27,7 +25,6 @@ class UIContainerComponent : public UIComponent {
      *  @note A gyerek komponensek shared_ptr-ek, így automatikusan felszabadulnak, ha már nincs rájuk szükség.
      */
     virtual ~UIContainerComponent() override {
-        DEBUG("UIContainerComponent: Destructor called\n");
         // Töröljük a gyerek komponenseket, hogy felszabadítsuk a memóriát
         children.clear(); // Eltávolítja az összes gyerek komponenst
     };
