@@ -132,18 +132,22 @@ void ScreenInfo::drawContent() {
     tft.drawString(valueBuffer, tableX, tableY);
 
     // 2. oszlop értékek
-    tableX = 340;
+    tableX = 350;
     tableY = 110;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f MHz", rp2040.f_cpu() / 1000000.0f);
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.1f MHz", rp2040.f_cpu() / 1000000.0f); //valamiért elromlott az snprintf() float kiírása :()
+    dtostrf(rp2040.f_cpu() / 1000000.0f, 0, 1, valueBuffer);
     tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getTotalHeap() / 1024.0f);
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getTotalHeap() / 1024.0f);
+    dtostrf(rp2040.getTotalHeap() / 1024.0f, 0, 1, valueBuffer);
     tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getFreeHeap() / 1024.0f);
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getFreeHeap() / 1024.0f);
+    dtostrf(rp2040.getFreeHeap() / 1024.0f, 0, 1, valueBuffer);
     tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getUsedHeap() / 1024.0f);
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.1f kB", rp2040.getUsedHeap() / 1024.0f);
+    dtostrf(rp2040.getUsedHeap() / 1024.0f, 0, 1, valueBuffer);
     tft.drawString(valueBuffer, tableX, tableY);
     tableY += lineHeight;
 
@@ -213,20 +217,21 @@ void ScreenInfo::handleOwnLoop() {
     tft.setTextColor(TFT_YELLOW, TFT_BLACK);
 
     // 2. oszlop
-    uint16_t x = 340;
+    uint16_t x = 350;
     uint16_t y = 190;
     constexpr uint8_t lineHeight = 10;
 
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fV", sensorUtils.readVBusExternal());
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.2fV", sensorUtils.readVBusExternal()); //valamiért elromlott az snprintf() float kiírása :()
+    dtostrf(sensorUtils.readVBusExternal(), 0, 2, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fV", sensorUtils.readVSysExternal());
+    dtostrf(sensorUtils.readVSysExternal(), 0, 2, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fC", sensorUtils.readExternalTemperature());
+    dtostrf(sensorUtils.readExternalTemperature(), 0, 2, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.2fC", sensorUtils.readCoreTemperature());
+    dtostrf(sensorUtils.readCoreTemperature(), 0, 2, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 
@@ -251,13 +256,16 @@ void ScreenInfo::handleOwnLoop() {
     snprintf(valueBuffer, sizeof(valueBuffer), "%u", gpsManager->getSatelliteCountForUI());
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.6f", gpsManager->getLocation().lat());
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.6f", gpsManager->getLocation().lat());
+    dtostrf(gpsManager->getLocation().lat(), 0, 6, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.6f", gpsManager->getLocation().lng());
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.6f", gpsManager->getLocation().lng());
+    dtostrf(gpsManager->getLocation().lng(), 0, 6, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.1fm", gpsManager->getAltitude().meters());
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.1fm", gpsManager->getAltitude().meters());
+    dtostrf(gpsManager->getAltitude().meters(), 0, 1, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
     tft.drawString(gpsManager->getGpsQualityString(), x, y);
@@ -267,7 +275,8 @@ void ScreenInfo::handleOwnLoop() {
     snprintf(valueBuffer, sizeof(valueBuffer), "%.1fkm/h", gpsManager->getSpeed().kmph());
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
-    snprintf(valueBuffer, sizeof(valueBuffer), "%.2f", gpsManager->getHdop().hdop());
+    // snprintf(valueBuffer, sizeof(valueBuffer), "%.2f", gpsManager->getHdop().hdop());
+    dtostrf(gpsManager->getHdop().hdop(), 0, 2, valueBuffer);
     tft.drawString(valueBuffer, x, y);
     y += lineHeight;
 
