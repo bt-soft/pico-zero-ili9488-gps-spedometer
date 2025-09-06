@@ -272,6 +272,5 @@ void loop1() {
     // Háttérvilágitás vezérlése - csak ha nem screensaver aktív
     if (screenManager && !screenManager->isCurrentScreenScreensaver()) {
         tftBackLightAdjuster.loop();
-        // DEBUG("Backlight level: %d, Sensor: %d\n", tftBackLightAdjuster.getBacklightLevel(), tftBackLightAdjuster.getSensorValue());
     }
 }
