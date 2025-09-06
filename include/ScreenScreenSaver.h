@@ -40,6 +40,14 @@ class ScreenScreenSaver : public UIScreen, public ButtonsGroupManager<ScreenScre
     virtual bool handleTouch(const TouchEvent &event) override;
 
     /**
+     * @brief Képernyő aktiválása
+     *
+     * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
+     * Reseteli a statikus változókat hogy kényszerítse az újrarajzolást
+     */
+    virtual void activate() override;
+
+    /**
      * @brief Kirajzolja a képernyő saját tartalmát
      */
     virtual void drawContent() override;

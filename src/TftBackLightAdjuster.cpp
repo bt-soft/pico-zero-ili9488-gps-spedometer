@@ -21,6 +21,7 @@ void TftBackLightAdjuster::loop(void) {
             } else {
                 new_brightness = map(lightSensorValue, SENSOR_VALUE_NIGHT, SENSOR_VALUE_DAILY, DAILY_BRIGHTNESS, NIGHTLY_BRIGHTNESS);
             }
+
         } else {
             // Manuális mód: a beállított értéket használjuk
             new_brightness = _manualBrightnessValue;
@@ -39,7 +40,7 @@ void TftBackLightAdjuster::loop(void) {
                 brightness--;
             }
 
-            // DEBUG("Backlight adjust to %d\n", brightness);
+            DEBUG("Backlight adjust to %d (target: %d)\n", brightness, new_brightness);
 
             // A setBacklightLevel már kezeli a 0 és 255 speciális esetet, de PWM-mel.
             // A direkt digitalWrite hatékonyabb lehet, de a sima analogWrite is megteszi.

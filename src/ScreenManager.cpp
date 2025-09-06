@@ -1,4 +1,5 @@
 #include "ScreenManager.h"
+#include "GpsManager.h"
 
 #include "ScreenDebugSetup.h"
 #include "ScreenGPSSetup.h"
@@ -14,7 +15,14 @@
 /**
  * @brief Képernyőkezelő osztály konstruktor
  */
-ScreenManager::ScreenManager() : previousScreenName(nullptr), lastActivityTime(millis()) { registerDefaultScreenFactories(); }
+// --- Method implementations moved from header ---
+
+extern GpsManager *gpsManager;
+
+ScreenManager::ScreenManager() {
+    DEBUG("ScreenManager: Constructor called\n");
+    registerDefaultScreenFactories();
+}
 
 /**
  * @brief Regisztrálja az alapértelmezett képernyőgyárakat
@@ -220,10 +228,37 @@ bool ScreenManager::handleTouch(const TouchEvent &event) {
 void ScreenManager::loop() {
     processDeferredActions();
     if (currentScreen) {
-        uint32_t screenSaverTimeoutMs = config.data.screenSaverTimeout * 60 * 1000;
-        if (screenSaverTimeoutMs > 0 && !STREQ(currentScreen->getName(), SCREEN_NAME_SCREENSAVER) && lastActivityTime != 0 && (millis() - lastActivityTime > screenSaverTimeoutMs)) {
-            switchToScreen(SCREEN_NAME_SCREENSAVER);
+        // GPS sebesség ellenőrzése a screensaver logikához
+        float currentSpeed = 0.0f;
+        bool hasValidSpeed = false;
+
+        if (gpsManager && gpsManager->getSpeed().isValid()) {
+            currentSpeed = gpsManager->getSpeed().kmph();
+            hasValidSpeed = true;
         }
+
+        uint32_t screenSaverTimeoutMs = config.data.screenSaverTimeout * 60 * 1000;
+
+        // Ha aktív a screensaver és mozog a jármű, deaktiváljuk
+        if (isCurrentScreenScreensaver() && hasValidSpeed && currentSpeed > 0.1f) {
+            DEBUG("ScreenManager: Vehicle moving (%.2f km/h), deactivating screensaver\n", currentSpeed);
+            goBack(); // Visszatérés az előző képernyőre
+        }
+        // Screensaver aktiválás csak akkor, ha a jármű áll
+        else if (screenSaverTimeoutMs > 0 && !isCurrentScreenScreensaver() && lastActivityTime != 0) {
+
+            // Ha mozog a jármű, reseteljük az aktivitás időt (ne aktiválódjon a screensaver)
+            if (hasValidSpeed && currentSpeed > 0.1f) {
+                lastActivityTime = millis();
+                DEBUG("ScreenManager: Vehicle moving (%.2f km/h), resetting screensaver timer\n", currentSpeed);
+            }
+            // Csak álló helyzetben aktiválódjon a screensaver
+            else if (millis() - lastActivityTime > screenSaverTimeoutMs) {
+                DEBUG("ScreenManager: Vehicle stopped, activating screensaver after timeout\n");
+                switchToScreen(SCREEN_NAME_SCREENSAVER);
+            }
+        }
+
         if (currentScreen->isRedrawNeeded()) {
             currentScreen->draw();
         }
@@ -241,3 +276,8 @@ bool ScreenManager::isCurrentScreenDialogActive() {
     }
     return currentScreen->isDialogActive();
 }
+
+/**
+ * @brief Megmondja, hogy az aktuális képernyő a screensaver-e
+ */
+bool ScreenManager::isCurrentScreenScreensaver() const { return currentScreen && STREQ(currentScreen->getName(), SCREEN_NAME_SCREENSAVER); }

@@ -59,6 +59,7 @@ class TftBackLightAdjuster {
     void setBacklightLevel(uint8_t level) {
         _backlightLevel = constrain(level, NIGHTLY_BRIGHTNESS, TFT_BACKGROUND_LED_MAX_BRIGHTNESS);
         analogWrite(PIN_TFT_BACKGROUND_LED, _backlightLevel);
+        brightness = _backlightLevel; // Az aktuális fényerő is erre álljon
     }
 
     /**

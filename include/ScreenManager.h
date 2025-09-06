@@ -59,4 +59,9 @@ class ScreenManager : public IScreenManager {
     bool handleTouch(const TouchEvent &event);
     void loop();
     bool isCurrentScreenDialogActive() override;
+
+    /**
+     * @brief Megmondja, hogy az aktuális képernyő a screensaver-e
+     */
+    bool isCurrentScreenScreensaver() const;
 };

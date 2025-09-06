@@ -76,7 +76,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     virtual void handleOwnLoop() override;
 
     /**
-     * @brief Képernyő aktiválása - Reset statikus változók
+     * @brief Képernyő aktiválása
      *
      * Meghívódik amikor a képernyő aktívvá válik (pl. visszatérés Info/Setup képernyőről)
      * Reseteli a statikus változókat hogy kényszerítse az újrarajzolást
