@@ -194,12 +194,12 @@ Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részle
 
 ## Képek 
 
-<img src="Docs/pictures/20250910_185151.jpg" width="70%">
-<img src="Docs/pictures/20250910_185202.jpg" width="70%">
-<img src="Docs/pictures/20250910_185213.jpg" width="70%">
-<img src="Docs/pictures/20250910_185229.jpg" width="70%">
-<img src="Docs/pictures/20250910_185239.jpg" width="70%">
-<img src="Docs/pictures/20250910_185308.jpg" width="70%">
-<img src="Docs/pictures/20250910_185341.jpg" width="70%">
-<img src="Docs/pictures/20250910_185345.jpg" width="70%">
-<img src="Docs/pictures/20250910_185408.jpg" width="70%">
+<img src="Docs/pictures/20250910_185151.jpg" width="50%">
+<img src="Docs/pictures/20250910_185202.jpg" width="50%">
+<img src="Docs/pictures/20250910_185213.jpg" width="50%">
+<img src="Docs/pictures/20250910_185229.jpg" width="50%">
+<img src="Docs/pictures/20250910_185239.jpg" width="50%">
+<img src="Docs/pictures/20250910_185308.jpg" width="50%">
+<img src="Docs/pictures/20250910_185341.jpg" width="50%">
+<img src="Docs/pictures/20250910_185345.jpg" width="50%">
+<img src="Docs/pictures/20250910_185408.jpg" width="50%">
