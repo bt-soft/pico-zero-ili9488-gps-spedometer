@@ -54,7 +54,7 @@
       "diff_pair_dimensions": [],
       "drc_exclusions": [
         [
-          "lib_footprint_mismatch|61110000|53770000|1a3781ff-9bcf-496a-a82a-78a9dec49585|00000000-0000-0000-0000-000000000000",
+          "lib_footprint_mismatch|61110000|54270000|1a3781ff-9bcf-496a-a82a-78a9dec49585|00000000-0000-0000-0000-000000000000",
           ""
         ],
         [
