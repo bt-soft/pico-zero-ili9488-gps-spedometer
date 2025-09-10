@@ -190,7 +190,9 @@ Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részle
 ---
 
 **⚠️ Biztonsági figyelmeztetés:** Ez az eszköz csak tájékoztató célokat szolgál. A közlekedési szabályok betartása a vezető felelőssége. A készülék használata nem mentesít a figyelmes és szabályos vezetés kötelezettsége alól.
-## Képek a Docs/pictures mappából
+
+
+## Képek 
 
 <img src="Docs/pictures/20250910_185151.jpg" width="70%">
 <img src="Docs/pictures/20250910_185202.jpg" width="70%">
