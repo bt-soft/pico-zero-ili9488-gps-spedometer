@@ -200,6 +200,6 @@ Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részle
 <img src="Docs/pictures/20250910_185229.jpg" width="50%">
 <img src="Docs/pictures/20250910_185239.jpg" width="50%">
 <img src="Docs/pictures/20250910_185308.jpg" width="50%">
-<img src="Docs/pictures/20250910_185341.jpg" width="50%">
-<img src="Docs/pictures/20250910_185345.jpg" width="50%">
-<img src="Docs/pictures/20250910_185408.jpg" width="50%">
+<img src="Docs/pictures/20250910_185341.jpg" height="50%">
+<img src="Docs/pictures/20250910_185345.jpg" height="50%">
+<img src="Docs/pictures/20250910_185408.jpg" height="50%">
