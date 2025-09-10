@@ -163,7 +163,7 @@ Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részle
 **Fejlesztő:** BT-Soft  
 **Blog:** [https://electrodiy.blog.hu/](https://electrodiy.blog.hu/)  
 **GitHub:** [https://github.com/bt-soft](https://github.com/bt-soft)  
-**Email:** [email cím]
+
 
 ---
 
