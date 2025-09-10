@@ -154,9 +154,7 @@ pio run --target uploadfs
 │   └── connections/      # Kábelezési útmutatók
 └── platformio.ini        # PlatformIO konfiguráció
 ```
-## Licenc
 
-Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részletekért.
 
 ## Kapcsolat
 
