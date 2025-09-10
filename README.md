@@ -192,12 +192,12 @@ Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részle
 **⚠️ Biztonsági figyelmeztetés:** Ez az eszköz csak tájékoztató célokat szolgál. A közlekedési szabályok betartása a vezető felelőssége. A készülék használata nem mentesít a figyelmes és szabályos vezetés kötelezettsége alól.
 ## Képek a Docs/pictures mappából
 
-![20250910_185151.jpg](Docs/pictures/20250910_185151.jpg)
-![20250910_185202.jpg](Docs/pictures/20250910_185202.jpg)
-![20250910_185213.jpg](Docs/pictures/20250910_185213.jpg)
-![20250910_185229.jpg](Docs/pictures/20250910_185229.jpg)
-![20250910_185239.jpg](Docs/pictures/20250910_185239.jpg)
-![20250910_185308.jpg](Docs/pictures/20250910_185308.jpg)
-![20250910_185341.jpg](Docs/pictures/20250910_185341.jpg)
-![20250910_185345.jpg](Docs/pictures/20250910_185345.jpg)
-![20250910_185408.jpg](Docs/pictures/20250910_185408.jpg)
+<img src="Docs/pictures/20250910_185151.jpg" width="70%">
+<img src="Docs/pictures/20250910_185202.jpg" width="70%">
+<img src="Docs/pictures/20250910_185213.jpg" width="70%">
+<img src="Docs/pictures/20250910_185229.jpg" width="70%">
+<img src="Docs/pictures/20250910_185239.jpg" width="70%">
+<img src="Docs/pictures/20250910_185308.jpg" width="70%">
+<img src="Docs/pictures/20250910_185341.jpg" width="70%">
+<img src="Docs/pictures/20250910_185345.jpg" width="70%">
+<img src="Docs/pictures/20250910_185408.jpg" width="70%">
