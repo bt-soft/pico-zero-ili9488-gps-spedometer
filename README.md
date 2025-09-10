@@ -23,7 +23,7 @@ Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő és navig�
 
 ### 🚨 **Trafipax Figyelmeztető Rendszer**
 - **Intelligens sebességmérő kamera (trafipax) adatbázis** kezelése
-- **Közeledési figyelmeztetés** 800 méteres távolságon belül
+- **Közeledési figyelmeztetés** max 1500 méteres beállítható távolságon belül
 - **Vizuális riasztás**: piros háttér közeledéskor, narancssárga távolodáskor
 - **Hangos figyelmeztetés** szirénával közeledés esetén
 - **Távolság megjelenítése** a legközelebbi trafipaxig
@@ -31,10 +31,8 @@ Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő és navig�
 
 ### 🎨 **Megjelenítés és Felhasználói Felület**
 - **3.5" ILI9488 480x320 színes TFT kijelző**
-- **Anti-flicker sprite alapú** megjelenítés
 - **Nagyméretű, jól olvasható** betűtípusok
-- **Kontraszt optimalizált** színek nappal és éjszaka
-- **Automatikusan állítható háttérvilágítás** (tervezett funkció)
+- **Automatikusan állított háttérvilágítás** a környezeti fényerőkhöz igazodva
 
 ### 💾 **Adatkezelés és Testre Szabás**
 - **LittleFS fájlrendszer** a beépített flash memóriában
@@ -46,10 +44,9 @@ Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő és navig�
 
 - **Mikrokontroller:** Raspberry Pi Pico vagy Pico Zero (RP2040 alapú)
 - **Kijelző:** ILI9488 3.5" 480x320 SPI TFT kijelző érintőképernyővel
-- **GPS Modul:** Bármilyen UART-alapú GPS modul (pl. NEO-6M, NEO-8M)
+- **GPS Modul:** Bármilyen UART-alapú GPS modul (pl. NEO-6M, NEO-8M), NMEA mondatok parszolása
 - **Tápellátás:** 5V USB vagy külső tápegység
-- **Ház:** 3D nyomtatható ház tervekkel (STL fájlok)
-- **Kábelezés:** A kapcsolási rajzok a `kicad/` mappában
+- **Rajz és NYÁK:** A kapcsolási rajzok, panel tervek a `kicad/` mappában
 
 ## Szoftver Architektúra
 
@@ -78,13 +75,7 @@ cd pico-zero-ili9488-gps-spedometer
 code .
 ```
 
-### 2. Firmware Fordítása és Feltöltése
-1. Nyissa meg a projektet Visual Studio Code-ban
-2. Telepítse a PlatformIO kiterjesztést
-3. Csatlakoztassa a Pico-t USB-n keresztül BOOTSEL módban
-4. Futtassa: `PlatformIO: Upload`
-
-### 3. Trafipax Adatbázis Feltöltése
+### 2. Trafipax Adatbázis Feltöltése
 A készülék kezdeti használatához fel kell tölteni a trafipax adatbázist:
 
 ```bash
@@ -107,7 +98,7 @@ Pest,Budapest,,M0 14+450,47.400208,19.011840
 
 ### Adatbázis Frissítése
 
-#### Módszer 1: Teljes Újrafeltöltés (Ajánlott)
+#### Feltöltés 
 ```bash
 # 1. Új trafipaxes.csv elhelyezése a data/ mappában
 # 2. Fájlrendszer feltöltése
@@ -116,19 +107,11 @@ pio run --target uploadfs
 # 3. Készülék újraindítása (automatikus)
 ```
 
-#### Módszer 2: Fejlesztői Módszer
-```ini
-# platformio.ini fájlban:
-[env:pico]
-extra_scripts = upload_fs.py  # Uncomment this line
-
-# Ezután minden "pio run --target upload" automatikusan feltölti a fájlrendszert is
-```
 
 ### Adatforrások
 - **Magyarország:** [AutópályaMatrica.hu](https://www.autopalyamatrica.hu/fix-traffipax-lista-veda-terkep) adatai
 
-**⚠️ Jogi figyelmeztetés:** A trafipax adatok tájékoztató jellegűek. A pontos és aktuális információkért mindig a hivatalos forrásokat használja!
+**⚠️ Figyelmeztetés:** A trafipax adatok tájékoztató jellegűek. 
 
 ## Konfiguráció és Testreszabás
 
@@ -148,12 +131,6 @@ extra_scripts = upload_fs.py  # Uncomment this line
 #define TFT_HEIGHT 320
 ```
 
-### Trafipax Figyelmeztetési Távolságok
-```cpp
-// src/main.cpp fájlban
-static constexpr double CRITICAL_DISTANCE = 800.0;  // 800m figyelmeztető távolság
-static constexpr unsigned long SIREN_INTERVAL = 10000;  // 10 sec szirénázás
-```
 
 ## Fejlesztői Információk
 
@@ -184,6 +161,7 @@ Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részle
 ## Kapcsolat
 
 **Fejlesztő:** BT-Soft  
+**Blog:** [https://electrodiy.blog.hu/](https://electrodiy.blog.hu/)
 **GitHub:** [https://github.com/bt-soft](https://github.com/bt-soft)  
 **Email:** [email cím]
 
@@ -192,7 +170,7 @@ Ez a projekt MIT licenc alatt áll - lásd a [LICENSE](LICENSE) fájlt a részle
 **⚠️ Biztonsági figyelmeztetés:** Ez az eszköz csak tájékoztató célokat szolgál. A közlekedési szabályok betartása a vezető felelőssége. A készülék használata nem mentesít a figyelmes és szabályos vezetés kötelezettsége alól.
 
 
-## Képek 
+## Képek a POC projektről
 
 <img src="Docs/pictures/20250910_185151.jpg" width="50%">
 <img src="Docs/pictures/20250910_185202.jpg" width="50%">
