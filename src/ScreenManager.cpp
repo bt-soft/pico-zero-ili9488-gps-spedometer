@@ -19,7 +19,10 @@
 
 extern GpsManager *gpsManager;
 
-ScreenManager::ScreenManager() { registerDefaultScreenFactories(); }
+ScreenManager::ScreenManager() {
+    lastActivityTime = millis(); // Inicializáljuk az aktivitás időt
+    registerDefaultScreenFactories();
+}
 
 /**
  * @brief Regisztrálja az alapértelmezett képernyőgyárakat
@@ -136,6 +139,7 @@ bool ScreenManager::immediateSwitch(const char *screenName, void *params, bool i
         if (params) {
             currentScreen->setParameters(params);
         }
+        // Aktivitás idő frissítése minden képernyőváltásnál (kivéve screensaver aktiválás)
         if (!STREQ(screenName, SCREEN_NAME_SCREENSAVER)) {
             lastActivityTime = millis();
         }
@@ -169,6 +173,8 @@ bool ScreenManager::immediateGoBack() {
         if (!screenBeforeScreenSaver.isEmpty()) {
             String targetScreen = screenBeforeScreenSaver;
             screenBeforeScreenSaver = String();
+            // Screensaver-ből való kilépéskor frissítjük az aktivitás időt
+            lastActivityTime = millis();
             return immediateSwitch(targetScreen.c_str(), nullptr, true);
         }
     }
@@ -218,10 +224,10 @@ void ScreenManager::loop() {
 
         uint32_t screenSaverTimeoutMs = config.data.screenSaverTimeout * 60 * 1000;
 
-        // Ha aktív a screensaver és mozog a jármű, deaktiváljuk
-        if (isCurrentScreenScreensaver() && hasValidSpeed && currentSpeed > 0.1f) {
+        // Ha aktív a screensaver és mozog a jármű (3km/h), deaktiváljuk
+        if (isCurrentScreenScreensaver() && hasValidSpeed && currentSpeed > 3.0f) {
             goBack(); // Visszatérés az előző képernyőre
-        } else if (screenSaverTimeoutMs > 0 && !isCurrentScreenScreensaver() && lastActivityTime != 0) {
+        } else if (screenSaverTimeoutMs > 0 && !isCurrentScreenScreensaver()) {
             // Screensaver aktiválás csak akkor, ha a jármű áll
 
             // Ha mozog a jármű, reseteljük az aktivitás időt (ne aktiválódjon a screensaver)
