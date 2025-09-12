@@ -215,13 +215,13 @@ Ez biztosítja, hogy a kijelző beállítások megfelelően érvényesüljenek a
 <img src="Docs/pictures/20250910_185229.jpg" width="50%">
 <img src="Docs/pictures/20250910_185239.jpg" width="50%">
 <img src="Docs/pictures/20250910_185308.jpg" width="50%">
-<img src="Docs/pictures/20250910_185341.jpg" width="30%">
-<img src="Docs/pictures/20250910_185345.jpg" width="30%">
 
 <div style="display: flex; gap: 8px;">
   <img src="Docs/pictures/20250910_185345.jpg" width="18%">
   <img src="Docs/pictures/20250910_185341.jpg" width="18%">
   <img src="Docs/pictures/20250910_185408.jpg" width="18%">
   <img src="Docs/pictures/20250910_185408.jpg" width="18%">
+  <img src="Docs/pictures/20250910_185341.jpg" width="18%">
+  <img src="Docs/pictures/20250910_185345.jpg" width="18%">
 </div>
 
