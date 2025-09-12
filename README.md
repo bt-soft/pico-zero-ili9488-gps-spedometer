@@ -49,7 +49,7 @@ Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő, amely egy
 ## Szoftver Architektúra
 
 - **Fejlesztői környezet:** [PlatformIO](https://platformio.org/) a [Visual Studio Code](https://code.visualstudio.com/)-ban
-- **Framework:** Arduino Framework Raspberry Pi Pico támogatással
+- **Framework:** Arduino Framework [Raspberry Pi Pico](https://github.com/maxgerhardt/platform-raspberrypi) támogatással
 - **Többmagos feldolgozás:** Dual-core RP2040 kihasználása
   - **Core 0:** Fő alkalmazás logika, kijelzőkezelés
   - **Core 1:** GPS adatfeldolgozás, háttér számítások
