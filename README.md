@@ -112,22 +112,36 @@ pio run --target uploadfs
 **⚠️ Figyelmeztetés:** A trafipax adatok tájékoztató jellegűek. 
 
 ## Konfiguráció és Testreszabás
+ A főbb hardveres pin hozzárendelések a `include/pins.h` fájlban találhatók, ezek igény szerint módosíthatók a saját bekötéshez.
 
-### GPS Beállítások
-```cpp
-// include/pins.h fájlban
-#define GPS_RX_PIN 0
-#define GPS_TX_PIN 1
-#define GPS_BAUD_RATE 9600
-```
+ ### Főbb Pin Definíciók
 
-### Kijelző Beállítások  
-```cpp
-// Docs/TFT_eSPI/User_Setup.h fájlban
-#define ILI9488_DRIVER
-#define TFT_WIDTH  480
-#define TFT_HEIGHT 320
-```
+ - **Serial1 TX/RX (GPS modul):**
+   - TX: GPIO 12 (`PIN_SERIAL1_TX_NEW`)
+   - RX: GPIO 13 (`PIN_SERIAL1_RX_NEW`)
+   - Használat: A GPS modul csatlakoztatásához a soros portot át kell állítani ezekre a pinekre a `Serial1.setRX(PIN_SERIAL1_RX_NEW)` és `Serial1.setTX(PIN_SERIAL1_TX_NEW)` hívásokkal a `Serial1.begin()` előtt.
+
+ - **TFT háttérvilágítás vezérlés:**
+   - GPIO 1 (`PIN_TFT_BACKGROUND_LED`)
+   - Automatikus fényerő szabályzás a környezeti fény alapján.
+
+ - **Fényérzékelő:**
+   - A1 (`PIN_LIGHT_SENSOR`)
+   - A háttérvilágítás automatikus szabályzásához.
+
+ - **Hőmérséklet szenzor (DS18B20):**
+   - GPIO 8 (`PIN_DS18B20_TEMP_SENSOR`)
+
+ - **Tápfeszültség mérés:**
+   - VBUS: A0 (`PIN_VBUS_EXTERNAL_MEASURE_INPUT`)
+   - VSYS: A2 (`PIN_VSYS_EXTERNAL_MEASURE_INPUT`)
+
+ - **Buzzer (hangjelzés):**
+   - GPIO 9 (`PIN_BUZZER`)
+
+ A fenti pinek módosíthatók a saját hardverhez igazítva a `include/pins.h` fájlban. További testreszabási lehetőségek:
+ - Trafipax figyelmeztetési távolság, hangjelzés, kijelző fényerő, stb. konfigurálható a szoftverben.
+ - Egyedi szenzorok vagy perifériák hozzáadása esetén új pin definíciókat kell felvenni a `pins.h`-ba.
 
 
 ## Fejlesztői Információk
