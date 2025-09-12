@@ -5,8 +5,8 @@ Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő, amely egy
 ![Kapcsolási Rajz](Docs/pictures/pico-gps-spedometer-sch.png)
 
 <div style="display: flex; gap: 8px;">
-  <img src="Docs/pictures/pico-gps-spedometer-3d.png" width="25%">
-  <img src="Docs/pictures/pico-gps-spedometer-3d-2.png" width="25%">
+  <img src="Docs/pictures/pico-gps-spedometer-3d.png" width="40%">
+  <img src="Docs/pictures/pico-gps-spedometer-3d-2.png" width="40%">
 </div>
 
 ## Főbb Jellemzők
