@@ -141,30 +141,46 @@ pio run --target uploadfs
 
  A fenti pinek módosíthatók a saját hardverhez igazítva a `include/pins.h` fájlban. További testreszabási lehetőségek:
  - Trafipax figyelmeztetési távolság, hangjelzés, kijelző fényerő, stb. konfigurálható a szoftverben.
- - Egyedi szenzorok vagy perifériák hozzáadása esetén új pin definíciókat kell felvenni a `pins.h`-ba.
-
+ 
 
 ## Fejlesztői Információk
 
 ### Projekt Struktúra
+
 ```
-├── src/                    # Fő forráskód
-│   ├── main.cpp           # Főprogram
-│   ├── TafipaxList.cpp    # Trafipax adatbázis kezelő
-│   └── TafipaxList.h
-├── include/               # Header fájlok
-│   ├── pins.h            # Pin definíciók
-│   ├── commons.h         # Közös definíciók
-│   └── *.h
-├── data/                  # LittleFS fájlok
-│   └── trafipaxes.csv    # Trafipax adatbázis
-├── kicad/                 # Hardver tervek
-│   ├── *.kicad_sch       # Kapcsolási rajz
-│   └── *.kicad_pcb       # Nyomtatott áramkör
-├── Docs/                  # Dokumentáció
-│   ├── pictures/         # Képek
-│   └── connections/      # Kábelezési útmutatók
-└── platformio.ini        # PlatformIO konfiguráció
+├── src/                       # Fő forráskód és implementációk
+│   ├── main.cpp               # Főprogram
+│   ├── Config.cpp/.h          # Konfigurációs logika
+│   ├── GpsManager.cpp/.h      # GPS kezelés
+│   ├── DebugDataInspector.cpp/.h
+│   ├── MessageDialog.cpp/.h
+│   ├── SatelliteDb.cpp/.h
+│   ├── Screen*                # Különböző képernyő logikák
+│   ├── SensorUtils.cpp/.h     # Szenzor segédfüggvények
+│   ├── TftBackLightAdjuster.cpp/.h
+│   ├── TraffipaxManager.cpp/.h
+│   ├── UIDialogBase.cpp/.h
+│   ├── UIScreen.cpp/.h
+│   ├── Utils.cpp/.h
+│   └── ValueChangeDialog.cpp/.h
+│   └── ... további modulok
+├── include/                   # Header fájlok
+│   ├── pins.h                 # Pin definíciók
+│   ├── ... további .h fájlok
+├── data/                      # LittleFS fájlok
+│   └── trafipaxes.csv         # Trafipax adatbázis
+├── Docs/                      # Dokumentáció
+│   ├── pictures/              # Képek, renderelt ábrák
+│   ├── TFT_eSPI/              # Kijelző setup és példák
+│   ├── ThreadSafeUsage.md     # Többszálú használat dokumentációja
+│   └── trafipaxes.csv         # Minta adatbázis
+├── kicad/                     # Hardver tervek
+│   ├── pico-gps-spedometer/   # Fő kapcsolási rajzok, PCB
+│   ├── pico-gps-spedometer-accu/ # Akkumulátoros verzió
+├── platformio.ini             # PlatformIO konfiguráció
+├── upload_fs.py               # Fájlrendszer feltöltő script
+├── info.txt                   # Projekt információk
+└── .vscode/                   # VS Code beállítások
 ```
 
 
