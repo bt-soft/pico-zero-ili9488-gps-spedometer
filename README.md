@@ -1,29 +1,27 @@
 # Pico GPS Sebességmérő Motorokhoz
 
-Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő és navigációs asszisztens, amely egy ILI9488 TFT kijelzőt használ a sebesség, idő, magasság és a közeli sebességmérő kamerák (trafipaxok) megjelenítésére. A készülék kifejezetten motorkerékpár-vezetők számára lett tervezve, hogy segítse őket a biztonságos és szabályos közlekedésben.
+Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő, amely egy ILI9488 TFT kijelzőt használ a sebesség, idő, magasság és a közeli sebességmérő kamerák (trafipaxok) megjelenítésére. A készülék kifejezetten motorkerékpár-vezetők számára lett tervezve, hogy segítse őket a biztonságos és szabályos közlekedésben.
 
+![Kapcsolási Rajz](Docs/pictures/pico-gps-spedometer-sch.png)
 ![3D render a készülékről](Docs/pictures/pico-gps-spedometer-3d.png)
 ![3D render a készülékről 2](Docs/pictures/pico-gps-spedometer-3d-2.png)
 
 ## Főbb Jellemzők
 
 ### 🚀 **Sebességmérés és Navigáció**
-- **Valós idejű sebességmérés** GPS adatok alapján nagy pontossággal
-- **Lineáris és kör alakú sebességmérő** vizuális megjelenítés választható kijelzési módokkal
-- **Digitális és analóg sebesség** kijelzés (km/h)
-- **Tengerszint feletti magasság** mérése és megjelenítése
-- **GPS koordináták** valós idejű kijelzése
+- **Valós idejű sebességmérés** GPS adatok alapján 
+- **Nagy méretű sebességmérő** vizuális megjelenítés
 - **Műholdak száma** és jelerősség megjelenítése
+- **Tengerszint feletti magasság** mérése és megjelenítése
 
 ### 🕐 **Időkezelés és Pozicionálás**
 - **Pontos idő** megjelenítése GPS szinkronizációval
 - **Automatikus időzóna** beállítás
 - **Téli/nyári időszámítás** támogatása
-- **Koordináták megjelenítése** decimális és DMS (fok/perc/másodperc) formátumban
 
 ### 🚨 **Trafipax Figyelmeztető Rendszer**
 - **Intelligens sebességmérő kamera (trafipax) adatbázis** kezelése
-- **Közeledési figyelmeztetés** max 1500 méteres beállítható távolságon belül
+- **Közeledési figyelmeztetés** max 1500 méteres beállítható távolságon belül (kör alapú megközelítés)
 - **Vizuális riasztás**: piros háttér közeledéskor, narancssárga távolodáskor
 - **Hangos figyelmeztetés** szirénával közeledés esetén
 - **Távolság megjelenítése** a legközelebbi trafipaxig
