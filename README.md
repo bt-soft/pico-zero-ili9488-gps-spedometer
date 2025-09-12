@@ -58,8 +58,8 @@ Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő, amely egy
 - `bodmer/TFT_eSPI` - Kijelzőkezelés és sprite renderelés
 - `mikalhart/TinyGPSPlus` - GPS adatfeldolgozás és koordináta számítások  
 - `LittleFS` - Beépített fájlrendszer kezelés
-- `NonBlockingDallas` - Hőmérséklet szenzorok (opcionális)
-- `FastLED` - LED vezérlés (státusz jelzéshez)
+- `NonBlockingDallas` - Hőmérséklet szenzor
+- `FastLED` - Zeró intergrált RGB LED vezérlés (státusz jelzéshez, debug funkció)
 
 ## Telepítés és Üzembe Helyezés
 
