@@ -192,7 +192,7 @@ pio run --target uploadfs
 Ez biztosítja, hogy a kijelző beállítások megfelelően érvényesüljenek a build során. Ha módosítod a kijelző vagy a pinek konfigurációját, ezt a fájlt frissíteni kell és újra bemásolni a fenti könyvtárba.
 
 
-
+---
 **Fejlesztő:** BT-Soft  
 **Blog:** [https://electrodiy.blog.hu/](https://electrodiy.blog.hu/)  
 **GitHub:** [https://github.com/bt-soft](https://github.com/bt-soft)  
