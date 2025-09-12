@@ -209,12 +209,14 @@ Ez biztosítja, hogy a kijelző beállítások megfelelően érvényesüljenek a
 
 ## Képek a POC projektről
 
-<img src="Docs/pictures/20250910_185151.jpg" width="50%">
-<img src="Docs/pictures/20250910_185202.jpg" width="50%">
-<img src="Docs/pictures/20250910_185213.jpg" width="50%">
-<img src="Docs/pictures/20250910_185229.jpg" width="50%">
-<img src="Docs/pictures/20250910_185239.jpg" width="50%">
-<img src="Docs/pictures/20250910_185308.jpg" width="50%">
+<div style="display: flex; gap: 8px;">
+  <img src="Docs/pictures/20250910_185151.jpg" width="50%">
+  <img src="Docs/pictures/20250910_185202.jpg" width="50%">
+  <img src="Docs/pictures/20250910_185213.jpg" width="50%">
+  <img src="Docs/pictures/20250910_185229.jpg" width="50%">
+  <img src="Docs/pictures/20250910_185239.jpg" width="50%">
+  <img src="Docs/pictures/20250910_185308.jpg" width="50%">
+</div>
 
 <div style="display: flex; gap: 8px;">
   <img src="Docs/pictures/20250910_185345.jpg" width="18%">
