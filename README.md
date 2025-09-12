@@ -183,7 +183,15 @@ pio run --target uploadfs
 ```
 
 
-## Kapcsolat
+**Fontos:** A TFT_eSPI könyvtár megfelelő működéséhez a `Docs/TFT_eSPI/User_Setup.h` fájlt be kell másolni a következő helyre:
+
+```
+.pio\libdeps\pico\TFT_eSPI\User_Setup.h
+```
+
+Ez biztosítja, hogy a kijelző beállítások megfelelően érvényesüljenek a build során. Ha módosítod a kijelző vagy a pinek konfigurációját, ezt a fájlt frissíteni kell és újra bemásolni a fenti könyvtárba.
+
+
 
 **Fejlesztő:** BT-Soft  
 **Blog:** [https://electrodiy.blog.hu/](https://electrodiy.blog.hu/)  
@@ -207,10 +215,3 @@ pio run --target uploadfs
 <img src="Docs/pictures/20250910_185345.jpg" width="30%">
 <img src="Docs/pictures/20250910_185408.jpg" width="30%">
 
-**Fontos:** A TFT_eSPI könyvtár megfelelő működéséhez a `Docs/TFT_eSPI/User_Setup.h` fájlt be kell másolni a következő helyre:
-
-```
-.pio\libdeps\pico\TFT_eSPI\User_Setup.h
-```
-
-Ez biztosítja, hogy a kijelző beállítások megfelelően érvényesüljenek a build során. Ha módosítod a kijelző vagy a pinek konfigurációját, ezt a fájlt frissíteni kell és újra bemásolni a fenti könyvtárba.
