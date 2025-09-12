@@ -8,12 +8,10 @@ Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő és navig�
 ## Főbb Jellemzők
 
 ### 🚀 **Sebességmérés és Navigáció**
-- **Valós idejű sebességmérés** GPS adatok alapján nagy pontossággal
-- **Lineáris és kör alakú sebességmérő** vizuális megjelenítés választható kijelzési módokkal
-- **Digitális és analóg sebesség** kijelzés (km/h)
-- **Tengerszint feletti magasság** mérése és megjelenítése
-- **GPS koordináták** valós idejű kijelzése
+- **Valós idejű sebességmérés** GPS adatok alapján 
+- **Nagy méretű sebességmérő** vizuális megjelenítés
 - **Műholdak száma** és jelerősség megjelenítése
+- **Tengerszint feletti magasság** mérése és megjelenítése
 
 ### 🕐 **Időkezelés és Pozicionálás**
 - **Pontos idő** megjelenítése GPS szinkronizációval
