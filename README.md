@@ -172,7 +172,6 @@ pio run --target uploadfs
 ├── Docs/                      # Dokumentáció
 │   ├── pictures/              # Képek, renderelt ábrák
 │   ├── TFT_eSPI/              # Kijelző setup és példák
-│   ├── ThreadSafeUsage.md     # Többszálú használat dokumentációja
 │   └── trafipaxes.csv         # Minta adatbázis
 ├── kicad/                     # Hardver tervek
 │   ├── pico-gps-spedometer/   # Fő kapcsolási rajzok, PCB
