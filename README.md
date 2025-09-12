@@ -220,6 +220,6 @@ Ez biztosítja, hogy a kijelző beállítások megfelelően érvényesüljenek a
   <img src="Docs/pictures/20250910_185345.jpg" width="18%">
   <img src="Docs/pictures/20250910_185341.jpg" width="18%">
   <img src="Docs/pictures/20250910_185345.jpg" width="18%">
-  <img src="Docs/pictures/20250910_185341.jpg" width="18%">
+  <img src="Docs/pictures/20250910_185408.jpg" width="18%">
 </div>
 
