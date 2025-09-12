@@ -2,7 +2,8 @@
 
 Ez a projekt egy fejlett Raspberry Pi Pico alapú GPS sebességmérő, amely egy ILI9488 TFT kijelzőt használ a sebesség, idő, magasság és a közeli sebességmérő kamerák (trafipaxok) megjelenítésére. A készülék kifejezetten motorkerékpár-vezetők számára lett tervezve, hogy segítse őket a biztonságos és szabályos közlekedésben.
 
-![Kapcsolási Rajz](Docs/pictures/pico-gps-spedometer-sch.png)
+<img src="Docs/pictures/pico-gps-spedometer-sch.png" width="50%">
+
 
 <div style="display: flex; gap: 8px;">
   <img src="Docs/pictures/pico-gps-spedometer-3d.png" width="40%">
