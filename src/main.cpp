@@ -176,9 +176,6 @@ void setup() {
     }
     screenManager->switchToScreen(SCREEN_NAME_MAIN); // A kezdő képernyőre kapcsolás
 
-    // Szenzor inicializálása
-    sensorUtils.init();
-
     // Pittyentünk egyet, hogy üzemkészek vagyunk
     Utils::beepTick();
 }
@@ -187,9 +184,6 @@ void setup() {
  *
  */
 void loop() {
-
-    // Szenzorok karbantartása
-    sensorUtils.loop();
 
     // Handle non-blocking siren
     Utils::handleNonBlockingSiren();
@@ -258,6 +252,9 @@ void setup1() {
     gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
     gpsManager->setSerialDebug(config.data.debugGpsSerialData);
     gpsManager->setDebugGpsSatellitesDatabase(config.data.debugGpsSatellitesDatabase);
+
+    // Szenzor inicializálása
+    sensorUtils.init();
 }
 
 /**
@@ -272,4 +269,7 @@ void loop1() {
     if (screenManager && !screenManager->isCurrentScreenScreensaver()) {
         tftBackLightAdjuster.loop();
     }
+
+    // Szenzorok karbantartása
+    sensorUtils.loop();
 }
