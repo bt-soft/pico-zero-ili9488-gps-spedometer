@@ -234,10 +234,10 @@ void ScreenSats::drawSatelliteCircle() {
     tft.drawString("E", centerX + maxRadius + 8, centerY + 5);
     tft.drawString("W", centerX - maxRadius - 8, centerY + 5);
     tft.setTextColor(TFT_DARKGREY, TFT_BLACK);
-    tft.drawString("90°", centerX + 8, centerY - 5);
-    tft.drawString("60°", centerX + maxRadius * 1 / 3 + 8, centerY - 5);
-    tft.drawString("30°", centerX + maxRadius * 2 / 3 + 8, centerY - 5);
-    tft.drawString("0°", centerX + maxRadius + 8, centerY - 5);
+    tft.drawString("90", centerX + 8, centerY - 5);
+    tft.drawString("60", centerX + maxRadius * 1 / 3 + 8, centerY - 5);
+    tft.drawString("30", centerX + maxRadius * 2 / 3 + 8, centerY - 5);
+    tft.drawString("0", centerX + maxRadius + 8, centerY - 5);
 
     // Műholdak rajzolása
     auto satellites = gpsManager->getSatelliteSnapshotForUI();
