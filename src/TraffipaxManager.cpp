@@ -7,7 +7,7 @@
 #include "Utils.h"
 #include "defines.h"
 
-// CSV forrás:
+// A CSV adatok forrása:
 //   https://www.autopalyamatrica.hu/fix-traffipax-lista-veda-terkep
 //
 // CSV feltöltése a LittleFS-re:
