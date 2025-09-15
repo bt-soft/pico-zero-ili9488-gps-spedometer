@@ -7,6 +7,7 @@
  */
 void TftBackLightAdjuster::begin() {
     pinMode(PIN_TFT_BACKGROUND_LED, OUTPUT);
+    setBacklightLevel(DEFAULT_BRIGHTNESS); // Fényerő azonnali beállítása alapértékre
 
     // Feliratkozás a config változásokra és a kezdeti értékek betöltése
     config.registerChangeCallback([this]() { this->onConfigChanged(); });
