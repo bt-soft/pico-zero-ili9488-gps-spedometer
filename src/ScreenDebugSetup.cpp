@@ -29,7 +29,7 @@ void ScreenDebugSetup::layoutComponents() {
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
                 config.data.debugGpsSerialOnInternalFastLed = event.state == UIButton::EventButtonState::On;
-                gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
+                config.checkSave();
             }
         }) //
     );
@@ -49,7 +49,7 @@ void ScreenDebugSetup::layoutComponents() {
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
                 config.data.debugGpsSerialData = event.state == UIButton::EventButtonState::On;
-                gpsManager->setSerialDebug(config.data.debugGpsSerialData);
+                config.checkSave();
             }
         }) //
     );
@@ -69,7 +69,7 @@ void ScreenDebugSetup::layoutComponents() {
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
                 config.data.debugGpsSatellitesDatabase = event.state == UIButton::EventButtonState::On;
-                gpsManager->setDebugGpsSatellitesDatabase(config.data.debugGpsSatellitesDatabase);
+                config.checkSave();
             }
         }) //
     );

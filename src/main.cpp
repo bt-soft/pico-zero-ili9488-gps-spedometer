@@ -249,9 +249,6 @@ void setup1() {
 
     // GPS Init + konfiguráció
     gpsManager = new GpsManager(&Serial1);
-    gpsManager->setLedDebug(config.data.debugGpsSerialOnInternalFastLed);
-    gpsManager->setSerialDebug(config.data.debugGpsSerialData);
-    gpsManager->setDebugGpsSatellitesDatabase(config.data.debugGpsSatellitesDatabase);
 
     // Szenzor inicializálása
     sensorUtils.init();

@@ -1,4 +1,5 @@
 #include "GpsManager.h"
+#include "Config.h"
 #include "Utils.h"
 #include "defines.h"
 
@@ -21,11 +22,11 @@ constexpr uint8_t MAX_SATELLITES = 50;
  * Konstruktor
  */
 GpsManager::GpsManager(HardwareSerial *serial)
-    : gpsSerial(serial),                      //
-      debugGpsSerialOnInternalFastLed(false), //
-      debugGpsSerialData(false),              //
-      debugGpsSatellitesDatabase(false)       //
+    : gpsSerial(serial) //
 {
+    // Feliratkozás a config változásokra és kezdeti érték beállítása
+    config.registerChangeCallback([this]() { this->onConfigChanged(); });
+    onConfigChanged(); // kezdeti értékek felvétele
 
     // Initialize FastLED for Pico Zero WS2812 RGB LED
     FastLED.addLeds<WS2812, INTERNAL_RGB_LED_PIN, GRB>(leds, INTERNAL_RGB_LED_NUM);
@@ -55,6 +56,16 @@ GpsManager::GpsManager(HardwareSerial *serial)
     // Ekkor indultunk
     bootStartTime = millis();
     gpsBootTime = 0;
+}
+
+/**
+ * @brief Callback függvény, amit a Config hív meg változás esetén
+ */
+void GpsManager::onConfigChanged() {
+    DEBUG("GpsManager::onConfigChanged() - Debug flag-ek frissítése.\n");
+    debugGpsSerialOnInternalFastLed = config.data.debugGpsSerialOnInternalFastLed;
+    debugGpsSerialData = config.data.debugGpsSerialData;
+    debugGpsSatellitesDatabase = config.data.debugGpsSatellitesDatabase;
 }
 
 /**

@@ -30,18 +30,9 @@ class GpsManager {
     void loop();
 
     /**
-     * LED debug mode beállítása
+     * @brief Callback függvény, amit a Config hív meg változás esetén
      */
-    void setLedDebug(bool state) { debugGpsSerialOnInternalFastLed = state; }
-    /**
-     * Soros debug mód beállítása
-     */
-    void setSerialDebug(bool state) { debugGpsSerialData = state; }
-
-    /**
-     * Debug GPS műhold adatbázis logolása
-     */
-    void setDebugGpsSatellitesDatabase(bool state) { debugGpsSatellitesDatabase = state; }
+    void onConfigChanged();
 
     /**
      * Thread-safe hozzáférés a műhold adatbázishoz UI számára (Core0)
