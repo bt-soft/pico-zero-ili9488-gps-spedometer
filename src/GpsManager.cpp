@@ -62,7 +62,7 @@ GpsManager::GpsManager(HardwareSerial *serial)
  * @brief Callback függvény, amit a Config hív meg változás esetén
  */
 void GpsManager::onConfigChanged() {
-    DEBUG("GpsManager::onConfigChanged() - Debug flag-ek frissítése.\n");
+    // DEBUG("GpsManager::onConfigChanged() - Debug flag-ek frissítése.\n");
     debugGpsSerialOnInternalFastLed = config.data.debugGpsSerialOnInternalFastLed;
     debugGpsSerialData = config.data.debugGpsSerialData;
     debugGpsSatellitesDatabase = config.data.debugGpsSatellitesDatabase;
