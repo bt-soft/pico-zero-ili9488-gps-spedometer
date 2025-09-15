@@ -22,6 +22,9 @@
 #define SCREEN_NAME_EMPTY "Empty"
 #define SCREEN_NAME_TEST "Test"
 
+// Képernyővédő deaktiválásához szükséges sebesség km/h-ban
+#define SCREEN_HIDE_SCREENSAVER_SPEED_KMPH 3.0f
+
 #define __DEBUG
 //  #define __DEBUG_WAIT_FOR_SERIAL
 
@@ -62,6 +65,7 @@
 #define TEMP_BARMETER_MIN -20.0f
 #define TEMP_BARMETER_MAX +70.0f
 
+// GPS adatok maximális életkora ms-ban
 #define GPS_DATA_MAX_AGE 5000
 
 // Minimum ennyi ideig látszik a traffipax alarm
