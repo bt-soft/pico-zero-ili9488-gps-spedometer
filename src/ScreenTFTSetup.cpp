@@ -30,7 +30,6 @@ void ScreenTFTSetup::layoutComponents() {
         [this](const UIButton::ButtonEvent &event) {
             if (event.state == UIButton::EventButtonState::On || event.state == UIButton::EventButtonState::Off) {
                 config.data.tftAutoBrightnessActive = event.state == UIButton::EventButtonState::On;
-                tftBackLightAdjuster.setAutoBrightnessActive(config.data.tftAutoBrightnessActive);
 
                 if (manualBrightnessBtn) {
                     manualBrightnessBtn->setEnabled(!config.data.tftAutoBrightnessActive);

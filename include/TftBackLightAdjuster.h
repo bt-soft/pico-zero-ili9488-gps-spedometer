@@ -38,20 +38,12 @@ class TftBackLightAdjuster {
     /**
      * Inicializálja a háttérvilágítást.
      */
-    void begin(bool tftAutoBrightnessActive = true, uint8_t _backlightLevel = DEFAULT_BRIGHTNESS) {
-        _tftAutoBrightnessActive = tftAutoBrightnessActive;
-        _manualBrightnessValue = _backlightLevel;
-        pinMode(PIN_TFT_BACKGROUND_LED, OUTPUT);
+    void begin();
 
-        setBacklightLevel(_backlightLevel);
-    }
-
-    void setAutoBrightnessActive(bool active) {
-        _tftAutoBrightnessActive = active;
-        if (!active) {
-            setBacklightLevel(_manualBrightnessValue);
-        }
-    }
+    /**
+     * @brief Callback függvény, amit a Config hív meg változás esetén
+     */
+    void onConfigChanged();
 
     /**
      * Beállítja a háttérvilágítás szintjét.

@@ -32,3 +32,20 @@ const Config_t DEFAULT_CONFIG = {
 
 // Globális konfiguráció példány
 Config config;
+
+/**
+ * @brief Feliratkoztat egy komponenst a konfiguráció változásainak figyelésére
+ * @param callback A függvény, amit változáskor meg kell hívni
+ */
+void Config::registerChangeCallback(ConfigChangeCallback callback) {
+    changeCallbacks.push_back(callback);
+}
+
+/**
+ * @brief Értesíti a feliratkozott komponenseket a változásról
+ */
+void Config::notifyChange() {
+    for (auto &callback : changeCallbacks) {
+        callback();
+    }
+}

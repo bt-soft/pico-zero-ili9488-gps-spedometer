@@ -20,6 +20,18 @@ extern GpsManager *gpsManager;
 ScreenManager::ScreenManager() {
     lastActivityTime = millis(); // Inicializáljuk az aktivitás időt
     registerDefaultScreenFactories();
+
+    // Feliratkozás a config változásokra és kezdeti érték beállítása
+    config.registerChangeCallback([this]() { this->onConfigChanged(); });
+    onConfigChanged();
+}
+
+/**
+ * @brief Callback függvény, amit a Config hív meg változás esetén
+ */
+void ScreenManager::onConfigChanged() {
+    // DEBUG("ScreenManager::onConfigChanged() - Képernyővédő időtúllépés újraszámolása.\n");
+    screenSaverTimeoutMs = config.data.screenSaverTimeout * 60 * 1000;
 }
 
 /**
@@ -209,7 +221,10 @@ bool ScreenManager::handleTouch(const TouchEvent &event) {
  * @brief Képernyőkezelő fő loop függvénye
  */
 void ScreenManager::loop() {
+
+    // Feldolgozzuk a függőben lévő képernyőváltásokat
     processDeferredActions();
+
     if (currentScreen) {
         // GPS sebesség ellenőrzése a screensaver logikához
         float currentSpeed = 0.0f;
@@ -220,20 +235,16 @@ void ScreenManager::loop() {
             hasValidSpeed = true;
         }
 
-        uint32_t screenSaverTimeoutMs = config.data.screenSaverTimeout * 60 * 1000;
-
         // Ha aktív a screensaver és mozog a jármű (3km/h), deaktiváljuk
-        if (isCurrentScreenScreensaver() && hasValidSpeed && currentSpeed > SCREEN_HIDE_SCREENSAVER_SPEED_KMPH) {
+        if (isCurrentScreenScreensaver() && hasValidSpeed && currentSpeed > 3.0f) {
             goBack(); // Visszatérés az előző képernyőre
         } else if (screenSaverTimeoutMs > 0 && !isCurrentScreenScreensaver()) {
             // Screensaver aktiválás csak akkor, ha a jármű áll
 
             // Ha mozog a jármű, reseteljük az aktivitás időt (ne aktiválódjon a screensaver)
-            if (hasValidSpeed && currentSpeed > SCREEN_HIDE_SCREENSAVER_SPEED_KMPH) {
+            if (hasValidSpeed && currentSpeed > 0.1f) {
                 lastActivityTime = millis();
-
-            } else if (Utils::timeHasPassed(lastActivityTime, screenSaverTimeoutMs)) {
-                // Csak álló helyzetben aktiválódjon a screensaver, ha eltelt a timeout
+            } else if (millis() - lastActivityTime > screenSaverTimeoutMs) { // Csak álló helyzetben aktiválódjon a screensaver
 
                 switchToScreen(SCREEN_NAME_SCREENSAVER);
             }

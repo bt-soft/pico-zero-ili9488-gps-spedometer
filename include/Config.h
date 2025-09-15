@@ -1,11 +1,17 @@
 #pragma once
 
+#include <functional>
+#include <vector>
+
 #include "ConfigData.h"
 #include "DebugDataInspector.h"
 #include "StoreBase.h"
 
 // Alapértelmezett konfigurációs adatok (readonly, const)
 extern const Config_t DEFAULT_CONFIG;
+
+// Callback típus definíció a konfiguráció változásának jelzésére
+using ConfigChangeCallback = std::function<void()>;
 
 /**
  * Konfigurációs adatok kezelése
@@ -15,6 +21,15 @@ class Config : public StoreBase<Config_t> {
     // A 'config' változó, alapértelmezett értékeket veszi fel a konstruktorban
     // Szándékosan public, nem kell a sok getter egy embedded rendszerben
     Config_t data;
+
+  private:
+    // Vektor a változást figyelő callback függvények tárolására
+    std::vector<ConfigChangeCallback> changeCallbacks;
+
+    /**
+     * @brief Értesíti a feliratkozott komponenseket a változásról
+     */
+    void notifyChange();
 
   protected:
     const char *getClassName() const override { return "Config"; }
@@ -41,6 +56,10 @@ class Config : public StoreBase<Config_t> {
             DebugDataInspector::printConfigData(getData());
         }
 #endif
+        // Csak akkor értesítünk, ha a mentés sikeres volt (CRC nem nulla)
+        if (savedCrc != 0) {
+            notifyChange();
+        }
         return savedCrc;
     }
 
@@ -57,6 +76,9 @@ class Config : public StoreBase<Config_t> {
         DebugDataInspector::printConfigData(getData()); // Akkor is kiírjuk, ha defaultot töltött
 #endif
 
+        // Betöltés után is értesítünk, hogy a komponensek felvegyék a friss értékeket
+        notifyChange();
+
         return loadedCrc;
     }
 
@@ -70,7 +92,17 @@ class Config : public StoreBase<Config_t> {
     /**
      * Alapértelmezett adatok betöltése
      */
-    void loadDefaults() override { memcpy(&data, &DEFAULT_CONFIG, sizeof(Config_t)); }
+    void loadDefaults() override {
+        memcpy(&data, &DEFAULT_CONFIG, sizeof(Config_t));
+        // Alapértelmezett értékek betöltésekor is értesítünk
+        notifyChange();
+    }
+
+    /**
+     * @brief Feliratkoztat egy komponenst a konfiguráció változásainak figyelésére
+     * @param callback A függvény, amit változáskor meg kell hívni
+     */
+    void registerChangeCallback(ConfigChangeCallback callback);
 };
 
 // Globális config példány deklaráció

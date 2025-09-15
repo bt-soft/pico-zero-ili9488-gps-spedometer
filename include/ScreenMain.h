@@ -93,7 +93,20 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      */
     virtual bool handleTouch(const TouchEvent &event) override;
 
+    /**
+     * @brief Callback függvény, amit a Config hív meg változás esetén
+     */
+    void onConfigChanged();
+
   private:
+    // Konfigurációs értékek gyorsítótárazása
+    bool _isTraffiAlarmEnabled;
+    bool _isExternalVoltageMode;
+    bool _isExternalTemperatureMode;
+    bool _isBeeperEnabled;
+    uint16_t _gpsTraffiAlarmDistance;
+    bool _isGpsTraffiSirenAlarmEnabled;
+
     // Optimalizált, duplikációmentes állapotváltozók
     double lastMaxSpeed = -1.0;
     double lastSpeed = -1.0;

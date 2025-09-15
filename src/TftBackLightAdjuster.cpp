@@ -1,5 +1,31 @@
 #include "TftBackLightAdjuster.h"
+#include "Config.h"
 #include "Utils.h"
+
+/**
+ * @brief Inicializálja a háttérvilágítást.
+ */
+void TftBackLightAdjuster::begin() {
+    pinMode(PIN_TFT_BACKGROUND_LED, OUTPUT);
+
+    // Feliratkozás a config változásokra és a kezdeti értékek betöltése
+    config.registerChangeCallback([this]() { this->onConfigChanged(); });
+    onConfigChanged();
+}
+
+/**
+ * @brief Callback függvény, amit a Config hív meg változás esetén
+ */
+void TftBackLightAdjuster::onConfigChanged() {
+    // DEBUG("TftBackLightAdjuster::onConfigChanged() - Fényerő beállítások frissítése.\n");
+    _tftAutoBrightnessActive = config.data.tftAutoBrightnessActive;
+    _manualBrightnessValue = config.data.tftManualBrightnessValue;
+
+    // Ha manuális módba váltottunk, azonnal beállítjuk a fényerőt
+    if (!_tftAutoBrightnessActive) {
+        setBacklightLevel(_manualBrightnessValue);
+    }
+}
 
 /**
  * LED háttérvilágítás PWM állítgatás

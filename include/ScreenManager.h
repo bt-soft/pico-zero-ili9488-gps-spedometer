@@ -31,6 +31,7 @@ class ScreenManager : public IScreenManager {
     std::shared_ptr<UIScreen> currentScreen;
     const char *previousScreenName;
     uint32_t lastActivityTime;
+    uint32_t screenSaverTimeoutMs; // Kiszámolt képernyővédő időtúllépés ms-ben
 
     // Navigációs stack - többszintű back navigációhoz
     std::vector<String> navigationStack;
@@ -59,6 +60,11 @@ class ScreenManager : public IScreenManager {
     bool handleTouch(const TouchEvent &event);
     void loop();
     bool isCurrentScreenDialogActive() override;
+
+    /**
+     * @brief Callback függvény, amit a Config hív meg változás esetén
+     */
+    void onConfigChanged();
 
     /**
      * @brief Megmondja, hogy az aktuális képernyő a screensaver-e

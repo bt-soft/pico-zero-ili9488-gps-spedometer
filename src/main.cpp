@@ -106,7 +106,7 @@ void setup() {
     SCREEN_H = tft.height();
 
 #ifdef __DEBUG_WAIT_FOR_SERIAL
-    tftBackLightAdjuster.begin(true);
+    tftBackLightAdjuster.begin();
     Utils::debugWaitForSerial(tft);
 #endif
 
@@ -155,7 +155,7 @@ void setup() {
     configLoaded = true;
 
     // TFT háttérvilágítás beállítása
-    tftBackLightAdjuster.begin(config.data.tftAutoBrightnessActive, config.data.tftManualBrightnessValue);
+    tftBackLightAdjuster.begin();
 
     // TFT érintőképernyő kalibrálása
     // Kell kalibrálni a TFT Touch-t?
