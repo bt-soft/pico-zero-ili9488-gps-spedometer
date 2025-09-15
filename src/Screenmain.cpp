@@ -21,6 +21,37 @@ TFT_eSprite spriteVerticalLinearMeter(&tft);
 extern bool demoMode;
 
 /**
+ * @brief ScreenMain konstruktor
+ */
+ScreenMain::ScreenMain() : UIScreen(SCREEN_NAME_MAIN) {
+
+    DEBUG("ScreenMain: Constructor called\n");
+    layoutComponents();
+
+    // Feliratkozás a config változásokra és kezdeti érték beállítása
+    config.registerChangeCallback([this]() { this->onConfigChanged(); });
+    onConfigChanged();
+}
+
+/**
+ * @brief Callback függvény, amit a Config hív meg változás esetén
+ */
+void ScreenMain::onConfigChanged() {
+    // DEBUG("ScreenMain::onConfigChanged() - Konfiguráció frissítése.\n");
+    _isTraffiAlarmEnabled = config.data.gpsTraffiAlarmEnabled;
+    _isBeeperEnabled = config.data.beeperEnabled;
+    _gpsTraffiAlarmDistance = config.data.gpsTraffiAlarmDistance;
+    _isGpsTraffiSirenAlarmEnabled = config.data.gpsTraffiSirenAlarmEnabled;
+
+    // Ha a mód megváltozott, a méterek újrarajzolásának kényszerítése
+    if (_isExternalVoltageMode != config.data.externalVoltageMode || _isExternalTemperatureMode != config.data.externalTemperatureMode) {
+        lastVerticalLinearSpriteUpdate = 0;
+    }
+    _isExternalVoltageMode = config.data.externalVoltageMode;
+    _isExternalTemperatureMode = config.data.externalTemperatureMode;
+}
+
+/**
  * UI komponensek elhelyezése
  */
 void ScreenMain::layoutComponents() {
@@ -363,13 +394,13 @@ ScreenMain::DisplayData ScreenMain::collectRealData() {
     data.maxSpeed = maxSpeedValue;
 
     // Szenzorok
-    if (config.data.externalVoltageMode) { // Feszmérő mód: true = VBus, false = VSys
+    if (_isExternalVoltageMode) { // Feszmérő mód: true = VBus, false = VSys
         data.voltage = sensorUtils.readVBusExternal();
     } else {
         data.voltage = sensorUtils.readVSysExternal();
     }
 
-    if (config.data.externalTemperatureMode) {
+    if (_isExternalTemperatureMode) {
         data.temperature = sensorUtils.readExternalTemperature();
     } else {
         data.temperature = sensorUtils.readCoreTemperature();
@@ -465,7 +496,7 @@ ScreenMain::DisplayData ScreenMain::collectDemoData() {
     data.maxSpeed = demoMaxSpeed;
 
     // Szenzorok - szimulált értékek
-    if (config.data.externalVoltageMode) {              // Feszmérő mód: true = VBus, false = VSys
+    if (_isExternalVoltageMode) {                       // Feszmérő mód: true = VBus, false = VSys
         data.voltage = 3.5 + (random(0, 1201) / 100.0); // 3.5 ... 15.5 V
     } else {
         data.voltage = 2.7 + (random(0, 231) / 100.0); // 2.7 ... 5.0 V
@@ -606,7 +637,7 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
     const unsigned long currentTime = millis();
 
     // Ha nincs közeli traffipax a kritikus távolságon belül
-    if (minDistance > config.data.gpsTraffiAlarmDistance) {
+    if (minDistance > _gpsTraffiAlarmDistance) {
         // Először jegyezzük fel, mikor kerültünk ki a tartományból
         if (outOfRangeStart == 0) {
             outOfRangeStart = currentTime;
@@ -661,7 +692,7 @@ void ScreenMain::processIntelligentTraffipaxAlert(double currentLat, double curr
     displayTraffipaxAlert(closestTraffipax, minDistance);
 
     // Szirénázás csak közeledés esetén, 10mp-enként, ha engedélyezve van
-    if (config.data.gpsTraffiSirenAlarmEnabled) {
+    if (_isGpsTraffiSirenAlarmEnabled) {
         if (traffipaxAlert.currentState == TraffipaxAlert::APPROACHING) {
             if (currentTime - traffipaxAlert.lastSirenTime >= TraffipaxAlert::SIREN_INTERVAL) {
                 Utils::startNonBlockingSiren(2, 600, 1800, 40, 4, 100);
@@ -696,7 +727,7 @@ void ScreenMain::handleOwnLoop() {
     }
 
     // Trafipax figyelmeztetés feldolgozása, ha engedélyezve van
-    if (config.data.gpsTraffiAlarmEnabled) {
+    if (_isTraffiAlarmEnabled) {
         processIntelligentTraffipaxAlert(data.latitude, data.longitude, data.positionValid);
     }
 
@@ -848,32 +879,32 @@ void ScreenMain::handleOwnLoop() {
 #define VERTICAL_LINEAR_METER_BAR_Y 250
     // Vertical Line bar - Battery (sprite-os)
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        config.data.externalVoltageMode ? "Vbus [V]" : "Vsys [V]",               // Feszmérő mód: true = VBus, false = VSys
-                        data.voltage,                                                            // value
-                        config.data.externalVoltageMode ? VBUS_BARMETER_MIN : VSYS_BARMETER_MIN, // minVal
-                        config.data.externalVoltageMode ? VBUS_BARMETER_MAX : VSYS_BARMETER_MAX, // maxVal
-                        0,                                                                       // x
-                        VERTICAL_LINEAR_METER_BAR_Y + 10,                                        // y: sprite alsó éle, +10 hogy ne lógjon le
-                        30,                                                                      // bar-w
-                        10,                                                                      // bar-h
-                        2,                                                                       // gap
-                        10,                                                                      // n
-                        RED2GREEN);                                                              // color
+                        _isExternalVoltageMode ? "Vbus [V]" : "Vsys [V]",               // Feszmérő mód: true = VBus, false = VSys
+                        data.voltage,                                                   // value
+                        _isExternalVoltageMode ? VBUS_BARMETER_MIN : VSYS_BARMETER_MIN, // minVal
+                        _isExternalVoltageMode ? VBUS_BARMETER_MAX : VSYS_BARMETER_MAX, // maxVal
+                        0,                                                              // x
+                        VERTICAL_LINEAR_METER_BAR_Y + 10,                               // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                                                             // bar-w
+                        10,                                                             // bar-h
+                        2,                                                              // gap
+                        10,                                                             // n
+                        RED2GREEN);                                                     // color
 
     // Vertical Line bar - Temperature
     verticalLinearMeter(&spriteVerticalLinearMeter, SPRITE_VERTICAL_LINEAR_METER_HEIGHT, SPRITE_VERTICAL_LINEAR_METER_WIDTH,
-                        config.data.externalTemperatureMode ? "Ext [C]" : "CPU [C]", // category
-                        data.temperature,                                            // value
-                        TEMP_BARMETER_MIN,                                           // minVal
-                        TEMP_BARMETER_MAX,                                           // maxVal
-                        tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH,            // x: sprite szélesség beszámítva
-                        VERTICAL_LINEAR_METER_BAR_Y + 10,                            // y: sprite alsó éle, +10 hogy ne lógjon le
-                        30,                                                          // bar-w
-                        10,                                                          // bar-h
-                        2,                                                           // gap
-                        10,                                                          // n
-                        BLUE2RED,                                                    // color
-                        true);                                                       // bal oldalt legyenek az értékek
+                        _isExternalTemperatureMode ? "Ext [C]" : "CPU [C]", // category
+                        data.temperature,                                   // value
+                        TEMP_BARMETER_MIN,                                  // minVal
+                        TEMP_BARMETER_MAX,                                  // maxVal
+                        tft.width() - SPRITE_VERTICAL_LINEAR_METER_WIDTH,   // x: sprite szélesség beszámítva
+                        VERTICAL_LINEAR_METER_BAR_Y + 10,                   // y: sprite alsó éle, +10 hogy ne lógjon le
+                        30,                                                 // bar-w
+                        10,                                                 // bar-h
+                        2,                                                  // gap
+                        10,                                                 // n
+                        BLUE2RED,                                           // color
+                        true);                                              // bal oldalt legyenek az értékek
 
     // Ha kényszerített újrarajzolás volt, akkor reseteljük a flag-et
     if (this->forceRedraw) {
@@ -933,7 +964,7 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
         getScreenManager()->switchToScreen(SCREEN_NAME_SATS);
 
         // Pittyentünk, ha az engedélyezve van
-        if (config.data.beeperEnabled) {
+        if (_isBeeperEnabled) {
             Utils::beepTick();
         }
 
@@ -948,8 +979,8 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
     if (event.x >= leftBarX && event.x < leftBarX + leftBarWidth && event.y >= leftBarY && event.y < leftBarY + leftBarHeight) {
         // Váltás a feszültség módok között
         config.data.externalVoltageMode = !config.data.externalVoltageMode;
-        lastVerticalLinearSpriteUpdate = 0;
-        if (config.data.beeperEnabled) {
+        config.checkSave(); // Változás jelzése a callback rendszernek
+        if (_isBeeperEnabled) {
             Utils::beepTick();
         }
         return true;
@@ -964,8 +995,8 @@ bool ScreenMain::handleTouch(const TouchEvent &event) {
     if (event.x >= rightBarX && event.x < rightBarX + rightBarWidth && event.y >= rightBarY && event.y < rightBarY + rightBarHeight) {
         // Váltás a hőmérsékléti módok között
         config.data.externalTemperatureMode = !config.data.externalTemperatureMode;
-        lastVerticalLinearSpriteUpdate = 0;
-        if (config.data.beeperEnabled) {
+        config.checkSave(); // Változás jelzése a callback rendszernek
+        if (_isBeeperEnabled) {
             Utils::beepTick();
         }
         return true; // Esemény kezelve

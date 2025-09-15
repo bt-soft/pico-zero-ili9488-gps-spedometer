@@ -61,11 +61,7 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @brief ScreenMain konstruktor
      * @param tft TFT display referencia
      */
-    ScreenMain() : UIScreen(SCREEN_NAME_MAIN) {
-
-        DEBUG("ScreenMain: Constructor called\n");
-        layoutComponents();
-    }
+    ScreenMain();
     virtual ~ScreenMain() = default;
 
     /**
