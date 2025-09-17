@@ -17,12 +17,11 @@ extern GpsManager *gpsManager;
 /**
  * @brief Képernyőkezelő osztály konstruktor
  */
-ScreenManager::ScreenManager() {
+ScreenManager::ScreenManager() : configCallbackToken(config.registerChangeCallback([this]() { this->onConfigChanged(); })) {
     lastActivityTime = millis(); // Inicializáljuk az aktivitás időt
     registerDefaultScreenFactories();
 
-    // Feliratkozás a config változásokra és kezdeti érték beállítása
-    config.registerChangeCallback([this]() { this->onConfigChanged(); });
+    // Kezdeti értékek beállítása
     onConfigChanged();
 }
 

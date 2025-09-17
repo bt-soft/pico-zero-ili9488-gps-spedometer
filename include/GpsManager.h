@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <TinyGPS++.h>
 
+#include "Config.h"
 #include "DayLightSaving.h"
 #include "SatelliteDb.h"
 
@@ -22,7 +23,7 @@ class GpsManager {
     /**
      * Konstruktor
      */
-    GpsManager(HardwareSerial *serial);
+    GpsManager(HardwareSerial &serial);
 
     /**
      * loop
@@ -81,7 +82,7 @@ class GpsManager {
     String getGpsModeToString();
 
   private:
-    HardwareSerial *gpsSerial;
+    HardwareSerial &gpsSerial;
     TinyGPSPlus gps;
 
     uint8_t currentSatelliteCount = 0;  // Number of satellites currently being tracked
@@ -105,6 +106,9 @@ class GpsManager {
     // Boot time - a GPS mikor látott érvényes műholdat?
     uint32_t bootStartTime;
     uint32_t gpsBootTime;
+
+    // Config callback token az automatikus leiratkozáshoz
+    ConfigCallbackToken configCallbackToken;
 
     void processGSVMessages();
 };

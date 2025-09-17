@@ -248,7 +248,7 @@ void setup1() {
     }
 
     // GPS Init + konfiguráció
-    gpsManager = new GpsManager(&Serial1);
+    gpsManager = new GpsManager(Serial1);
 
     // Szenzor inicializálása
     sensorUtils.init();

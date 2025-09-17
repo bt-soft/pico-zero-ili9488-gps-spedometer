@@ -1,7 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
+#include <memory>
 
+#include "Config.h"
 #include "defines.h"
 #include "pins.h"
 
@@ -28,6 +30,9 @@ class TftBackLightAdjuster {
     byte new_brightness;
     bool _tftAutoBrightnessActive;
     uint8_t _manualBrightnessValue;
+
+    // Config callback token az automatikus leiratkozáshoz
+    std::unique_ptr<ConfigCallbackToken> configCallbackToken;
 
   public:
     /**

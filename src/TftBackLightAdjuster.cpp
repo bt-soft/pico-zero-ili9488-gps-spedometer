@@ -10,7 +10,7 @@ void TftBackLightAdjuster::begin() {
     setBacklightLevel(DEFAULT_BRIGHTNESS); // Fényerő azonnali beállítása alapértékre
 
     // Feliratkozás a config változásokra és a kezdeti értékek betöltése
-    config.registerChangeCallback([this]() { this->onConfigChanged(); });
+    configCallbackToken = std::make_unique<ConfigCallbackToken>(config.registerChangeCallback([this]() { this->onConfigChanged(); }));
     onConfigChanged();
 }
 

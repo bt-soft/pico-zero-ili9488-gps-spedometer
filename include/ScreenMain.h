@@ -62,13 +62,13 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
      * @param tft TFT display referencia
      */
     ScreenMain();
-    virtual ~ScreenMain() = default;
 
-    /**
-     * @brief Loop hívás felülírása
-     * animációs vagy egyéb saját logika végrehajtására
-     * @note Ez a metódus nem hívja meg a gyerek komponensek loop-ját, csak saját logikát tartalmaz.
-     */
+    // Default destruktor - a ConfigCallbackToken automatikusan leiratkozik
+    virtual ~ScreenMain() = default; /**
+                                      * @brief Loop hívás felülírása
+                                      * animációs vagy egyéb saját logika végrehajtására
+                                      * @note Ez a metódus nem hívja meg a gyerek komponensek loop-ját, csak saját logikát tartalmaz.
+                                      */
     virtual void handleOwnLoop() override;
 
     /**
@@ -145,6 +145,9 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
         static constexpr unsigned long SIREN_INTERVAL = 10000; // 10 sec szirénázási intervallum
     };
     TraffipaxAlert traffipaxAlert;
+
+    // Config callback token az automatikus leiratkozáshoz
+    ConfigCallbackToken configCallbackToken;
 
     /**
      * @brief UI komponensek létrehozása és elhelyezése

@@ -43,6 +43,9 @@ class ScreenManager : public IScreenManager {
     std::queue<DeferredAction> deferredActions;
     bool processingEvents = false;
 
+    // Config callback token az automatikus leiratkozáshoz
+    ConfigCallbackToken configCallbackToken;
+
     void registerDefaultScreenFactories();
 
   public:
