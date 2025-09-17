@@ -64,11 +64,11 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     ScreenMain();
 
     // Default destruktor - a ConfigCallbackToken automatikusan leiratkozik
-    virtual ~ScreenMain() = default; /**
-                                      * @brief Loop hívás felülírása
-                                      * animációs vagy egyéb saját logika végrehajtására
-                                      * @note Ez a metódus nem hívja meg a gyerek komponensek loop-ját, csak saját logikát tartalmaz.
-                                      */
+    virtual ~ScreenMain(); /**
+                            * @brief Loop hívás felülírása
+                            * animációs vagy egyéb saját logika végrehajtására
+                            * @note Ez a metódus nem hívja meg a gyerek komponensek loop-ját, csak saját logikát tartalmaz.
+                            */
     virtual void handleOwnLoop() override;
 
     /**
@@ -146,8 +146,8 @@ class ScreenMain : public UIScreen, public ButtonsGroupManager<ScreenMain> {
     };
     TraffipaxAlert traffipaxAlert;
 
-    // Config callback token az automatikus leiratkozáshoz
-    ConfigCallbackToken configCallbackToken;
+    // Config callback id a leiratkozáshoz
+    size_t configCallbackId;
 
     /**
      * @brief UI komponensek létrehozása és elhelyezése

@@ -1,9 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include <memory>
 
-#include "Config.h"
 #include "defines.h"
 #include "pins.h"
 
@@ -31,14 +29,19 @@ class TftBackLightAdjuster {
     bool _tftAutoBrightnessActive;
     uint8_t _manualBrightnessValue;
 
-    // Config callback token az automatikus leiratkozáshoz
-    std::unique_ptr<ConfigCallbackToken> configCallbackToken;
+    // Config callback id a leiratkozáshoz
+    size_t configCallbackId;
 
   public:
     /**
      * Konstruktor.
      */
     TftBackLightAdjuster() : lastSensorCheckMsec(0), lastAdjustMsec(0), brightness(DEFAULT_BRIGHTNESS), new_brightness(0) {}
+
+    /**
+     * Destruktor.
+     */
+    ~TftBackLightAdjuster();
 
     /**
      * Inicializálja a háttérvilágítást.

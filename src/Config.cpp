@@ -34,49 +34,22 @@ const Config_t DEFAULT_CONFIG = {
 Config config;
 
 /**
- * @brief ConfigCallbackToken destruktor implementáció
- */
-ConfigCallbackToken::~ConfigCallbackToken() { unregister(); }
-
-/**
- * @brief ConfigCallbackToken manuális leiratkozás
- */
-void ConfigCallbackToken::unregister() {
-    if (valid && config) {
-        config->internalUnregister(callbackId);
-        valid = false;
-    }
-}
-
-/**
  * @brief Feliratkoztat egy komponenst a konfiguráció változásainak figyelésére
  * @param callback A függvény, amit változáskor meg kell hívni
- * @return RAII token, amely destruktora automatikusan leiratkozik
+ * @return Index a leiratkozáshoz
  */
-ConfigCallbackToken Config::registerChangeCallback(ConfigChangeCallback callback) {
-    size_t index;
-
-    // Ha van szabad index, azt használjuk
-    if (!freeIndices.empty()) {
-        index = freeIndices.back();
-        freeIndices.pop_back();
-        changeCallbacks[index] = CallbackEntry(std::move(callback));
-    } else {
-        // Új elemet adunk hozzá
-        changeCallbacks.emplace_back(std::move(callback));
-        index = changeCallbacks.size() - 1;
-    }
-
-    return ConfigCallbackToken(this, index);
+size_t Config::registerChangeCallback(ConfigChangeCallback callback) {
+    changeCallbacks.push_back(callback);
+    return changeCallbacks.size() - 1;
 }
 
 /**
- * @brief Belső leiratkozás implementáció
+ * @brief Leiratkoztat egy komponenst index alapján
+ * @param callbackId A registerChangeCallback által visszaadott index
  */
-void Config::internalUnregister(size_t callbackId) {
-    if (callbackId < changeCallbacks.size() && changeCallbacks[callbackId].active) {
-        changeCallbacks[callbackId].active = false;
-        freeIndices.push_back(callbackId);
+void Config::unregisterCallback(size_t callbackId) {
+    if (callbackId < changeCallbacks.size()) {
+        changeCallbacks[callbackId] = nullptr; // Egyszerűen nullptr-re állítjuk
     }
 }
 
@@ -84,9 +57,9 @@ void Config::internalUnregister(size_t callbackId) {
  * @brief Értesíti a feliratkozott komponenseket a változásról
  */
 void Config::notifyChange() {
-    for (auto &entry : changeCallbacks) {
-        if (entry.active && entry.callback) { // Csak az aktív callback-eket hívjuk meg
-            entry.callback();
+    for (auto &callback : changeCallbacks) {
+        if (callback) { // Csak a nem-null callback-eket hívjuk meg
+            callback();
         }
     }
 }

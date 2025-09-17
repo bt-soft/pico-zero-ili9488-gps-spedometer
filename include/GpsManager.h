@@ -26,6 +26,11 @@ class GpsManager {
     GpsManager(HardwareSerial &serial);
 
     /**
+     * Destruktor
+     */
+    ~GpsManager();
+
+    /**
      * loop
      */
     void loop();
@@ -108,7 +113,7 @@ class GpsManager {
     uint32_t gpsBootTime;
 
     // Config callback token az automatikus leiratkozáshoz
-    ConfigCallbackToken configCallbackToken;
+    size_t configCallbackId;
 
     void processGSVMessages();
 };

@@ -3,6 +3,11 @@
 #include "Utils.h"
 
 /**
+ * @brief Destruktor - leiratkozás a config változásokról.
+ */
+TftBackLightAdjuster::~TftBackLightAdjuster() { config.unregisterCallback(configCallbackId); }
+
+/**
  * @brief Inicializálja a háttérvilágítást.
  */
 void TftBackLightAdjuster::begin() {
@@ -10,7 +15,7 @@ void TftBackLightAdjuster::begin() {
     setBacklightLevel(DEFAULT_BRIGHTNESS); // Fényerő azonnali beállítása alapértékre
 
     // Feliratkozás a config változásokra és a kezdeti értékek betöltése
-    configCallbackToken = std::make_unique<ConfigCallbackToken>(config.registerChangeCallback([this]() { this->onConfigChanged(); }));
+    configCallbackId = config.registerChangeCallback([this]() { this->onConfigChanged(); });
     onConfigChanged();
 }
 

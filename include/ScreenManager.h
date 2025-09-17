@@ -44,12 +44,13 @@ class ScreenManager : public IScreenManager {
     bool processingEvents = false;
 
     // Config callback token az automatikus leiratkozáshoz
-    ConfigCallbackToken configCallbackToken;
+    size_t configCallbackId;
 
     void registerDefaultScreenFactories();
 
   public:
     ScreenManager();
+    ~ScreenManager();
     std::shared_ptr<UIScreen> getCurrentScreen() const;
     String getPreviousScreenName() const;
     void registerScreenFactory(const char *screenName, ScreenFactory factory);

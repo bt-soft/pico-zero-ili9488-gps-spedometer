@@ -14,47 +14,6 @@ extern const Config_t DEFAULT_CONFIG;
 // Callback típus definíció a konfiguráció változásának jelzésére
 using ConfigChangeCallback = std::function<void()>;
 
-// Forward deklaráció a CallbackToken számára
-class Config;
-
-/**
- * @brief RAII (Resource Acquisition Is Initialization) token a Config callback automatikus leiratkozásához
- * A token destruktora automatikusan leiratkozik a Config-ról
- */
-class ConfigCallbackToken {
-  private:
-    Config *config;
-    size_t callbackId;
-    bool valid;
-
-  public:
-    ConfigCallbackToken(Config *cfg, size_t id) : config(cfg), callbackId(id), valid(true) {}
-
-    // Move konstruktor és operátor
-    ConfigCallbackToken(ConfigCallbackToken &&other) noexcept : config(other.config), callbackId(other.callbackId), valid(other.valid) { other.valid = false; }
-
-    ConfigCallbackToken &operator=(ConfigCallbackToken &&other) noexcept {
-        if (this != &other) {
-            unregister();
-            config = other.config;
-            callbackId = other.callbackId;
-            valid = other.valid;
-            other.valid = false;
-        }
-        return *this;
-    }
-
-    // Copy tiltása
-    ConfigCallbackToken(const ConfigCallbackToken &) = delete;
-    ConfigCallbackToken &operator=(const ConfigCallbackToken &) = delete;
-
-    // Destruktor automatikusan leiratkozik
-    ~ConfigCallbackToken();
-
-    // Manuális leiratkozás
-    void unregister();
-};
-
 /**
  * Konfigurációs adatok kezelése
  */
@@ -65,29 +24,13 @@ class Config : public StoreBase<Config_t> {
     Config_t data;
 
   private:
-    // Callback struktúra aktív flag-gel
-    struct CallbackEntry {
-        ConfigChangeCallback callback;
-        bool active;
-
-        CallbackEntry(ConfigChangeCallback cb) : callback(std::move(cb)), active(true) {}
-    };
-
     // Vektor a változást figyelő callback függvények tárolására
-    std::vector<CallbackEntry> changeCallbacks;
-
-    // Újrahasznosítható indexek
-    std::vector<size_t> freeIndices;
+    std::vector<ConfigChangeCallback> changeCallbacks;
 
     /**
      * @brief Értesíti a feliratkozott komponenseket a változásról
      */
     void notifyChange();
-
-    /**
-     * @brief Belső leiratkozás implementáció
-     */
-    void internalUnregister(size_t callbackId);
 
   protected:
     const char *getClassName() const override { return "Config"; }
@@ -159,12 +102,15 @@ class Config : public StoreBase<Config_t> {
     /**
      * @brief Feliratkoztat egy komponenst a konfiguráció változásainak figyelésére
      * @param callback A függvény, amit változáskor meg kell hívni
-     * @return RAII token, amely destruktora automatikusan leiratkozik
+     * @return Index a leiratkozáshoz
      */
-    ConfigCallbackToken registerChangeCallback(ConfigChangeCallback callback);
+    size_t registerChangeCallback(ConfigChangeCallback callback);
 
-    // Belső használatra - a token számára
-    friend class ConfigCallbackToken;
+    /**
+     * @brief Leiratkoztat egy komponenst index alapján
+     * @param callbackId A registerChangeCallback által visszaadott index
+     */
+    void unregisterCallback(size_t callbackId);
 };
 
 // Globális config példány deklaráció

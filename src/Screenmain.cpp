@@ -23,14 +23,23 @@ extern bool demoMode;
 /**
  * @brief ScreenMain konstruktor
  */
-ScreenMain::ScreenMain() : UIScreen(SCREEN_NAME_MAIN), configCallbackToken(config.registerChangeCallback([this]() { this->onConfigChanged(); })) {
+ScreenMain::ScreenMain() : UIScreen(SCREEN_NAME_MAIN) {
 
     DEBUG("ScreenMain: Constructor called\n");
+
+    // Feliratkozás a config változásokra
+    configCallbackId = config.registerChangeCallback([this]() { this->onConfigChanged(); });
+
     layoutComponents();
 
     // Kezdeti érték beállítása
     onConfigChanged();
 }
+
+/**
+ * @brief ScreenMain destruktor
+ */
+ScreenMain::~ScreenMain() { config.unregisterCallback(configCallbackId); }
 
 /**
  * @brief Callback függvény, amit a Config hív meg változás esetén

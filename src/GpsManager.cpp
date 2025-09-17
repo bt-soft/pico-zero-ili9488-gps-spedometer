@@ -21,15 +21,16 @@ constexpr uint8_t MAX_SATELLITES = 50;
 /**
  * Konstruktor
  */
-GpsManager::GpsManager(HardwareSerial &serial)
-    : gpsSerial(serial), configCallbackToken(config.registerChangeCallback([this]() { this->onConfigChanged(); })) //
-{
+GpsManager::GpsManager(HardwareSerial &serial) : gpsSerial(serial) {
+    // Feliratkozás a config változásokra
+    configCallbackId = config.registerChangeCallback([this]() { this->onConfigChanged(); });
+
     // Kezdeti értékek felvétele
     onConfigChanged();
 
-    // Initialize FastLED for Pico Zero WS2812 RGB LED
+    // inicializáljuk a FastLED-et: Pico Zero WS2812 RGB LED
     FastLED.addLeds<WS2812, INTERNAL_RGB_LED_PIN, GRB>(leds, INTERNAL_RGB_LED_NUM);
-    FastLED.setBrightness(INTERNAL_RGB_LED_BRIGHTNESS); // Set brightness
+    FastLED.setBrightness(INTERNAL_RGB_LED_BRIGHTNESS); // Fényerő beállítása
     FastLED.clear();
     FastLED.show();
 
@@ -56,6 +57,11 @@ GpsManager::GpsManager(HardwareSerial &serial)
     bootStartTime = millis();
     gpsBootTime = 0;
 }
+
+/**
+ * Destruktor
+ */
+GpsManager::~GpsManager() { config.unregisterCallback(configCallbackId); }
 
 /**
  * @brief Callback függvény, amit a Config hív meg változás esetén
