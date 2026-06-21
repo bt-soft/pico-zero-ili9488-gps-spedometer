@@ -3,6 +3,7 @@
 #include <TinyGPS++.h>
 #include <algorithm>
 #include <list>
+#include <vector>
 
 class SatelliteDb {
   public:

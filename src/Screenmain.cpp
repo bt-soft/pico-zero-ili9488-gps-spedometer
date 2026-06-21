@@ -17,6 +17,9 @@ constexpr uint8_t ALERT_TEXT_PADDING = 5;
 // Sprite a vertikális bar-oknak
 TFT_eSprite spriteVerticalLinearMeter(&tft);
 
+// Sprite csak az idő kirajzolásához (flicker csökkentés)
+TFT_eSprite spriteTime(&tft);
+
 // Demó mód
 extern bool demoMode;
 
@@ -786,17 +789,42 @@ void ScreenMain::handleOwnLoop() {
         UIScreen::updateUIValue<String>(
             lastDateTime, String(valueBuffer),
             [&]() {
+                // Dátum
                 tft.setTextSize(2);
                 tft.setFreeFont();
                 tft.setTextDatum(ML_DATUM);
                 tft.setTextColor(TFT_WHITE, TFT_BLACK);
                 tft.setTextPadding(tft.textWidth("8888-88-88") + 10);
                 tft.drawString(data.dateString, ::SCREEN_W / 2 - 50, 12, 1);
-                tft.setTextSize(1);
+                // Idő: csak az idő legyen egy kis sprite-on, hogy ne töröljön semmit a fejlécben
                 tft.setFreeFont(&FreeSansBold18pt7b);
-                tft.setTextPadding(tft.textWidth("88:88:88") + 10);
-                tft.drawString(data.timeString, ::SCREEN_W / 2 - 70, 40);
-                tft.setFreeFont();
+                tft.setTextSize(1);
+
+// Idő sprite pozíciója: bal középre, 50px magasságban
+#define TIME_SPRITE_Y 50
+
+                spriteTime.fillSprite(TFT_BLACK);
+
+                // Megszerezzük az idő szöveg szélességét (fix formátum: "88:88:88")
+                spriteTime.setFreeFont(&FreeSansBold24pt7b);
+                spriteTime.setTextSize(1);
+                spriteTime.setTextDatum(ML_DATUM);
+                spriteTime.setTextPadding(0);
+                const int timeTextW = tft.textWidth("88:88:88") + 60; // szélesség + padding
+                const int timeTextH = 40;                             // elegendő magasság a fontnak
+
+                if (!spriteTime.created()) {
+                    spriteTime.createSprite(timeTextW, timeTextH);
+                }
+
+                // Rajzolás sprite-on belül: bal középre
+                spriteTime.drawString(data.timeString, 0, timeTextH / 2);
+                spriteTime.setFreeFont();
+
+                // Idő pozícionálása a képernyőn: középre és 50px magasságban
+                const int pushX = ::SCREEN_W / 2 - 70 - 30;
+                const int pushY = TIME_SPRITE_Y - (timeTextH / 2);
+                spriteTime.pushSprite(pushX, pushY);
             },
             0, this->forceRedraw);
 
